@@ -1,0 +1,910 @@
+<!doctype html>
+<html lang="pt-br"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Catalogo Lumia</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#1a1d21;--mut:#6b7280;--ac:#2b6cb0}
+*{box-sizing:border-box}body{margin:0;font:16px/1.4 system-ui,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+header{position:sticky;top:0;background:var(--card);border-bottom:1px solid #e5e7eb;padding:14px 18px;z-index:2}
+header h1{margin:0 0 8px;font-size:20px}
+#busca{width:100%;max-width:480px;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:15px}
+main{max-width:1200px;margin:0 auto;padding:18px;display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+.card{background:var(--card);border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.foto{aspect-ratio:1;background:#fff;display:flex;align-items:center;justify-content:center}
+.foto img{width:100%;height:100%;object-fit:contain}
+.sem-foto{color:var(--mut);font-size:13px}
+.info{padding:10px 12px;display:flex;flex-direction:column;gap:4px}
+.info h2{margin:0;font-size:14px;font-weight:600;line-height:1.3}
+.sku{margin:0;font-size:12px;color:var(--mut)}
+.preco{margin:2px 0 0;font-size:16px;font-weight:700;color:var(--ac)}
+#vazio{display:none;text-align:center;color:var(--mut);padding:40px}
+footer{text-align:center;color:var(--mut);padding:24px;font-size:13px}
+</style></head><body>
+<header><h1>Catalogo Lumia</h1>
+<input id="busca" type="search" placeholder="Buscar por nome ou SKU..." autocomplete="off"></header>
+<main id="grade">
+<article class="card" data-busca="adesivo blackout fosco fundo branco full com impressão digital 4x0 (recortes) 0002-001">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>ADESIVO BLACKOUT FOSCO FUNDO BRANCO FULL COM IMPRESSÃO DIGITAL 4X0 (RECORTES)</h2>
+  <p class="sku">0002-001</p>
+  <p class="preco">Sob consulta</p></div>
+</article>
+<article class="card" data-busca="alicate corte diagonal plato cortador de fio e filamento 170 wire cutter 1086-86">
+  <div class="foto"><img src="fotos/1086-86.jpg" alt="ALICATE CORTE DIAGONAL PLATO CORTADOR DE FIO E FILAMENTO 170 WIRE CUTTER" loading="lazy"></div>
+  <div class="info"><h2>ALICATE CORTE DIAGONAL PLATO CORTADOR DE FIO E FILAMENTO 170 WIRE CUTTER</h2>
+  <p class="sku">1086-86</p>
+  <p class="preco">R$ 24,24</p></div>
+</article>
+<article class="card" data-busca="base sensor de filamento para bambu lab a1 series 1176-86">
+  <div class="foto"><img src="fotos/1176-86.jpg" alt="BASE SENSOR DE FILAMENTO PARA BAMBU LAB A1 SERIES" loading="lazy"></div>
+  <div class="info"><h2>BASE SENSOR DE FILAMENTO PARA BAMBU LAB A1 SERIES</h2>
+  <p class="sku">1176-86</p>
+  <p class="preco">R$ 75,04</p></div>
+</article>
+<article class="card" data-busca="bico nozzle 0.25mm flashforge ad5x 1206-86">
+  <div class="foto"><img src="fotos/1206-86.jpg" alt="BICO NOZZLE 0.25MM FLASHFORGE AD5X" loading="lazy"></div>
+  <div class="info"><h2>BICO NOZZLE 0.25MM FLASHFORGE AD5X</h2>
+  <p class="sku">1206-86</p>
+  <p class="preco">R$ 121,00</p></div>
+</article>
+<article class="card" data-busca="bico nozzle 0.4mm flashforge ad5x 1095-86">
+  <div class="foto"><img src="fotos/1095-86.jpg" alt="BICO NOZZLE 0.4MM FLASHFORGE AD5X" loading="lazy"></div>
+  <div class="info"><h2>BICO NOZZLE 0.4MM FLASHFORGE AD5X</h2>
+  <p class="sku">1095-86</p>
+  <p class="preco">R$ 77,99</p></div>
+</article>
+<article class="card" data-busca="bico nozzle rosqueavel anycubic kobra 3 1104-86">
+  <div class="foto"><img src="fotos/1104-86.jpg" alt="BICO NOZZLE ROSQUEAVEL ANYCUBIC KOBRA 3" loading="lazy"></div>
+  <div class="info"><h2>BICO NOZZLE ROSQUEAVEL ANYCUBIC KOBRA 3</h2>
+  <p class="sku">1104-86</p>
+  <p class="preco">R$ 29,99</p></div>
+</article>
+<article class="card" data-busca="bico nozzle rosqueavel bambu a1 series 0.2mm 1080-86">
+  <div class="foto"><img src="fotos/1080-86.jpg" alt="BICO NOZZLE ROSQUEAVEL BAMBU A1 SERIES 0.2MM" loading="lazy"></div>
+  <div class="info"><h2>BICO NOZZLE ROSQUEAVEL BAMBU A1 SERIES 0.2MM</h2>
+  <p class="sku">1080-86</p>
+  <p class="preco">R$ 29,09</p></div>
+</article>
+<article class="card" data-busca="bico nozzle rosqueavel bambu a1 series 0.4mm 1081-86">
+  <div class="foto"><img src="fotos/1081-86.jpg" alt="BICO NOZZLE ROSQUEAVEL BAMBU A1 SERIES 0.4MM" loading="lazy"></div>
+  <div class="info"><h2>BICO NOZZLE ROSQUEAVEL BAMBU A1 SERIES 0.4MM</h2>
+  <p class="sku">1081-86</p>
+  <p class="preco">R$ 29,09</p></div>
+</article>
+<article class="card" data-busca="bico nozzle rosqueavel bambu a1 series 0.6mm 1082-86">
+  <div class="foto"><img src="fotos/1082-86.jpg" alt="BICO NOZZLE ROSQUEAVEL BAMBU A1 SERIES 0.6MM" loading="lazy"></div>
+  <div class="info"><h2>BICO NOZZLE ROSQUEAVEL BAMBU A1 SERIES 0.6MM</h2>
+  <p class="sku">1082-86</p>
+  <p class="preco">R$ 42,00</p></div>
+</article>
+<article class="card" data-busca="ceramica zirconia termistor hotend para bambu lab a1 h2d a1 mini 1205-86">
+  <div class="foto"><img src="fotos/1205-86.jpg" alt="CERAMICA ZIRCONIA TERMISTOR HOTEND PARA BAMBU LAB A1 H2D A1 MINI" loading="lazy"></div>
+  <div class="info"><h2>CERAMICA ZIRCONIA TERMISTOR HOTEND PARA BAMBU LAB A1 H2D A1 MINI</h2>
+  <p class="sku">1205-86</p>
+  <p class="preco">R$ 153,00</p></div>
+</article>
+<article class="card" data-busca="escareador rebarbador debarbador ferramenta deburring tool 1088-86">
+  <div class="foto"><img src="fotos/1088-86.jpg" alt="ESCAREADOR REBARBADOR DEBARBADOR FERRAMENTA DEBURRING TOOL" loading="lazy"></div>
+  <div class="info"><h2>ESCAREADOR REBARBADOR DEBARBADOR FERRAMENTA DEBURRING TOOL</h2>
+  <p class="sku">1088-86</p>
+  <p class="preco">R$ 29,99</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint abs branco 1kg (1.75mm) 1211-104">
+  <div class="foto"><img src="fotos/1211-104.jpg" alt="FILAMENTO MASTERPRINT ABS BRANCO 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT ABS BRANCO 1KG (1.75MM)</h2>
+  <p class="sku">1211-104</p>
+  <p class="preco">R$ 129,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint petg amarelo 1kg (1.75mm) 1115-104">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PETG AMARELO 1KG (1.75MM)</h2>
+  <p class="sku">1115-104</p>
+  <p class="preco">R$ 78,99</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint petg azul 1kg (1.75mm) 1132-104">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PETG AZUL 1KG (1.75MM)</h2>
+  <p class="sku">1132-104</p>
+  <p class="preco">R$ 75,04</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint petg branco 1kg (1.75mm) 1098-104">
+  <div class="foto"><img src="fotos/1098-104.jpg" alt="FILAMENTO MASTERPRINT PETG BRANCO 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PETG BRANCO 1KG (1.75MM)</h2>
+  <p class="sku">1098-104</p>
+  <p class="preco">R$ 109,99</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint petg bronze 1kg (1.75mm) 1129-104">
+  <div class="foto"><img src="fotos/1129-104.jpg" alt="FILAMENTO MASTERPRINT PETG BRONZE 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PETG BRONZE 1KG (1.75MM)</h2>
+  <p class="sku">1129-104</p>
+  <p class="preco">R$ 67,89</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint petg cinza 1kg (1.75mm) 1114-104">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PETG CINZA 1KG (1.75MM)</h2>
+  <p class="sku">1114-104</p>
+  <p class="preco">R$ 78,99</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint petg cool grey 1kg (1.75mm) 1208-104">
+  <div class="foto"><img src="fotos/1208-104.jpg" alt="FILAMENTO MASTERPRINT PETG COOL GREY 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PETG COOL GREY 1KG (1.75MM)</h2>
+  <p class="sku">1208-104</p>
+  <p class="preco">R$ 109,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint petg dourado 1kg (1.75mm) 1140-104">
+  <div class="foto"><img src="fotos/1140-104.jpg" alt="FILAMENTO MASTERPRINT PETG DOURADO 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PETG DOURADO 1KG (1.75MM)</h2>
+  <p class="sku">1140-104</p>
+  <p class="preco">R$ 129,99</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint petg fibra de carbono 1kg (1.75mm) 1141-104">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PETG FIBRA DE CARBONO 1KG (1.75MM)</h2>
+  <p class="sku">1141-104</p>
+  <p class="preco">R$ 129,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint petg fluorescente roxo 1kg (1.75mm) 1111-104">
+  <div class="foto"><img src="fotos/1111-104.jpg" alt="FILAMENTO MASTERPRINT PETG FLUORESCENTE ROXO 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PETG FLUORESCENTE ROXO 1KG (1.75MM)</h2>
+  <p class="sku">1111-104</p>
+  <p class="preco">R$ 67,89</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint petg fosco branco 1kg (1.75mm) 1197-104">
+  <div class="foto"><img src="fotos/1197-104.jpg" alt="FILAMENTO MASTERPRINT PETG FOSCO BRANCO 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PETG FOSCO BRANCO 1KG (1.75MM)</h2>
+  <p class="sku">1197-104</p>
+  <p class="preco">R$ 78,89</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint petg green olive 1kg (1.75mm) 1209-104">
+  <div class="foto"><img src="fotos/1209-104.jpg" alt="FILAMENTO MASTERPRINT PETG GREEN OLIVE 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PETG GREEN OLIVE 1KG (1.75MM)</h2>
+  <p class="sku">1209-104</p>
+  <p class="preco">R$ 109,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint petg laranja 1kg (1.75mm) 1128-104">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PETG LARANJA 1KG (1.75MM)</h2>
+  <p class="sku">1128-104</p>
+  <p class="preco">R$ 78,99</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint petg lavanda 1kg (1.75mm) 1112-104">
+  <div class="foto"><img src="fotos/1112-104.jpg" alt="FILAMENTO MASTERPRINT PETG LAVANDA 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PETG LAVANDA 1KG (1.75MM)</h2>
+  <p class="sku">1112-104</p>
+  <p class="preco">R$ 71,88</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint petg luminous rainbow 1kg (1.75mm) 1182-104">
+  <div class="foto"><img src="fotos/1182-104.jpg" alt="FILAMENTO MASTERPRINT PETG LUMINOUS RAINBOW 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PETG LUMINOUS RAINBOW 1KG (1.75MM)</h2>
+  <p class="sku">1182-104</p>
+  <p class="preco">R$ 159,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint petg madeira 1kg (1.75mm) 1139-104">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PETG MADEIRA 1KG (1.75MM)</h2>
+  <p class="sku">1139-104</p>
+  <p class="preco">R$ 78,99</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint petg marrom 1kg (1.75mm) 1138-104">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PETG MARROM 1KG (1.75MM)</h2>
+  <p class="sku">1138-104</p>
+  <p class="preco">R$ 75,04</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint petg pcv indoor  branco 1kg (1.75mm) 1184-104">
+  <div class="foto"><img src="fotos/1184-104.jpg" alt="FILAMENTO MASTERPRINT PETG PCV INDOOR  BRANCO 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PETG PCV INDOOR  BRANCO 1KG (1.75MM)</h2>
+  <p class="sku">1184-104</p>
+  <p class="preco">R$ 110,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint petg pcv outdoor branco 1kg (1.75mm) 1110-104">
+  <div class="foto"><img src="fotos/1110-104.jpg" alt="FILAMENTO MASTERPRINT PETG PCV OUTDOOR BRANCO 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PETG PCV OUTDOOR BRANCO 1KG (1.75MM)</h2>
+  <p class="sku">1110-104</p>
+  <p class="preco">R$ 110,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint petg prata 1kg (1.75mm) 1107-104">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PETG PRATA 1KG (1.75MM)</h2>
+  <p class="sku">1107-104</p>
+  <p class="preco">R$ 78,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint petg preto 1kg (1.75mm) 1097-104">
+  <div class="foto"><img src="fotos/1097-104.jpg" alt="FILAMENTO MASTERPRINT PETG PRETO 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PETG PRETO 1KG (1.75MM)</h2>
+  <p class="sku">1097-104</p>
+  <p class="preco">R$ 109,99</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint petg rosa 1kg (1.75mm) 1106-104">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PETG ROSA 1KG (1.75MM)</h2>
+  <p class="sku">1106-104</p>
+  <p class="preco">R$ 78,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint petg roxo 1kg (1.75mm) 1143-104">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PETG ROXO 1KG (1.75MM)</h2>
+  <p class="sku">1143-104</p>
+  <p class="preco">R$ 78,99</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint petg skin 1kg (1.75mm) 1113-104">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PETG SKIN 1KG (1.75MM)</h2>
+  <p class="sku">1113-104</p>
+  <p class="preco">R$ 78,99</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint petg translucido amarelo 1kg (1.75mm) 1151-104">
+  <div class="foto"><img src="fotos/1151-104.jpg" alt="FILAMENTO MASTERPRINT PETG TRANSLUCIDO AMARELO 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PETG TRANSLUCIDO AMARELO 1KG (1.75MM)</h2>
+  <p class="sku">1151-104</p>
+  <p class="preco">R$ 99,99</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint petg translucido azul 1kg (1.75mm) 1152-104">
+  <div class="foto"><img src="fotos/1152-104.jpg" alt="FILAMENTO MASTERPRINT PETG TRANSLUCIDO AZUL 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PETG TRANSLUCIDO AZUL 1KG (1.75MM)</h2>
+  <p class="sku">1152-104</p>
+  <p class="preco">R$ 78,99</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint petg translucido branco 1kg (1.75mm) 1105-104">
+  <div class="foto"><img src="fotos/1105-104.jpg" alt="FILAMENTO MASTERPRINT PETG TRANSLUCIDO BRANCO 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PETG TRANSLUCIDO BRANCO 1KG (1.75MM)</h2>
+  <p class="sku">1105-104</p>
+  <p class="preco">R$ 77,80</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint petg translucido verde 1kg (1.75mm) 1142-104">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PETG TRANSLUCIDO VERDE 1KG (1.75MM)</h2>
+  <p class="sku">1142-104</p>
+  <p class="preco">R$ 62,08</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint petg translucido vermelho 1kg (1.75mm) 1153-104">
+  <div class="foto"><img src="fotos/1153-104.jpg" alt="FILAMENTO MASTERPRINT PETG TRANSLUCIDO VERMELHO 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PETG TRANSLUCIDO VERMELHO 1KG (1.75MM)</h2>
+  <p class="sku">1153-104</p>
+  <p class="preco">R$ 69,99</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint petg transparente 1kg (1.75mm) 1210-104">
+  <div class="foto"><img src="fotos/1210-104.jpg" alt="FILAMENTO MASTERPRINT PETG TRANSPARENTE 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PETG TRANSPARENTE 1KG (1.75MM)</h2>
+  <p class="sku">1210-104</p>
+  <p class="preco">R$ 109,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint petg verde 1kg (1.75mm) 1130-104">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PETG VERDE 1KG (1.75MM)</h2>
+  <p class="sku">1130-104</p>
+  <p class="preco">R$ 109,90</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint petg vermelho 1kg (1.75mm) 1131-104">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PETG VERMELHO 1KG (1.75MM)</h2>
+  <p class="sku">1131-104</p>
+  <p class="preco">R$ 109,99</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla amarelo 1kg (1.75mm) 1136-104">
+  <div class="foto"><img src="fotos/1136-104.jpg" alt="FILAMENTO MASTERPRINT PLA AMARELO 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA AMARELO 1KG (1.75MM)</h2>
+  <p class="sku">1136-104</p>
+  <p class="preco">R$ 96,99</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla azul 1kg (1.75mm) 1137-104">
+  <div class="foto"><img src="fotos/1137-104.jpg" alt="FILAMENTO MASTERPRINT PLA AZUL 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA AZUL 1KG (1.75MM)</h2>
+  <p class="sku">1137-104</p>
+  <p class="preco">R$ 109,99</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla azul claro 1kg (1.75mm) 1189-104">
+  <div class="foto"><img src="fotos/1189-104.jpg" alt="FILAMENTO MASTERPRINT PLA AZUL CLARO 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA AZUL CLARO 1KG (1.75MM)</h2>
+  <p class="sku">1189-104</p>
+  <p class="preco">R$ 159,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla azul escuro 1kg (1.75mm) 1190-104">
+  <div class="foto"><img src="fotos/1190-104.jpg" alt="FILAMENTO MASTERPRINT PLA AZUL ESCURO 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA AZUL ESCURO 1KG (1.75MM)</h2>
+  <p class="sku">1190-104</p>
+  <p class="preco">R$ 159,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla branco 1kg (1.75mm) 1099-104">
+  <div class="foto"><img src="fotos/1099-104.jpg" alt="FILAMENTO MASTERPRINT PLA BRANCO 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA BRANCO 1KG (1.75MM)</h2>
+  <p class="sku">1099-104</p>
+  <p class="preco">R$ 117,10</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla cafe 1kg (1.75mm) 1203-104">
+  <div class="foto"><img src="fotos/1203-104.jpg" alt="FILAMENTO MASTERPRINT PLA CAFE 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA CAFE 1KG (1.75MM)</h2>
+  <p class="sku">1203-104</p>
+  <p class="preco">R$ 159,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla cinza 1kg (1.75mm) 1185-104">
+  <div class="foto"><img src="fotos/1185-104.jpg" alt="FILAMENTO MASTERPRINT PLA CINZA 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA CINZA 1KG (1.75MM)</h2>
+  <p class="sku">1185-104</p>
+  <p class="preco">R$ 159,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla cinza claro 1kg (1.75mm) 1200-104">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA CINZA CLARO 1KG (1.75MM)</h2>
+  <p class="sku">1200-104</p>
+  <p class="preco">R$ 119,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla cobre 1kg (1.75mm) 1150-104">
+  <div class="foto"><img src="fotos/1150-104.jpg" alt="FILAMENTO MASTERPRINT PLA COBRE 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA COBRE 1KG (1.75MM)</h2>
+  <p class="sku">1150-104</p>
+  <p class="preco">R$ 104,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla dourado 1kg (1.75mm) 1127-104">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA DOURADO 1KG (1.75MM)</h2>
+  <p class="sku">1127-104</p>
+  <p class="preco">R$ 129,99</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla fibra de carbono 1kg (1.75mm) 1154-104">
+  <div class="foto"><img src="fotos/1154-104.jpg" alt="FILAMENTO MASTERPRINT PLA FIBRA DE CARBONO 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA FIBRA DE CARBONO 1KG (1.75MM)</h2>
+  <p class="sku">1154-104</p>
+  <p class="preco">R$ 147,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla fosco cinza fossil 1kg (1.75mm) 1163-104">
+  <div class="foto"><img src="fotos/1163-104.jpg" alt="FILAMENTO MASTERPRINT PLA FOSCO CINZA FOSSIL 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA FOSCO CINZA FOSSIL 1KG (1.75MM)</h2>
+  <p class="sku">1163-104</p>
+  <p class="preco">R$ 159,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla fosco dreamy rainbow 1kg (1.75mm) 1164-104">
+  <div class="foto"><img src="fotos/1164-104.jpg" alt="FILAMENTO MASTERPRINT PLA FOSCO DREAMY RAINBOW 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA FOSCO DREAMY RAINBOW 1KG (1.75MM)</h2>
+  <p class="sku">1164-104</p>
+  <p class="preco">R$ 129,99</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla fosco roxo 1kg (1.75mm) 1165-104">
+  <div class="foto"><img src="fotos/1165-104.jpg" alt="FILAMENTO MASTERPRINT PLA FOSCO ROXO 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA FOSCO ROXO 1KG (1.75MM)</h2>
+  <p class="sku">1165-104</p>
+  <p class="preco">R$ 99,99</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla fosforescente azul 1kg (1.75mm) 1155-104">
+  <div class="foto"><img src="fotos/1155-104.jpg" alt="FILAMENTO MASTERPRINT PLA FOSFORESCENTE AZUL 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA FOSFORESCENTE AZUL 1KG (1.75MM)</h2>
+  <p class="sku">1155-104</p>
+  <p class="preco">R$ 120,90</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla fosforescente rainbow 1kg (1.75mm) 1156-104">
+  <div class="foto"><img src="fotos/1156-104.jpg" alt="FILAMENTO MASTERPRINT PLA FOSFORESCENTE RAINBOW 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA FOSFORESCENTE RAINBOW 1KG (1.75MM)</h2>
+  <p class="sku">1156-104</p>
+  <p class="preco">R$ 132,90</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla fosforescente verde 1kg (1.75mm) 1157-104">
+  <div class="foto"><img src="fotos/1157-104.jpg" alt="FILAMENTO MASTERPRINT PLA FOSFORESCENTE VERDE 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA FOSFORESCENTE VERDE 1KG (1.75MM)</h2>
+  <p class="sku">1157-104</p>
+  <p class="preco">R$ 120,90</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla ice cream 1kg (1.75mm) 1118-104">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA ICE CREAM 1KG (1.75MM)</h2>
+  <p class="sku">1118-104</p>
+  <p class="preco">R$ 99,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla laranja 1kg (1.75mm) 1191-104">
+  <div class="foto"><img src="fotos/1191-104.jpg" alt="FILAMENTO MASTERPRINT PLA LARANJA 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA LARANJA 1KG (1.75MM)</h2>
+  <p class="sku">1191-104</p>
+  <p class="preco">R$ 159,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla madeira 1kg (1.75mm) 1126-104">
+  <div class="foto"><img src="fotos/1126-104.jpg" alt="FILAMENTO MASTERPRINT PLA MADEIRA 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA MADEIRA 1KG (1.75MM)</h2>
+  <p class="sku">1126-104</p>
+  <p class="preco">R$ 99,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla madeira escura 1kg (1.75mm) 1120-104">
+  <div class="foto"><img src="fotos/1120-104.jpg" alt="FILAMENTO MASTERPRINT PLA MADEIRA ESCURA 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA MADEIRA ESCURA 1KG (1.75MM)</h2>
+  <p class="sku">1120-104</p>
+  <p class="preco">R$ 124,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla marmore 1kg (1.75mm) 1119-104">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA MARMORE 1KG (1.75MM)</h2>
+  <p class="sku">1119-104</p>
+  <p class="preco">R$ 129,99</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla marrom 1kg (1.75mm) 1192-104">
+  <div class="foto"><img src="fotos/1192-104.jpg" alt="FILAMENTO MASTERPRINT PLA MARROM 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA MARROM 1KG (1.75MM)</h2>
+  <p class="sku">1192-104</p>
+  <p class="preco">R$ 159,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla marrom escuro 1kg (1.75mm) 1204-104">
+  <div class="foto"><img src="fotos/1204-104.jpg" alt="FILAMENTO MASTERPRINT PLA MARROM ESCURO 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA MARROM ESCURO 1KG (1.75MM)</h2>
+  <p class="sku">1204-104</p>
+  <p class="preco">R$ 159,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla prata 1kg (1.75mm) 1166-104">
+  <div class="foto"><img src="fotos/1166-104.jpg" alt="FILAMENTO MASTERPRINT PLA PRATA 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA PRATA 1KG (1.75MM)</h2>
+  <p class="sku">1166-104</p>
+  <p class="preco">R$ 119,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla prata grafite 1kg (1.75mm) 1167-104">
+  <div class="foto"><img src="fotos/1167-104.jpg" alt="FILAMENTO MASTERPRINT PLA PRATA GRAFITE 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA PRATA GRAFITE 1KG (1.75MM)</h2>
+  <p class="sku">1167-104</p>
+  <p class="preco">R$ 199,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla preto 1kg (1.75mm) 1100-104">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA PRETO 1KG (1.75MM)</h2>
+  <p class="sku">1100-104</p>
+  <p class="preco">R$ 113,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla preto com glitter 1kg (1.75mm) 1168-104">
+  <div class="foto"><img src="fotos/1168-104.jpg" alt="FILAMENTO MASTERPRINT PLA PRETO COM GLITTER 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA PRETO COM GLITTER 1KG (1.75MM)</h2>
+  <p class="sku">1168-104</p>
+  <p class="preco">R$ 107,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla rosa claro 1kg (1.75mm) 1193-104">
+  <div class="foto"><img src="fotos/1193-104.jpg" alt="FILAMENTO MASTERPRINT PLA ROSA CLARO 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA ROSA CLARO 1KG (1.75MM)</h2>
+  <p class="sku">1193-104</p>
+  <p class="preco">R$ 159,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla roxo 1kg (1.75mm) 1194-104">
+  <div class="foto"><img src="fotos/1194-104.jpg" alt="FILAMENTO MASTERPRINT PLA ROXO 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA ROXO 1KG (1.75MM)</h2>
+  <p class="sku">1194-104</p>
+  <p class="preco">R$ 159,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla roxo claro 1kg (1.75mm) 1169-104">
+  <div class="foto"><img src="fotos/1169-104.jpg" alt="FILAMENTO MASTERPRINT PLA ROXO CLARO 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA ROXO CLARO 1KG (1.75MM)</h2>
+  <p class="sku">1169-104</p>
+  <p class="preco">R$ 119,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla roxo com glitter 1kg (1.75mm) 1158-104">
+  <div class="foto"><img src="fotos/1158-104.jpg" alt="FILAMENTO MASTERPRINT PLA ROXO COM GLITTER 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA ROXO COM GLITTER 1KG (1.75MM)</h2>
+  <p class="sku">1158-104</p>
+  <p class="preco">R$ 112,90</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla roxo/preto 1kg (1.75mm) 1159-104">
+  <div class="foto"><img src="fotos/1159-104.jpg" alt="FILAMENTO MASTERPRINT PLA ROXO/PRETO 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA ROXO/PRETO 1KG (1.75MM)</h2>
+  <p class="sku">1159-104</p>
+  <p class="preco">R$ 120,90</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla silk azul 1kg (1.75mm) 1125-104">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA SILK AZUL 1KG (1.75MM)</h2>
+  <p class="sku">1125-104</p>
+  <p class="preco">R$ 119,99</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla silk azul/roxo 1kg (1.75mm) 1160-104">
+  <div class="foto"><img src="fotos/1160-104.jpg" alt="FILAMENTO MASTERPRINT PLA SILK AZUL/ROXO 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA SILK AZUL/ROXO 1KG (1.75MM)</h2>
+  <p class="sku">1160-104</p>
+  <p class="preco">R$ 116,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla silk branco 1kg (1.75mm) 1123-104">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA SILK BRANCO 1KG (1.75MM)</h2>
+  <p class="sku">1123-104</p>
+  <p class="preco">R$ 129,99</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla silk bronze 1kg (1.75mm) 1170-104">
+  <div class="foto"><img src="fotos/1170-104.jpg" alt="FILAMENTO MASTERPRINT PLA SILK BRONZE 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA SILK BRONZE 1KG (1.75MM)</h2>
+  <p class="sku">1170-104</p>
+  <p class="preco">R$ 107,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla silk dourado 1kg (1.75mm) 1121-104">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA SILK DOURADO 1KG (1.75MM)</h2>
+  <p class="sku">1121-104</p>
+  <p class="preco">R$ 159,99</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla silk fuchsia 1kg (1.75mm) 1161-104">
+  <div class="foto"><img src="fotos/1161-104.jpg" alt="FILAMENTO MASTERPRINT PLA SILK FUCHSIA 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA SILK FUCHSIA 1KG (1.75MM)</h2>
+  <p class="sku">1161-104</p>
+  <p class="preco">R$ 109,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla silk prata com glitter 1kg (1.75mm) 1186-104">
+  <div class="foto"><img src="fotos/1186-104.jpg" alt="FILAMENTO MASTERPRINT PLA SILK PRATA COM GLITTER 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA SILK PRATA COM GLITTER 1KG (1.75MM)</h2>
+  <p class="sku">1186-104</p>
+  <p class="preco">R$ 125,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla silk preto 1kg (1.75mm) 1122-104">
+  <div class="foto"><img src="fotos/1122-104.jpg" alt="FILAMENTO MASTERPRINT PLA SILK PRETO 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA SILK PRETO 1KG (1.75MM)</h2>
+  <p class="sku">1122-104</p>
+  <p class="preco">R$ 119,99</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla silk rainbow 1kg (1.75mm) 1171-104">
+  <div class="foto"><img src="fotos/1171-104.jpg" alt="FILAMENTO MASTERPRINT PLA SILK RAINBOW 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA SILK RAINBOW 1KG (1.75MM)</h2>
+  <p class="sku">1171-104</p>
+  <p class="preco">R$ 129,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla silk roxo/azul/preto 1kg (1.75mm) 1162-104">
+  <div class="foto"><img src="fotos/1162-104.jpg" alt="FILAMENTO MASTERPRINT PLA SILK ROXO/AZUL/PRETO 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA SILK ROXO/AZUL/PRETO 1KG (1.75MM)</h2>
+  <p class="sku">1162-104</p>
+  <p class="preco">R$ 115,90</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla silk vermelho 1kg (1.75mm) 1124-104">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA SILK VERMELHO 1KG (1.75MM)</h2>
+  <p class="sku">1124-104</p>
+  <p class="preco">R$ 109,99</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla skin 1kg (1.75mm) 1172-104">
+  <div class="foto"><img src="fotos/1172-104.jpg" alt="FILAMENTO MASTERPRINT PLA SKIN 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA SKIN 1KG (1.75MM)</h2>
+  <p class="sku">1172-104</p>
+  <p class="preco">R$ 159,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla transparente 1kg (1.75mm) 1173-104">
+  <div class="foto"><img src="fotos/1173-104.jpg" alt="FILAMENTO MASTERPRINT PLA TRANSPARENTE 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA TRANSPARENTE 1KG (1.75MM)</h2>
+  <p class="sku">1173-104</p>
+  <p class="preco">R$ 119,99</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla transparente preto/azul c/ glitter 1kg (1.75mm) 1181-104">
+  <div class="foto"><img src="fotos/1181-104.jpg" alt="FILAMENTO MASTERPRINT PLA TRANSPARENTE PRETO/AZUL C/ GLITTER 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA TRANSPARENTE PRETO/AZUL C/ GLITTER 1KG (1.75MM)</h2>
+  <p class="sku">1181-104</p>
+  <p class="preco">R$ 125,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla verde 1kg (1.75mm) 1135-104">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA VERDE 1KG (1.75MM)</h2>
+  <p class="sku">1135-104</p>
+  <p class="preco">R$ 129,99</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla verde bambu 1 kg (1.75mm) 1117-104">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA VERDE BAMBU 1 KG (1.75MM)</h2>
+  <p class="sku">1117-104</p>
+  <p class="preco">R$ 99,99</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla verde escuro 1kg (1.75mm) 1116-104">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA VERDE ESCURO 1KG (1.75MM)</h2>
+  <p class="sku">1116-104</p>
+  <p class="preco">R$ 119,99</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla verde limao 1kg (1.75mm) 1183-104">
+  <div class="foto"><img src="fotos/1183-104.jpg" alt="FILAMENTO MASTERPRINT PLA VERDE LIMAO 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA VERDE LIMAO 1KG (1.75MM)</h2>
+  <p class="sku">1183-104</p>
+  <p class="preco">R$ 129,99</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla vermelho 1kg (1.75mm) 1195-104">
+  <div class="foto"><img src="fotos/1195-104.jpg" alt="FILAMENTO MASTERPRINT PLA VERMELHO 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA VERMELHO 1KG (1.75MM)</h2>
+  <p class="sku">1195-104</p>
+  <p class="preco">R$ 159,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint pla vermelho/dourado 1kg (1.75mm) 1174-104">
+  <div class="foto"><img src="fotos/1174-104.jpg" alt="FILAMENTO MASTERPRINT PLA VERMELHO/DOURADO 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT PLA VERMELHO/DOURADO 1KG (1.75MM)</h2>
+  <p class="sku">1174-104</p>
+  <p class="preco">R$ 104,75</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint tpu branco 1kg (1.75mm) 1175-104">
+  <div class="foto"><img src="fotos/1175-104.jpg" alt="FILAMENTO MASTERPRINT TPU BRANCO 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT TPU BRANCO 1KG (1.75MM)</h2>
+  <p class="sku">1175-104</p>
+  <p class="preco">R$ 140,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint tpu cinza 1kg (1.75mm) 1179-104">
+  <div class="foto"><img src="fotos/1179-104.jpg" alt="FILAMENTO MASTERPRINT TPU CINZA 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT TPU CINZA 1KG (1.75MM)</h2>
+  <p class="sku">1179-104</p>
+  <p class="preco">R$ 140,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint tpu preto 1kg (1.75mm) 1180-104">
+  <div class="foto"><img src="fotos/1180-104.jpg" alt="FILAMENTO MASTERPRINT TPU PRETO 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT TPU PRETO 1KG (1.75MM)</h2>
+  <p class="sku">1180-104</p>
+  <p class="preco">R$ 140,00</p></div>
+</article>
+<article class="card" data-busca="filamento masterprint tpu transparente 1kg (1.75mm) 1212-104">
+  <div class="foto"><img src="fotos/1212-104.jpg" alt="FILAMENTO MASTERPRINT TPU TRANSPARENTE 1KG (1.75MM)" loading="lazy"></div>
+  <div class="info"><h2>FILAMENTO MASTERPRINT TPU TRANSPARENTE 1KG (1.75MM)</h2>
+  <p class="sku">1212-104</p>
+  <p class="preco">R$ 129,00</p></div>
+</article>
+<article class="card" data-busca="filamento soleyin ultra pla greenery 1kg (1.75mm) 1187-107">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>FILAMENTO SOLEYIN ULTRA PLA GREENERY 1KG (1.75MM)</h2>
+  <p class="sku">1187-107</p>
+  <p class="preco">R$ 99,99</p></div>
+</article>
+<article class="card" data-busca="filamento soleyin ultra pla ocean blue 1kg (1.75mm) 1188-107">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>FILAMENTO SOLEYIN ULTRA PLA OCEAN BLUE 1KG (1.75MM)</h2>
+  <p class="sku">1188-107</p>
+  <p class="preco">R$ 99,99</p></div>
+</article>
+<article class="card" data-busca="hub de filamento para ams lite com 5 vias 1084-86">
+  <div class="foto"><img src="fotos/1084-86.jpg" alt="HUB DE FILAMENTO PARA AMS LITE COM 5 VIAS" loading="lazy"></div>
+  <div class="info"><h2>HUB DE FILAMENTO PARA AMS LITE COM 5 VIAS</h2>
+  <p class="sku">1084-86</p>
+  <p class="preco">R$ 145,49</p></div>
+</article>
+<article class="card" data-busca="impressora 3d bambu lab a1 combo 1196-108">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>IMPRESSORA 3D BAMBU LAB A1 COMBO</h2>
+  <p class="sku">1196-108</p>
+  <p class="preco">R$ 5.759,88</p></div>
+</article>
+<article class="card" data-busca="impressora 3d flashforge ad5x 1198-109">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>IMPRESSORA 3D FLASHFORGE AD5X</h2>
+  <p class="sku">1198-109</p>
+  <p class="preco">R$ 4.400,00</p></div>
+</article>
+<article class="card" data-busca="impressora 3d snapmaker u1 1199-110">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>IMPRESSORA 3D SNAPMAKER U1</h2>
+  <p class="sku">1199-110</p>
+  <p class="preco">R$ 19.188,00</p></div>
+</article>
+<article class="card" data-busca="kit 04 filtro limpeza filamento impressora 3d 1093-86">
+  <div class="foto"><img src="fotos/1093-86.jpg" alt="KIT 04 FILTRO LIMPEZA FILAMENTO IMPRESSORA 3D" loading="lazy"></div>
+  <div class="info"><h2>KIT 04 FILTRO LIMPEZA FILAMENTO IMPRESSORA 3D</h2>
+  <p class="sku">1093-86</p>
+  <p class="preco">R$ 35,80</p></div>
+</article>
+<article class="card" data-busca="kit 08 filtro limpeza filamento impressora 3d 1093-kit08">
+  <div class="foto"><img src="fotos/1093-KIT08.jpg" alt="KIT 08 FILTRO LIMPEZA FILAMENTO IMPRESSORA 3D" loading="lazy"></div>
+  <div class="info"><h2>KIT 08 FILTRO LIMPEZA FILAMENTO IMPRESSORA 3D</h2>
+  <p class="sku">1093-KIT08</p>
+  <p class="preco">R$ 71,60</p></div>
+</article>
+<article class="card" data-busca="kit 10 agulhas desentupir bico nozzle hotend 1042-86">
+  <div class="foto"><img src="fotos/1042-86.jpg" alt="KIT 10 AGULHAS DESENTUPIR BICO NOZZLE HOTEND" loading="lazy"></div>
+  <div class="info"><h2>KIT 10 AGULHAS DESENTUPIR BICO NOZZLE HOTEND</h2>
+  <p class="sku">1042-86</p>
+  <p class="preco">R$ 29,99</p></div>
+</article>
+<article class="card" data-busca="kit 16 filtro limpeza filamento impressora 3d 1093-kit16">
+  <div class="foto"><img src="fotos/1093-KIT16.jpg" alt="KIT 16 FILTRO LIMPEZA FILAMENTO IMPRESSORA 3D" loading="lazy"></div>
+  <div class="info"><h2>KIT 16 FILTRO LIMPEZA FILAMENTO IMPRESSORA 3D</h2>
+  <p class="sku">1093-KIT16</p>
+  <p class="preco">R$ 143,20</p></div>
+</article>
+<article class="card" data-busca="kit 32 ferramentas para impressão 3d 1043-86">
+  <div class="foto"><img src="fotos/1043-86.jpg" alt="KIT 32 FERRAMENTAS PARA IMPRESSÃO 3D" loading="lazy"></div>
+  <div class="info"><h2>KIT 32 FERRAMENTAS PARA IMPRESSÃO 3D</h2>
+  <p class="sku">1043-86</p>
+  <p class="preco">R$ 199,99</p></div>
+</article>
+<article class="card" data-busca="kit filamento petg preto 1kg + petg branco 1kg masterprint kit-01">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>KIT FILAMENTO PETG PRETO 1KG + PETG BRANCO 1KG MASTERPRINT</h2>
+  <p class="sku">KIT-01</p>
+  <p class="preco">R$ 197,60</p></div>
+</article>
+<article class="card" data-busca="kit hotend para anycubic kobra 3 max 0.4mm 1079-86">
+  <div class="foto"><img src="fotos/1079-86.jpg" alt="KIT HOTEND PARA ANYCUBIC KOBRA 3 MAX 0.4MM" loading="lazy"></div>
+  <div class="info"><h2>KIT HOTEND PARA ANYCUBIC KOBRA 3 MAX 0.4MM</h2>
+  <p class="sku">1079-86</p>
+  <p class="preco">R$ 193,93</p></div>
+</article>
+<article class="card" data-busca="kit hotend para anycubic kobra s1 0.4mm 1075-86">
+  <div class="foto"><img src="fotos/1075-86.jpg" alt="KIT HOTEND PARA ANYCUBIC KOBRA S1 0.4MM" loading="lazy"></div>
+  <div class="info"><h2>KIT HOTEND PARA ANYCUBIC KOBRA S1 0.4MM</h2>
+  <p class="sku">1075-86</p>
+  <p class="preco">R$ 126,09</p></div>
+</article>
+<article class="card" data-busca="kit hotend para bambu lab a1 series 0.4mm 1000-86">
+  <div class="foto"><img src="fotos/1000-86.jpg" alt="KIT HOTEND PARA BAMBU LAB A1 SERIES 0.4MM" loading="lazy"></div>
+  <div class="info"><h2>KIT HOTEND PARA BAMBU LAB A1 SERIES 0.4MM</h2>
+  <p class="sku">1000-86</p>
+  <p class="preco">R$ 109,99</p></div>
+</article>
+<article class="card" data-busca="kit hotend para creality ender 3 s1 cr10 1032-86">
+  <div class="foto"><img src="fotos/1032-86.jpg" alt="KIT HOTEND PARA CREALITY ENDER 3 S1 CR10" loading="lazy"></div>
+  <div class="info"><h2>KIT HOTEND PARA CREALITY ENDER 3 S1 CR10</h2>
+  <p class="sku">1032-86</p>
+  <p class="preco">R$ 78,00</p></div>
+</article>
+<article class="card" data-busca="kit hotend para creality ender 3 v3 ke k1 1031-86">
+  <div class="foto"><img src="fotos/1031-86.jpg" alt="KIT HOTEND PARA CREALITY ENDER 3 V3 KE K1" loading="lazy"></div>
+  <div class="info"><h2>KIT HOTEND PARA CREALITY ENDER 3 V3 KE K1</h2>
+  <p class="sku">1031-86</p>
+  <p class="preco">R$ 129,99</p></div>
+</article>
+<article class="card" data-busca="kit hotend para creality hi combo upgraded 0.4mm 1085-86">
+  <div class="foto"><img src="fotos/1085-86.jpg" alt="KIT HOTEND PARA CREALITY HI COMBO UPGRADED 0.4MM" loading="lazy"></div>
+  <div class="info"><h2>KIT HOTEND PARA CREALITY HI COMBO UPGRADED 0.4MM</h2>
+  <p class="sku">1085-86</p>
+  <p class="preco">R$ 184,29</p></div>
+</article>
+<article class="card" data-busca="kit hotend para creality k1 k1max k1c nozzle 0.4mm 1002-86">
+  <div class="foto"><img src="fotos/1002-86.jpg" alt="KIT HOTEND PARA CREALITY K1 K1MAX K1C NOZZLE 0.4MM" loading="lazy"></div>
+  <div class="info"><h2>KIT HOTEND PARA CREALITY K1 K1MAX K1C NOZZLE 0.4MM</h2>
+  <p class="sku">1002-86</p>
+  <p class="preco">R$ 119,99</p></div>
+</article>
+<article class="card" data-busca="kit hotend v2.0 para anycubic kobra 3 1103-86">
+  <div class="foto"><img src="fotos/1103-86.jpg" alt="KIT HOTEND V2.0 PARA ANYCUBIC KOBRA 3" loading="lazy"></div>
+  <div class="info"><h2>KIT HOTEND V2.0 PARA ANYCUBIC KOBRA 3</h2>
+  <p class="sku">1103-86</p>
+  <p class="preco">R$ 129,99</p></div>
+</article>
+<article class="card" data-busca="kit hotend v2.0 para bambu lab p1s / p1p 0.4mm 1177-86">
+  <div class="foto"><img src="fotos/1177-86.jpg" alt="KIT HOTEND V2.0 PARA BAMBU LAB P1S / P1P 0.4MM" loading="lazy"></div>
+  <div class="info"><h2>KIT HOTEND V2.0 PARA BAMBU LAB P1S / P1P 0.4MM</h2>
+  <p class="sku">1177-86</p>
+  <p class="preco">R$ 153,00</p></div>
+</article>
+<article class="card" data-busca="kit hotend v2.0 para bambu lab x1/x1c 0.4mm 1178-86">
+  <div class="foto"><img src="fotos/1178-86.jpg" alt="KIT HOTEND V2.0 PARA BAMBU LAB X1/X1C 0.4MM" loading="lazy"></div>
+  <div class="info"><h2>KIT HOTEND V2.0 PARA BAMBU LAB X1/X1C 0.4MM</h2>
+  <p class="sku">1178-86</p>
+  <p class="preco">R$ 141,00</p></div>
+</article>
+<article class="card" data-busca="kit saco bag plastica a vacuo 10 unidades + pistola para bag plastica a vacuo 1040-86">
+  <div class="foto"><img src="fotos/1040-86.jpg" alt="KIT SACO BAG PLASTICA A VACUO 10 UNIDADES + PISTOLA PARA BAG PLASTICA A VACUO" loading="lazy"></div>
+  <div class="info"><h2>KIT SACO BAG PLASTICA A VACUO 10 UNIDADES + PISTOLA PARA BAG PLASTICA A VACUO</h2>
+  <p class="sku">1040-86</p>
+  <p class="preco">R$ 78,99</p></div>
+</article>
+<article class="card" data-busca="laminas para rebarbador debarbador escareador manual rasquete 1089-86">
+  <div class="foto"><img src="fotos/1089-86.jpg" alt="LAMINAS PARA REBARBADOR DEBARBADOR ESCAREADOR MANUAL RASQUETE" loading="lazy"></div>
+  <div class="info"><h2>LAMINAS PARA REBARBADOR DEBARBADOR ESCAREADOR MANUAL RASQUETE</h2>
+  <p class="sku">1089-86</p>
+  <p class="preco">R$ 29,99</p></div>
+</article>
+<article class="card" data-busca="lampada led lamp para luminarias redondo 1077-86">
+  <div class="foto"><img src="fotos/1077-86.jpg" alt="LAMPADA LED LAMP PARA LUMINARIAS REDONDO" loading="lazy"></div>
+  <div class="info"><h2>LAMPADA LED LAMP PARA LUMINARIAS REDONDO</h2>
+  <p class="sku">1077-86</p>
+  <p class="preco">R$ 39,99</p></div>
+</article>
+<article class="card" data-busca="led neon personalizado 0001-001">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>LED NEON PERSONALIZADO</h2>
+  <p class="sku">0001-001</p>
+  <p class="preco">Sob consulta</p></div>
+</article>
+<article class="card" data-busca="letra caixa personalizada 0000-001">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>LETRA CAIXA PERSONALIZADA</h2>
+  <p class="sku">0000-001</p>
+  <p class="preco">Sob consulta</p></div>
+</article>
+<article class="card" data-busca="limpador de bico purge wiper purga purgador impressora 3d bambu lab a1 series 1148-86">
+  <div class="foto"><img src="fotos/1148-86.jpg" alt="LIMPADOR DE BICO PURGE WIPER PURGA PURGADOR IMPRESSORA 3D BAMBU LAB A1 SERIES" loading="lazy"></div>
+  <div class="info"><h2>LIMPADOR DE BICO PURGE WIPER PURGA PURGADOR IMPRESSORA 3D BAMBU LAB A1 SERIES</h2>
+  <p class="sku">1148-86</p>
+  <p class="preco">R$ 129,99</p></div>
+</article>
+<article class="card" data-busca="mão de obra (reparos e pintura) 0003-001">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>MÃO DE OBRA (REPAROS E PINTURA)</h2>
+  <p class="sku">0003-001</p>
+  <p class="preco">Sob consulta</p></div>
+</article>
+<article class="card" data-busca="marcadores 24 cores canetinha acrilica acabamento pintura em pecas 3d 1101-86">
+  <div class="foto"><img src="fotos/1101-86.jpg" alt="MARCADORES 24 CORES CANETINHA ACRILICA ACABAMENTO PINTURA EM PECAS 3D" loading="lazy"></div>
+  <div class="info"><h2>MARCADORES 24 CORES CANETINHA ACRILICA ACABAMENTO PINTURA EM PECAS 3D</h2>
+  <p class="sku">1101-86</p>
+  <p class="preco">R$ 96,99</p></div>
+</article>
+<article class="card" data-busca="nozzle bico anycubic kobra 3 max 0.4mm 1078-86">
+  <div class="foto"><img src="fotos/1078-86.jpg" alt="NOZZLE BICO ANYCUBIC KOBRA 3 MAX 0.4MM" loading="lazy"></div>
+  <div class="info"><h2>NOZZLE BICO ANYCUBIC KOBRA 3 MAX 0.4MM</h2>
+  <p class="sku">1078-86</p>
+  <p class="preco">R$ 69,00</p></div>
+</article>
+<article class="card" data-busca="nozzle bico creality (unicornio) k1 k1max k1c 0.2mm 1059-86">
+  <div class="foto"><img src="fotos/1059-86.jpg" alt="NOZZLE BICO CREALITY (UNICORNIO) K1 K1MAX K1C 0.2MM" loading="lazy"></div>
+  <div class="info"><h2>NOZZLE BICO CREALITY (UNICORNIO) K1 K1MAX K1C 0.2MM</h2>
+  <p class="sku">1059-86</p>
+  <p class="preco">R$ 78,90</p></div>
+</article>
+<article class="card" data-busca="nozzle bico creality (unicornio) k1 k1max k1c 0.4mm 1001-86">
+  <div class="foto"><img src="fotos/1001-86.jpg" alt="NOZZLE BICO CREALITY (UNICORNIO) K1 K1MAX K1C 0.4MM" loading="lazy"></div>
+  <div class="info"><h2>NOZZLE BICO CREALITY (UNICORNIO) K1 K1MAX K1C 0.4MM</h2>
+  <p class="sku">1001-86</p>
+  <p class="preco">R$ 78,00</p></div>
+</article>
+<article class="card" data-busca="nozzle bico creality (unicornio) k1 k1max k1c 0.6mm 1044-86">
+  <div class="foto"><img src="fotos/1044-86.jpg" alt="NOZZLE BICO CREALITY (UNICORNIO) K1 K1MAX K1C 0.6MM" loading="lazy"></div>
+  <div class="info"><h2>NOZZLE BICO CREALITY (UNICORNIO) K1 K1MAX K1C 0.6MM</h2>
+  <p class="sku">1044-86</p>
+  <p class="preco">R$ 78,90</p></div>
+</article>
+<article class="card" data-busca="nozzle bico creality (unicornio) k1 k1max k1c 0.8mm 1017-86">
+  <div class="foto"><img src="fotos/1017-86.jpg" alt="NOZZLE BICO CREALITY (UNICORNIO) K1 K1MAX K1C 0.8MM" loading="lazy"></div>
+  <div class="info"><h2>NOZZLE BICO CREALITY (UNICORNIO) K1 K1MAX K1C 0.8MM</h2>
+  <p class="sku">1017-86</p>
+  <p class="preco">R$ 78,00</p></div>
+</article>
+<article class="card" data-busca="nozzle bico creality (unicornio) k2 hi plus 0.2mm 1201-86">
+  <div class="foto"><img src="fotos/1201-86.jpg" alt="NOZZLE BICO CREALITY (UNICORNIO) K2 HI PLUS 0.2MM" loading="lazy"></div>
+  <div class="info"><h2>NOZZLE BICO CREALITY (UNICORNIO) K2 HI PLUS 0.2MM</h2>
+  <p class="sku">1201-86</p>
+  <p class="preco">R$ 78,99</p></div>
+</article>
+<article class="card" data-busca="nozzle bico creality (unicornio) k2 hi plus 0.4mm 1060-86">
+  <div class="foto"><img src="fotos/1060-86.jpg" alt="NOZZLE BICO CREALITY (UNICORNIO) K2 HI PLUS 0.4MM" loading="lazy"></div>
+  <div class="info"><h2>NOZZLE BICO CREALITY (UNICORNIO) K2 HI PLUS 0.4MM</h2>
+  <p class="sku">1060-86</p>
+  <p class="preco">R$ 78,90</p></div>
+</article>
+<article class="card" data-busca="par parafuso m2 hotend creality k1 k1max aço 1061-86">
+  <div class="foto"><img src="fotos/1061-86.jpg" alt="PAR PARAFUSO M2 HOTEND CREALITY K1 K1MAX AÇO" loading="lazy"></div>
+  <div class="info"><h2>PAR PARAFUSO M2 HOTEND CREALITY K1 K1MAX AÇO</h2>
+  <p class="sku">1061-86</p>
+  <p class="preco">R$ 19,31</p></div>
+</article>
+<article class="card" data-busca="placa mãe extrusora toolhead board bambu lab a1 series 1149-86">
+  <div class="foto"><img src="fotos/1149-86.jpg" alt="PLACA MÃE EXTRUSORA TOOLHEAD BOARD BAMBU LAB A1 SERIES" loading="lazy"></div>
+  <div class="info"><h2>PLACA MÃE EXTRUSORA TOOLHEAD BOARD BAMBU LAB A1 SERIES</h2>
+  <p class="sku">1149-86</p>
+  <p class="preco">R$ 464,10</p></div>
+</article>
+<article class="card" data-busca="placas identificação 0004-001">
+  <div class="foto"><div class="sem-foto">sem foto</div></div>
+  <div class="info"><h2>PLACAS IDENTIFICAÇÃO</h2>
+  <p class="sku">0004-001</p>
+  <p class="preco">Sob consulta</p></div>
+</article>
+<article class="card" data-busca="ptfe tubo para bambu lab 2.5mmx4mm 4 metros/pcs 1083-86">
+  <div class="foto"><img src="fotos/1083-86.jpg" alt="PTFE TUBO PARA BAMBU LAB 2.5MMX4MM 4 METROS/PCS" loading="lazy"></div>
+  <div class="info"><h2>PTFE TUBO PARA BAMBU LAB 2.5MMX4MM 4 METROS/PCS</h2>
+  <p class="sku">1083-86</p>
+  <p class="preco">R$ 69,99</p></div>
+</article>
+<article class="card" data-busca="sensor de filamento para bambu lab a1 series 1207-86">
+  <div class="foto"><img src="fotos/1207-86.jpg" alt="SENSOR DE FILAMENTO PARA BAMBU LAB A1 SERIES" loading="lazy"></div>
+  <div class="info"><h2>SENSOR DE FILAMENTO PARA BAMBU LAB A1 SERIES</h2>
+  <p class="sku">1207-86</p>
+  <p class="preco">R$ 89,00</p></div>
+</article>
+<article class="card" data-busca="suporte para placa de video com regulador de altura 1091-001">
+  <div class="foto"><img src="fotos/1091-001.jpg" alt="SUPORTE PARA PLACA DE VIDEO COM REGULADOR DE ALTURA" loading="lazy"></div>
+  <div class="info"><h2>SUPORTE PARA PLACA DE VIDEO COM REGULADOR DE ALTURA</h2>
+  <p class="sku">1091-001</p>
+  <p class="preco">R$ 9,99</p></div>
+</article>
+<article class="card" data-busca="termistor do hotend transmissor para bambu lab a1 series aquecimento heating a1 series 1076-86">
+  <div class="foto"><img src="fotos/1076-86.jpg" alt="TERMISTOR DO HOTEND TRANSMISSOR PARA BAMBU LAB A1 SERIES AQUECIMENTO HEATING A1 SERIES" loading="lazy"></div>
+  <div class="info"><h2>TERMISTOR DO HOTEND TRANSMISSOR PARA BAMBU LAB A1 SERIES AQUECIMENTO HEATING A1 SERIES</h2>
+  <p class="sku">1076-86</p>
+  <p class="preco">R$ 184,29</p></div>
+</article>
+<article class="card" data-busca="termistor zirconia do hotend transmissor para bambu lab a1 series aquecimento heating a1 series 1202-86">
+  <div class="foto"><img src="fotos/1202-86.jpg" alt="TERMISTOR ZIRCONIA DO HOTEND TRANSMISSOR PARA BAMBU LAB A1 SERIES AQUECIMENTO HEATING A1 SERIES" loading="lazy"></div>
+  <div class="info"><h2>TERMISTOR ZIRCONIA DO HOTEND TRANSMISSOR PARA BAMBU LAB A1 SERIES AQUECIMENTO HEATING A1 SERIES</h2>
+  <p class="sku">1202-86</p>
+  <p class="preco">R$ 214,14</p></div>
+</article>
+<article class="card" data-busca="termo-higrômetro digital termômetro e medidor de umidade eletrônico 1096-86">
+  <div class="foto"><img src="fotos/1096-86.jpg" alt="TERMO-HIGRÔMETRO DIGITAL TERMÔMETRO E MEDIDOR DE UMIDADE ELETRÔNICO" loading="lazy"></div>
+  <div class="info"><h2>TERMO-HIGRÔMETRO DIGITAL TERMÔMETRO E MEDIDOR DE UMIDADE ELETRÔNICO</h2>
+  <p class="sku">1096-86</p>
+  <p class="preco">R$ 29,99</p></div>
+</article>
+</main>
+<p id="vazio">Nenhum produto encontrado.</p>
+<footer>146 produtos</footer>
+<script>
+const b=document.getElementById('busca'),cs=[...document.querySelectorAll('.card')],v=document.getElementById('vazio');
+b.addEventListener('input',()=>{const t=b.value.trim().toLowerCase();let n=0;
+cs.forEach(c=>{const ok=c.dataset.busca.includes(t);c.style.display=ok?'':'none';if(ok)n++;});
+v.style.display=n?'none':'block';});
+</script></body></html>
