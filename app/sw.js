@@ -1,7 +1,7 @@
 // Cache do app: a casca vale offline e o dados.enc cai para a ultima copia sem sinal.
 // O nome TEM que mudar quando a casca muda: o activate so apaga cache de nome diferente,
 // entao repetir o nome deixa a versao velha do app viva no celular.
-const CACHE = "estoque-v2";
+const CACHE = "estoque-v3";
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(["./", "manifest.webmanifest"])));
