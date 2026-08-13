@@ -10,6 +10,9 @@
 <style>
   :root { --am:#FFCE02; --bg:#111; --card:#1c1c1c; --linha:#2c2c2c; --txt:#eee; --fraco:#999; }
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  /* Precisa vir de um seletor forte: regra de ID com display: (ex. #scan) ganha do
+     [hidden]{display:none} do navegador e deixa o elemento "escondido" na tela. */
+  [hidden] { display:none !important; }
   body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.4 system-ui,sans-serif;
          padding-bottom:env(safe-area-inset-bottom); }
   header { position:sticky; top:0; background:var(--bg); padding:10px 12px;
