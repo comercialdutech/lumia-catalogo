@@ -42,6 +42,16 @@
   #trava button { width:100%; background:var(--am); color:#111; font-weight:600; border:0; }
   #erro { color:#ff6b6b; min-height:18px; font-size:13px; }
   .sair { padding:4px 8px; font-size:11px; }
+  #cam { background:var(--card); border-color:var(--am); color:var(--am); font-weight:600; padding:11px 12px; }
+  #scan { position:fixed; inset:0; background:#000; z-index:20; display:flex;
+          align-items:center; justify-content:center; }
+  #scan video { width:100%; height:100%; object-fit:cover; }
+  #scan .mira { position:absolute; width:74vw; max-width:320px; aspect-ratio:1;
+                border:3px solid var(--am); border-radius:14px; }
+  #scan .rodape { position:absolute; left:0; right:0; bottom:0; padding:16px;
+                  padding-bottom:calc(16px + env(safe-area-inset-bottom));
+                  display:flex; gap:12px; align-items:center; justify-content:space-between;
+                  background:linear-gradient(transparent,#000c); color:var(--txt); }
 </style>
 </head>
 <body>
@@ -63,10 +73,17 @@
     <div class="linha">
       <input id="busca" placeholder="SKU ou nome" enterkeyhint="search"
              autocapitalize="off" autocorrect="off" autocomplete="off">
+      <button id="cam" aria-label="Escanear código">Escanear</button>
       <button id="ir">Ver</button>
     </div>
   </header>
-  <div id="saida"><div class="msg">Digite o SKU ou o nome e toque em Ver.</div></div>
+  <div id="saida"><div class="msg">Digite o SKU, ou toque em Escanear e aponte para o código de barras da embalagem.</div></div>
+</div>
+
+<div id="scan" hidden>
+  <video id="video" playsinline muted></video>
+  <div class="mira"></div>
+  <div class="rodape"><span id="scanmsg">aponte para o código</span><button id="fechar">fechar</button></div>
 </div>
 
 <script>
@@ -141,15 +158,80 @@ async function entrar(senha) {
   localStorage.senha = senha;
   $("#erro").textContent = "";
   $("#trava").hidden = true; $("#app").hidden = false;
-  $("#busca").focus();
+  if (!daUrl()) $("#busca").focus();
 }
 
+// .../app/#1097-104 — a camera nativa do celular so sabe abrir link, entao o QR pode
+// levar essa URL e a consulta ja acontece sozinha ao abrir.
+function daUrl() {
+  const codigo = limparCodigo(decodeURIComponent(location.hash.slice(1)));
+  if (!codigo) return false;
+  $("#busca").value = codigo;
+  buscar();
+  return true;
+}
+
+// --- leitura por camera. BarcodeDetector e nativo do navegador: sem biblioteca.
+// Le o QR com o SKU e tambem o codigo de barras que ja vem impresso na embalagem.
+const FORMATOS = ["qr_code", "ean_13", "ean_8", "code_128", "code_39"];
+
+// O QR pode trazer o SKU puro ou a URL do app com #SKU — assim a camera nativa do
+// celular, que so abre link, tambem cai na consulta certa.
+function limparCodigo(txt) {
+  const t = (txt || "").trim();
+  if (!/^https?:\/\//i.test(t)) return t;
+  try {
+    const u = new URL(t);
+    return (u.hash.slice(1) || u.pathname.split("/").filter(Boolean).pop() || "").trim();
+  } catch { return t; }
+}
+
+async function escanear() {
+  if (!("BarcodeDetector" in window))
+    return alert("Este navegador não lê código pela câmera (o Chrome do Android lê). "
+                 + "Dá para digitar o SKU normalmente.");
+  const suportados = await BarcodeDetector.getSupportedFormats();
+  const detector = new BarcodeDetector({formats: FORMATOS.filter(f => suportados.includes(f))});
+  let camera;
+  try {
+    camera = await navigator.mediaDevices.getUserMedia({video: {facingMode: "environment"}});
+  } catch {
+    return alert("Sem permissão para usar a câmera.");
+  }
+  const video = $("#video");
+  video.srcObject = camera;
+  await video.play();
+  $("#scan").hidden = false;
+
+  const parar = () => {
+    clearInterval(timer);
+    camera.getTracks().forEach(t => t.stop());
+    $("#scan").hidden = true;
+    video.srcObject = null;
+  };
+  $("#fechar").onclick = parar;
+  // ponytail: varredura a cada 250ms; se ler devagar em etiqueta pequena, baixar o intervalo.
+  const timer = setInterval(async () => {
+    let achados = [];
+    try { achados = await detector.detect(video); } catch { return; }
+    if (!achados.length) return;
+    const codigo = limparCodigo(achados[0].rawValue);
+    if (!codigo) return;
+    parar();
+    navigator.vibrate?.(60);
+    $("#busca").value = codigo;
+    buscar();
+  }, 250);
+}
+
+$("#cam").onclick = escanear;
 $("#entrar").onclick = () => $("#senha").value ? entrar($("#senha").value)
                                                : ($("#erro").textContent = "digite a senha");
 $("#senha").onkeydown = ev => { if (ev.key === "Enter") $("#entrar").click(); };
 $("#ir").onclick = buscar;
 $("#busca").onkeydown = ev => { if (ev.key === "Enter") { ev.target.blur(); buscar(); } };
 $("#sair").onclick = () => { delete localStorage.senha; location.reload(); };
+window.onhashchange = () => { if (!$("#app").hidden) daUrl(); };
 
 if (PROXY.includes("SEU-SUBDOMINIO"))
   document.body.innerHTML = '<div class="msg">Falta publicar o proxy e pôr a URL dele em PROXY, no index.html.</div>';
