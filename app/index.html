@@ -50,6 +50,7 @@
   #verPedido span { background:var(--am); color:#111; border-radius:999px; padding:1px 6px;
                     font-weight:700; margin-left:2px; }
   .add { margin-top:10px; width:100%; background:var(--am); color:#111; border:0; font-weight:700; padding:10px; }
+  .ver { margin-top:10px; width:100%; color:var(--am); border-color:var(--am); font-weight:600; padding:10px; }
   .barra { display:flex; gap:8px; align-items:center; padding:10px 12px;
            border-bottom:1px solid var(--linha); font-size:13px; color:var(--fraco); }
   .barra button { padding:7px 10px; font-size:13px; }
@@ -135,14 +136,16 @@ async function consultar(q) {
 }
 
 function cartao(it) {
-  // Saldo de cada empresa fica lado a lado e NUNCA somado: sao dois CNPJs, e ha
+  // Saldo de cada empresa fica lado a lado e NUNCA somado: sao CNPJs diferentes, e ha
   // deposito com o mesmo nome nos dois. Somar inventaria estoque que nao existe.
-  const contas = Object.entries(it.contas).map(([empresa, c]) => `
+  // Sem "contas" a busca trouxe muitos resultados e o saldo so vem no toque.
+  const contas = it.contas ? `<div class="contas">${Object.entries(it.contas).map(([empresa, c]) => `
     <div class="conta ${c.total > 0 ? "tem" : "sem"}">
       <div class="e">${esc(empresa)}</div><div class="t">${c.total}</div>
       ${Object.entries(c.depositos).map(([d, s]) =>
         `<div class="dep"><span>${esc(d)}</span><b>${s}</b></div>`).join("")}
-    </div>`).join("");
+    </div>`).join("")}</div>`
+    : `<button class="ver" data-saldo="${esc(it.codigo)}">Ver estoque</button>`;
   return `<div class="card">
     <div class="cab">
       <img loading="lazy" src="../fotos/${encodeURIComponent(it.codigo)}.jpg"
@@ -150,9 +153,28 @@ function cartao(it) {
       <div><div class="n">${esc(it.nome)}</div>
            <div class="sku">${esc(it.codigo)} · ${brl(it.preco)}</div></div>
     </div>
-    <div class="contas">${contas || '<div class="msg">sem saldo devolvido</div>'}</div>
+    ${contas}
     <button class="add" data-add="${esc(it.codigo)}">+ Adicionar ao pedido</button>
   </div>`;
+}
+
+// Uma chamada por empresa, so para o produto tocado.
+async function verSaldo(cod, botao) {
+  const it = ultimos.get(cod);
+  if (!it) return;
+  botao.textContent = "consultando...";
+  try {
+    const partes = await Promise.all(Object.entries(it.ids || {}).map(async ([conta, id]) => {
+      const r = await fetch(`${PROXY}/?saldo=${encodeURIComponent(id)}&conta=${encodeURIComponent(conta)}`,
+                            {headers: {authorization: "Bearer " + localStorage.senha}, cache: "no-store"});
+      if (!r.ok) throw new Error("proxy " + r.status);
+      return [conta, (await r.json()).saldo];
+    }));
+    it.contas = Object.fromEntries(partes);
+    botao.closest(".card").outerHTML = cartao(it);      // repinta so este cartao
+  } catch (e) {
+    botao.textContent = "não deu, tocar de novo";
+  }
 }
 
 // --- pedido do cliente. Funcoes puras (recebem e devolvem a lista) para o testa.mjs
@@ -184,8 +206,10 @@ async function buscar() {
     $("#quando").textContent = new Date(r.em).toLocaleTimeString("pt-BR");
     $("#saida").innerHTML =
       (r.avisos.length ? `<div class="aviso">${esc(r.avisos.join(" · "))}</div>` : "") +
-      (r.truncado ? `<div class="msg">mostrando ${r.itens.length} de ${r.truncado} — refine a busca</div>` : "") +
-      (r.itens.length ? r.itens.map(cartao).join("") : '<div class="msg">nada encontrado</div>');
+      (r.truncado ? '<div class="msg">a Olist devolve no máximo 100 por busca — refine se faltar algum</div>' : "") +
+      (r.itens.length ? `<div class="msg">${r.itens.length} produto${r.itens.length === 1 ? "" : "s"}</div>`
+                        + r.itens.map(cartao).join("")
+                      : '<div class="msg">nada encontrado</div>');
   } catch (e) {
     if (e.message === "senha") {          // senha trocada no proxy no meio do uso
       delete localStorage.senha;
@@ -275,6 +299,8 @@ $("#excluir").onclick = () => {
 
 // Um listener por tela em vez de um por botao: a lista e redesenhada a cada toque.
 $("#saida").onclick = ev => {
+  const ver = ev.target.closest("[data-saldo]");
+  if (ver) return verSaldo(ver.dataset.saldo, ver);
   const cod = ev.target.closest("[data-add]")?.dataset.add;
   if (!cod || !ultimos.has(cod)) return;
   pedido = addItem(pedido, ultimos.get(cod));
