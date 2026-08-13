@@ -46,6 +46,24 @@
   #erro { color:#ff6b6b; min-height:18px; font-size:13px; }
   .sair { padding:4px 8px; font-size:11px; }
   #cam { padding:11px 12px; font-size:17px; line-height:1; }   /* opcional: some sem suporte */
+  #verPedido { padding:5px 10px; font-size:12px; }
+  #verPedido span { background:var(--am); color:#111; border-radius:999px; padding:1px 6px;
+                    font-weight:700; margin-left:2px; }
+  .add { margin-top:10px; width:100%; background:var(--am); color:#111; border:0; font-weight:700; padding:10px; }
+  .barra { display:flex; gap:8px; align-items:center; padding:10px 12px;
+           border-bottom:1px solid var(--linha); font-size:13px; color:var(--fraco); }
+  .barra button { padding:7px 10px; font-size:13px; }
+  .barra #voltar { margin-left:auto; }
+  .item { display:flex; gap:10px; padding:12px; border-bottom:1px solid var(--linha); align-items:flex-start; }
+  .item input[type=checkbox] { width:22px; height:22px; margin-top:2px; flex:none; accent-color:var(--am); }
+  .item .d { flex:1; min-width:0; }
+  .qtd { display:flex; gap:8px; align-items:center; margin-top:8px; }
+  .qtd button { width:38px; padding:6px 0; font-size:18px; line-height:1; }
+  .qtd b { min-width:28px; text-align:center; font-size:17px; font-variant-numeric:tabular-nums; }
+  .qtd .lixo { margin-left:auto; border-color:#5a2a2a; }
+  .total { position:sticky; bottom:0; background:var(--card); border-top:1px solid var(--linha);
+           padding:14px 12px; padding-bottom:calc(14px + env(safe-area-inset-bottom));
+           display:flex; justify-content:space-between; font-size:17px; font-weight:700; }
   #scan { position:fixed; inset:0; background:#000; z-index:20; display:flex;
           align-items:center; justify-content:center; }
   #scan video { width:100%; height:100%; object-fit:cover; }
@@ -71,9 +89,10 @@
     <div class="topo">
       <b>Estoque</b>
       <small id="quando"></small>
+      <button id="verPedido">Pedido <span id="conta">0</span></button>
       <button class="sair" id="sair">sair</button>
     </div>
-    <div class="linha">
+    <div class="linha" id="linhaBusca">
       <input id="busca" placeholder="SKU ou nome" enterkeyhint="search"
              autocapitalize="off" autocorrect="off" autocomplete="off">
       <button id="ir">Ver</button>
@@ -81,6 +100,16 @@
     </div>
   </header>
   <div id="saida"><div class="msg">Digite o SKU ou o nome e toque em Ver.</div></div>
+
+  <div id="pedido" hidden>
+    <div class="barra">
+      <label><input type="checkbox" id="todos"> todos</label>
+      <button id="excluir">Excluir marcados</button>
+      <button id="voltar">Buscar</button>
+    </div>
+    <div id="itens"></div>
+    <div class="total" id="total"></div>
+  </div>
 </div>
 
 <div id="scan" hidden>
@@ -122,15 +151,36 @@ function cartao(it) {
            <div class="sku">${esc(it.codigo)} · ${brl(it.preco)}</div></div>
     </div>
     <div class="contas">${contas || '<div class="msg">sem saldo devolvido</div>'}</div>
+    <button class="add" data-add="${esc(it.codigo)}">+ Adicionar ao pedido</button>
   </div>`;
 }
+
+// --- pedido do cliente. Funcoes puras (recebem e devolvem a lista) para o testa.mjs
+// conseguir rodar a conta sem navegador.
+function addItem(lista, prod) {
+  const j = lista.find(i => i.codigo === prod.codigo);
+  if (j) return lista.map(i => i === j ? {...i, qtd: i.qtd + 1} : i);
+  return [...lista, {codigo: prod.codigo, nome: prod.nome, preco: prod.preco, qtd: 1, sel: false}];
+}
+// "-" nunca zera: quem tira o produto da lista e a lixeira, senao um toque a mais apaga item.
+const mudarQtd = (lista, cod, d) =>
+  lista.map(i => i.codigo === cod ? {...i, qtd: Math.max(1, i.qtd + d)} : i);
+const marcar = (lista, cod, sel) => lista.map(i => i.codigo === cod ? {...i, sel} : i);
+const removerItem = (lista, cod) => lista.filter(i => i.codigo !== cod);
+const excluirMarcados = lista => lista.filter(i => !i.sel);
+const totalPedido = lista => ({
+  itens: lista.reduce((s, i) => s + i.qtd, 0),
+  valor: lista.reduce((s, i) => s + i.preco * i.qtd, 0),
+});
 
 async function buscar() {
   const q = $("#busca").value.trim();
   if (q.length < 2) return;
+  verBusca();
   $("#saida").innerHTML = '<div class="msg">consultando a Olist...</div>';
   try {
     const r = await consultar(q);
+    ultimos = new Map(r.itens.map(i => [i.codigo, i]));
     $("#quando").textContent = new Date(r.em).toLocaleTimeString("pt-BR");
     $("#saida").innerHTML =
       (r.avisos.length ? `<div class="aviso">${esc(r.avisos.join(" · "))}</div>` : "") +
@@ -161,6 +211,7 @@ async function entrar(senha) {
   localStorage.senha = senha;
   $("#erro").textContent = "";
   $("#trava").hidden = true; $("#app").hidden = false;
+  salvarPedido();                       // repinta o contador com o pedido que ficou salvo
   if (!daUrl()) $("#busca").focus();
 }
 
@@ -173,6 +224,78 @@ function daUrl() {
   buscar();
   return true;
 }
+
+// --- tela do pedido. Fica no localStorage porque um atendimento e interrompido o tempo
+// todo: fechar o app no meio da venda nao pode perder a lista que o cliente ja pediu.
+let pedido = [], ultimos = new Map();
+try { pedido = JSON.parse(localStorage.pedido || "[]"); } catch { pedido = []; }
+
+function salvarPedido() {
+  localStorage.pedido = JSON.stringify(pedido);
+  const t = totalPedido(pedido);
+  $("#conta").textContent = t.itens;
+  if (!$("#pedido").hidden) pintarPedido();
+}
+
+function pintarPedido() {
+  const t = totalPedido(pedido);
+  $("#itens").innerHTML = pedido.length ? pedido.map(i => `
+    <div class="item">
+      <input type="checkbox" data-sel="${esc(i.codigo)}" ${i.sel ? "checked" : ""}
+             aria-label="marcar ${esc(i.nome)}">
+      <div class="d">
+        <div>${esc(i.nome)}</div>
+        <div class="sku">${esc(i.codigo)} · ${brl(i.preco)} un · <b>${brl(i.preco * i.qtd)}</b></div>
+        <div class="qtd">
+          <button data-menos="${esc(i.codigo)}" aria-label="tirar um">−</button>
+          <b>${i.qtd}</b>
+          <button data-mais="${esc(i.codigo)}" aria-label="somar um">+</button>
+          <button class="lixo" data-lixo="${esc(i.codigo)}" aria-label="remover do pedido">🗑</button>
+        </div>
+      </div>
+    </div>`).join("") : '<div class="msg">Nenhum produto no pedido. Busque e toque em "+ Adicionar ao pedido".</div>';
+  $("#total").innerHTML = `<span>${t.itens} ${t.itens === 1 ? "item" : "itens"}</span><span>${brl(t.valor)}</span>`;
+  $("#todos").checked = pedido.length > 0 && pedido.every(i => i.sel);
+}
+
+const verBusca = () => { $("#pedido").hidden = true; $("#saida").hidden = false;
+                         $("#linhaBusca").hidden = false; };
+const verPedido = () => { $("#saida").hidden = true; $("#linhaBusca").hidden = true;
+                          $("#pedido").hidden = false; pintarPedido(); };
+
+$("#verPedido").onclick = () => $("#pedido").hidden ? verPedido() : verBusca();
+$("#voltar").onclick = verBusca;
+$("#todos").onchange = ev => { pedido = pedido.map(i => ({...i, sel: ev.target.checked})); salvarPedido(); };
+$("#excluir").onclick = () => {
+  const n = pedido.filter(i => i.sel).length;
+  if (!n) return alert("Marque os produtos que quer excluir.");
+  if (!confirm(`Excluir ${n} produto${n === 1 ? "" : "s"} do pedido?`)) return;
+  pedido = excluirMarcados(pedido); salvarPedido();
+};
+
+// Um listener por tela em vez de um por botao: a lista e redesenhada a cada toque.
+$("#saida").onclick = ev => {
+  const cod = ev.target.closest("[data-add]")?.dataset.add;
+  if (!cod || !ultimos.has(cod)) return;
+  pedido = addItem(pedido, ultimos.get(cod));
+  salvarPedido();
+  navigator.vibrate?.(30);
+  ev.target.textContent = "✓ no pedido";
+  setTimeout(() => { ev.target.textContent = "+ Adicionar ao pedido"; }, 900);
+};
+$("#itens").onclick = ev => {
+  const b = ev.target.closest("button"); if (!b) return;
+  const d = b.dataset;
+  if (d.mais) pedido = mudarQtd(pedido, d.mais, +1);
+  else if (d.menos) pedido = mudarQtd(pedido, d.menos, -1);
+  else if (d.lixo) pedido = removerItem(pedido, d.lixo);
+  else return;
+  salvarPedido();
+};
+$("#itens").onchange = ev => {
+  const cod = ev.target.dataset.sel;
+  if (cod) { pedido = marcar(pedido, cod, ev.target.checked); salvarPedido(); }
+};
 
 // --- leitura por camera. BarcodeDetector e nativo do navegador: sem biblioteca.
 // Le o QR com o SKU e tambem o codigo de barras que ja vem impresso na embalagem.
