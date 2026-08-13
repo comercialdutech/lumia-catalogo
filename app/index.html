@@ -117,14 +117,29 @@ async function buscar() {
       (r.truncado ? `<div class="msg">mostrando ${r.itens.length} de ${r.truncado} — refine a busca</div>` : "") +
       (r.itens.length ? r.itens.map(cartao).join("") : '<div class="msg">nada encontrado</div>');
   } catch (e) {
-    if (e.message === "senha") { delete localStorage.senha; return location.reload(); }
+    if (e.message === "senha") {          // senha trocada no proxy no meio do uso
+      delete localStorage.senha;
+      $("#app").hidden = true; $("#trava").hidden = false;
+      return ($("#erro").textContent = "a senha mudou, entre de novo");
+    }
     $("#saida").innerHTML = `<div class="aviso">sem resposta: ${esc(e.message)}.
       Estoque so existe ao vivo — sem internet nao da para consultar.</div>`;
   }
 }
 
-function entrar(senha) {
+// Valida a senha no proxy antes de entrar. Busca vazia nao chega na Olist, entao o
+// teste e de graca — e sem ele a senha errada so apareceria depois, como um salto
+// mudo de volta para esta tela.
+async function entrar(senha) {
+  $("#erro").textContent = "verificando...";
+  try {
+    const r = await fetch(`${PROXY}/?q=`, {headers: {authorization: "Bearer " + senha},
+                                           cache: "no-store"});
+    if (r.status === 401) return ($("#erro").textContent = "senha errada");
+    if (!r.ok) return ($("#erro").textContent = `o proxy respondeu ${r.status}`);
+  } catch { return ($("#erro").textContent = "sem internet"); }
   localStorage.senha = senha;
+  $("#erro").textContent = "";
   $("#trava").hidden = true; $("#app").hidden = false;
   $("#busca").focus();
 }
