@@ -12,9 +12,10 @@ self.addEventListener("activate", e => {
   self.clients.claim();
 });
 
-// Rede primeiro (estoque velho engana), cache so quando a rede falha.
+// So a casca do app entra no cache. A consulta de saldo vai para outro dominio (o Worker)
+// e NUNCA e cacheada: saldo velho no balcao faz vender o que nao tem.
 self.addEventListener("fetch", e => {
-  if (e.request.method !== "GET") return;
+  if (e.request.method !== "GET" || new URL(e.request.url).origin !== self.location.origin) return;
   e.respondWith(
     fetch(e.request)
       .then(r => { const c = r.clone(); caches.open(CACHE).then(k => k.put(e.request, c)); return r; })
