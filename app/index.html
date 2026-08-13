@@ -42,7 +42,7 @@
   #trava button { width:100%; background:var(--am); color:#111; font-weight:600; border:0; }
   #erro { color:#ff6b6b; min-height:18px; font-size:13px; }
   .sair { padding:4px 8px; font-size:11px; }
-  #cam { background:var(--card); border-color:var(--am); color:var(--am); font-weight:600; padding:11px 12px; }
+  #cam { padding:11px 12px; font-size:17px; line-height:1; }   /* opcional: some sem suporte */
   #scan { position:fixed; inset:0; background:#000; z-index:20; display:flex;
           align-items:center; justify-content:center; }
   #scan video { width:100%; height:100%; object-fit:cover; }
@@ -73,11 +73,11 @@
     <div class="linha">
       <input id="busca" placeholder="SKU ou nome" enterkeyhint="search"
              autocapitalize="off" autocorrect="off" autocomplete="off">
-      <button id="cam" aria-label="Escanear código">Escanear</button>
       <button id="ir">Ver</button>
+      <button id="cam" aria-label="Ler código pela câmera" title="Ler código pela câmera" hidden>📷</button>
     </div>
   </header>
-  <div id="saida"><div class="msg">Digite o SKU, ou toque em Escanear e aponte para o código de barras da embalagem.</div></div>
+  <div id="saida"><div class="msg">Digite o SKU ou o nome e toque em Ver.</div></div>
 </div>
 
 <div id="scan" hidden>
@@ -187,9 +187,6 @@ function limparCodigo(txt) {
 }
 
 async function escanear() {
-  if (!("BarcodeDetector" in window))
-    return alert("Este navegador não lê código pela câmera (o Chrome do Android lê). "
-                 + "Dá para digitar o SKU normalmente.");
   const suportados = await BarcodeDetector.getSupportedFormats();
   const detector = new BarcodeDetector({formats: FORMATOS.filter(f => suportados.includes(f))});
   let camera;
@@ -224,7 +221,9 @@ async function escanear() {
   }, 250);
 }
 
-$("#cam").onclick = escanear;
+// A camera e um extra: o botao so aparece onde o navegador sabe ler codigo (Chrome/Android).
+// Sem ele o app fica exatamente como antes — digitar SKU ou nome e tocar em Ver.
+if ("BarcodeDetector" in window) { $("#cam").hidden = false; $("#cam").onclick = escanear; }
 $("#entrar").onclick = () => $("#senha").value ? entrar($("#senha").value)
                                                : ($("#erro").textContent = "digite a senha");
 $("#senha").onkeydown = ev => { if (ev.key === "Enter") $("#entrar").click(); };
