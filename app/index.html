@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Estoque</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#111111">
+<link rel="apple-touch-icon" href="icone-192.png">
+<style>
+  :root { --am:#FFCE02; --bg:#111; --card:#1c1c1c; --linha:#2c2c2c; --txt:#eee; --fraco:#999; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.4 system-ui,sans-serif;
+         padding-bottom:env(safe-area-inset-bottom); }
+  header { position:sticky; top:0; background:var(--bg); padding:10px 12px 6px;
+           border-bottom:1px solid var(--linha); z-index:5; }
+  .topo { display:flex; align-items:center; gap:8px; }
+  .topo b { color:var(--am); font-size:17px; }
+  .topo small { color:var(--fraco); margin-left:auto; font-size:11px; text-align:right; }
+  select, input, button { font:inherit; color:var(--txt); background:var(--card);
+                          border:1px solid var(--linha); border-radius:8px; padding:9px 10px; }
+  input { width:100%; }
+  .chips { display:flex; gap:6px; margin-top:8px; overflow-x:auto; }
+  .chip { padding:6px 12px; border-radius:999px; background:var(--card); border:1px solid var(--linha);
+          white-space:nowrap; font-size:13px; }
+  .chip[aria-pressed="true"] { background:var(--am); color:#111; border-color:var(--am); font-weight:600; }
+  ul { list-style:none; margin:0; padding:0; }
+  li { display:flex; gap:10px; padding:10px 12px; border-bottom:1px solid var(--linha); align-items:center; }
+  li img { width:44px; height:44px; object-fit:cover; border-radius:6px; background:var(--card); flex:none; }
+  .nome { flex:1; min-width:0; }
+  .nome div { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sku { color:var(--fraco); font-size:12px; }
+  .saldo { text-align:right; flex:none; font-variant-numeric:tabular-nums; }
+  .saldo b { font-size:18px; }
+  .sem b { color:#ff6b6b; } .baixo b { color:var(--am); }
+  .detalhe { padding:0 12px 12px 66px; border-bottom:1px solid var(--linha); color:var(--fraco);
+             font-size:13px; display:grid; grid-template-columns:auto auto; gap:2px 14px; }
+  .detalhe span:nth-child(even) { text-align:right; color:var(--txt); }
+  .dia { padding:12px 12px 4px; color:var(--am); font-size:13px; font-weight:600; }
+  .vazio { padding:40px 12px; text-align:center; color:var(--fraco); }
+  #trava { padding:60px 24px; text-align:center; }
+  #trava input { margin:16px 0 10px; }
+  #trava button { width:100%; background:var(--am); color:#111; font-weight:600; border:0; padding:12px; }
+  #trava label { display:block; margin-top:14px; color:var(--fraco); font-size:13px; }
+  #erro { color:#ff6b6b; min-height:18px; font-size:13px; }
+  .sair { margin-left:6px; padding:4px 8px; font-size:11px; }
+</style>
+</head>
+<body>
+
+<div id="trava">
+  <h2 style="color:var(--am);margin:0">Estoque</h2>
+  <input id="senha" type="password" placeholder="senha" autocomplete="current-password" enterkeyhint="go">
+  <button id="entrar">Entrar</button>
+  <div id="erro"></div>
+  <label><input type="checkbox" id="lembrar" checked style="width:auto"> lembrar neste aparelho</label>
+</div>
+
+<div id="app" hidden>
+  <header>
+    <div class="topo">
+      <b>Estoque</b>
+      <select id="empresa"></select>
+      <button class="sair" id="sair">sair</button>
+      <small id="quando"></small>
+    </div>
+    <div class="chips">
+      <button class="chip" data-aba="estoque" aria-pressed="true">Estoque</button>
+      <button class="chip" data-aba="vendas" aria-pressed="false">Vendas</button>
+      <button class="chip" data-nivel="" aria-pressed="true">Todos</button>
+      <button class="chip" data-nivel="sem" aria-pressed="false">Sem</button>
+      <button class="chip" data-nivel="baixo" aria-pressed="false">Baixo</button>
+    </div>
+    <div style="margin-top:8px"><input id="busca" placeholder="buscar SKU ou nome" enterkeyhint="search"></div>
+  </header>
+  <ul id="lista"></ul>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const brl = n => (n || 0).toLocaleString("pt-BR", {style:"currency", currency:"BRL"});
+let dados, aba = "estoque", nivel = "", abertos = new Set();
+
+// --- decifra o payload: PBKDF2 -> keystream HMAC-SHA512 -> tag HMAC-SHA256 (espelha app.py)
+async function decifrar(pac, senha) {
+  const b = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+  const [sal, ct, tag] = [b(pac.salt), b(pac.ct), b(pac.tag)];
+  const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(senha),
+                                             "PBKDF2", false, ["deriveBits"]);
+  const km = new Uint8Array(await crypto.subtle.deriveBits(
+      {name:"PBKDF2", salt:sal, iterations:pac.iter, hash:"SHA-256"}, base, 512));
+  const kc = await crypto.subtle.importKey("raw", km.slice(0,32), {name:"HMAC",hash:"SHA-512"}, false, ["sign"]);
+  const ka = await crypto.subtle.importKey("raw", km.slice(32), {name:"HMAC",hash:"SHA-256"}, false, ["sign"]);
+
+  const msg = new Uint8Array(sal.length + ct.length);
+  msg.set(sal); msg.set(ct, sal.length);
+  const esperado = new Uint8Array(await crypto.subtle.sign("HMAC", ka, msg));
+  if (esperado.length !== tag.length || esperado.some((v,i) => v !== tag[i])) throw new Error("senha");
+
+  const out = new Uint8Array(ct.length);
+  for (let i = 0, n = 0; n < ct.length; i++, n += 64) {
+    const ctr = new Uint8Array(4); new DataView(ctr.buffer).setUint32(0, i);
+    const blk = new Uint8Array(await crypto.subtle.sign("HMAC", kc, ctr));
+    for (let j = 0; j < 64 && n + j < ct.length; j++) out[n+j] = ct[n+j] ^ blk[j];
+  }
+  return JSON.parse(new TextDecoder().decode(out));
+}
+
+async function abrir(senha, lembrar) {
+  const pac = await (await fetch("dados.enc", {cache:"no-cache"})).json();
+  dados = await decifrar(pac, senha);
+  if (lembrar) localStorage.senha = senha;
+  $("#trava").hidden = true; $("#app").hidden = false;
+  $("#empresa").innerHTML = dados.empresas.map((e,i) => `<option value="${i}">${e.nome}</option>`).join("");
+  $("#empresa").hidden = dados.empresas.length < 2;
+  pintar();
+}
+
+function esc(s) { return String(s ?? "").replace(/[<>&]/g, c => ({"<":"&lt;",">":"&gt;","&":"&amp;"}[c])); }
+
+function pintar() {
+  const e = dados.empresas[$("#empresa").value || 0];
+  $("#quando").textContent = e.gerado_em;
+  $("#lista").innerHTML = aba === "estoque" ? linhasEstoque(e) : linhasVendas(e);
+}
+
+function linhasEstoque(e) {
+  const q = $("#busca").value.trim().toLowerCase();
+  const itens = e.itens.filter(i =>
+    (!nivel || i.nivel === nivel) &&
+    (!q || (i.nome + " " + i.codigo).toLowerCase().includes(q)));
+  if (!itens.length) return '<li class="vazio">nada encontrado</li>';
+  return itens.map(i => {
+    const foto = e.foto ? `<img loading="lazy" src="../fotos/${encodeURIComponent(i.codigo)}.jpg"
+                            onerror="this.style.visibility='hidden'">`
+                        : '<img style="visibility:hidden">';
+    const linha = `<li class="${i.nivel}" onclick="alterna('${esc(i.codigo)}')">${foto}
+      <div class="nome"><div>${esc(i.nome)}</div><div class="sku">${esc(i.codigo)}</div></div>
+      <div class="saldo"><b>${i.proprio + i.full}</b><div class="sku">mín ${i.minimo}</div></div></li>`;
+    if (!abertos.has(i.codigo)) return linha;
+    return linha + `<div class="detalhe">
+      <span>Próprio / Full</span><span>${i.proprio} / ${i.full}</span>
+      <span>Demanda no mês</span><span>${i.demanda_mes ?? "-"}</span>
+      <span>Sugestão de compra</span><span>${i.sugestao || 0}</span>
+      <span>Custo / Venda</span><span>${brl(i.custo)} / ${brl(i.preco)}</span>
+      <span>Fornecedor</span><span>${esc(i.fornecedor)}</span>
+      <span>Última venda</span><span>${esc(i.ultima_venda) || "-"}</span></div>`;
+  }).join("");
+}
+
+function linhasVendas(e) {
+  const dias = [...new Set(e.vendas.map(v => v.data))].sort().reverse();
+  if (!dias.length) return '<li class="vazio">sem vendas no período</li>';
+  return dias.map(d => {
+    const vs = e.vendas.filter(v => v.data === d);
+    const total = vs.reduce((s, v) => s + v.valor, 0);
+    const ped = vs.reduce((s, v) => s + v.pedidos, 0);
+    const data = d.split("-").reverse().slice(0, 2).join("/");
+    return `<div class="dia">${data} — ${brl(total)} · ${ped} pedido${ped === 1 ? "" : "s"}</div>` +
+      e.itens_dia.filter(i => i.data === d).map(i =>
+        `<li><div class="nome"><div>${esc(i.nome)}</div><div class="sku">${esc(i.loja)}</div></div>
+         <div class="saldo"><b>${i.qtd}</b><div class="sku">${brl(i.valor)}</div></div></li>`).join("");
+  }).join("");
+}
+
+function alterna(cod) { abertos.has(cod) ? abertos.delete(cod) : abertos.add(cod); pintar(); }
+
+$("#entrar").onclick = async () => {
+  $("#erro").textContent = "abrindo...";
+  try { await abrir($("#senha").value, $("#lembrar").checked); }
+  catch (err) { $("#erro").textContent = err.message === "senha" ? "senha errada" : "sem conexão e sem cópia salva"; }
+};
+$("#senha").onkeydown = ev => { if (ev.key === "Enter") $("#entrar").click(); };
+$("#sair").onclick = () => { delete localStorage.senha; location.reload(); };
+$("#busca").oninput = pintar;
+$("#empresa").onchange = () => { abertos.clear(); pintar(); };
+document.querySelectorAll(".chip").forEach(c => c.onclick = () => {
+  const grupo = c.dataset.aba !== undefined ? "aba" : "nivel";
+  document.querySelectorAll(`.chip[data-${grupo}]`).forEach(o => o.setAttribute("aria-pressed", o === c));
+  if (grupo === "aba") { aba = c.dataset.aba; $("#busca").parentElement.hidden = aba !== "estoque"; }
+  else nivel = c.dataset.nivel;
+  pintar();
+});
+
+if (localStorage.senha) abrir(localStorage.senha, true).catch(() => { delete localStorage.senha; });
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");
+</script>
+</body>
+</html>
