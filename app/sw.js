@@ -1,7 +1,7 @@
 // Cache so da casca do app (o saldo e sempre ao vivo, nunca cacheado).
 // O nome TEM que mudar quando a casca muda: o activate so apaga cache de nome diferente,
 // entao repetir o nome deixa a versao velha do app viva no celular.
-const CACHE = "estoque-v7";
+const CACHE = "estoque-v8";
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(["./", "manifest.webmanifest"])));

@@ -51,6 +51,9 @@
                     font-weight:700; margin-left:2px; }
   .add { margin-top:10px; width:100%; background:var(--am); color:#111; border:0; font-weight:700; padding:10px; }
   .ver { margin-top:10px; width:100%; color:var(--am); border-color:var(--am); font-weight:600; padding:10px; }
+  .marca { margin-top:10px; padding:12px; border-radius:8px; background:var(--card);
+           font-weight:700; font-size:17px; text-align:center; }
+  .marca.tem { color:#4ade80; } .marca.sem { color:#ff6b6b; }
   .barra { display:flex; gap:8px; align-items:center; padding:10px 12px;
            border-bottom:1px solid var(--linha); font-size:13px; color:var(--fraco); }
   .barra button { padding:7px 10px; font-size:13px; }
@@ -80,6 +83,8 @@
 
 <div id="trava">
   <h2 style="color:var(--am);margin:0">Estoque</h2>
+  <input id="usuario" placeholder="usuário" autocomplete="username" enterkeyhint="next"
+         autocapitalize="off" autocorrect="off" spellcheck="false">
   <input id="senha" type="password" placeholder="senha" autocomplete="current-password" enterkeyhint="go">
   <button id="entrar">Entrar</button>
   <div id="erro"></div>
@@ -127,9 +132,12 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[<>&"]/g, c => ({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;"}[c]));
 const brl = n => (n || 0).toLocaleString("pt-BR", {style:"currency", currency:"BRL"});
 
+// Uma so montagem do cabecalho: quem entra e "usuario:senha", em toda chamada.
+const cabecalho = () => ({authorization: `Bearer ${localStorage.usuario || ""}:${localStorage.senha || ""}`});
+
 async function consultar(q) {
   const r = await fetch(`${PROXY}/?q=${encodeURIComponent(q)}`,
-                        {headers: {authorization: "Bearer " + localStorage.senha}, cache: "no-store"});
+                        {headers: cabecalho(), cache: "no-store"});
   if (r.status === 401) throw new Error("senha");
   if (!r.ok) throw new Error("proxy " + r.status);
   return r.json();
@@ -145,7 +153,9 @@ function cartao(it) {
       ${Object.entries(c.depositos).map(([d, s]) =>
         `<div class="dep"><span>${esc(d)}</span><b>${s}</b></div>`).join("")}
     </div>`).join("")}</div>`
-    : `<button class="ver" data-saldo="${esc(it.codigo)}">Ver estoque</button>`;
+    : it.disponivel !== undefined
+      ? `<div class="marca ${it.disponivel ? "tem" : "sem"}">${it.disponivel ? "✓ Disponível" : "Sem estoque"}</div>`
+      : `<button class="ver" data-saldo="${esc(it.codigo)}">Ver estoque</button>`;
   return `<div class="card">
     <div class="cab">
       <img loading="lazy" src="../fotos/${encodeURIComponent(it.codigo)}.jpg"
@@ -166,11 +176,15 @@ async function verSaldo(cod, botao) {
   try {
     const partes = await Promise.all(Object.entries(it.ids || {}).map(async ([conta, id]) => {
       const r = await fetch(`${PROXY}/?saldo=${encodeURIComponent(id)}&conta=${encodeURIComponent(conta)}`,
-                            {headers: {authorization: "Bearer " + localStorage.senha}, cache: "no-store"});
+                            {headers: cabecalho(), cache: "no-store"});
       if (!r.ok) throw new Error("proxy " + r.status);
-      return [conta, (await r.json()).saldo];
+      return [conta, await r.json()];
     }));
-    it.contas = Object.fromEntries(partes);
+    // Cliente recebe {disponivel}; equipe recebe {saldo} com quantidade e depositos.
+    if (partes.every(([, j]) => j.saldo === undefined))
+      it.disponivel = partes.some(([, j]) => j.disponivel);
+    else
+      it.contas = Object.fromEntries(partes.filter(([, j]) => j.saldo).map(([c, j]) => [c, j.saldo]));
     botao.closest(".card").outerHTML = cartao(it);      // repinta so este cartao
   } catch (e) {
     botao.textContent = "não deu, tocar de novo";
@@ -212,9 +226,9 @@ async function buscar() {
                       : '<div class="msg">nada encontrado</div>');
   } catch (e) {
     if (e.message === "senha") {          // senha trocada no proxy no meio do uso
-      delete localStorage.senha;
+      delete localStorage.senha; delete localStorage.usuario;
       $("#app").hidden = true; $("#trava").hidden = false;
-      return ($("#erro").textContent = "a senha mudou, entre de novo");
+      return ($("#erro").textContent = "seu acesso mudou, entre de novo");
     }
     $("#saida").innerHTML = `<div class="aviso">sem resposta: ${esc(e.message)}.
       Estoque so existe ao vivo — sem internet nao da para consultar.</div>`;
@@ -224,14 +238,15 @@ async function buscar() {
 // Valida a senha no proxy antes de entrar. Busca vazia nao chega na Olist, entao o
 // teste e de graca — e sem ele a senha errada so apareceria depois, como um salto
 // mudo de volta para esta tela.
-async function entrar(senha) {
+async function entrar(usuario, senha) {
   $("#erro").textContent = "verificando...";
   try {
-    const r = await fetch(`${PROXY}/?q=`, {headers: {authorization: "Bearer " + senha},
+    const r = await fetch(`${PROXY}/?q=`, {headers: {authorization: `Bearer ${usuario}:${senha}`},
                                            cache: "no-store"});
-    if (r.status === 401) return ($("#erro").textContent = "senha errada");
+    if (r.status === 401) return ($("#erro").textContent = "usuário ou senha errados");
     if (!r.ok) return ($("#erro").textContent = `o proxy respondeu ${r.status}`);
   } catch { return ($("#erro").textContent = "sem internet"); }
+  localStorage.usuario = usuario;
   localStorage.senha = senha;
   $("#erro").textContent = "";
   $("#trava").hidden = true; $("#app").hidden = false;
@@ -376,17 +391,19 @@ async function escanear() {
 // A camera e um extra: o botao so aparece onde o navegador sabe ler codigo (Chrome/Android).
 // Sem ele o app fica exatamente como antes — digitar SKU ou nome e tocar em Ver.
 if ("BarcodeDetector" in window) { $("#cam").hidden = false; $("#cam").onclick = escanear; }
-$("#entrar").onclick = () => $("#senha").value ? entrar($("#senha").value)
-                                               : ($("#erro").textContent = "digite a senha");
+$("#entrar").onclick = () => ($("#usuario").value.trim() && $("#senha").value)
+  ? entrar($("#usuario").value.trim(), $("#senha").value)
+  : ($("#erro").textContent = "preencha usuário e senha");
+$("#usuario").onkeydown = ev => { if (ev.key === "Enter") $("#senha").focus(); };
 $("#senha").onkeydown = ev => { if (ev.key === "Enter") $("#entrar").click(); };
 $("#ir").onclick = buscar;
 $("#busca").onkeydown = ev => { if (ev.key === "Enter") { ev.target.blur(); buscar(); } };
-$("#sair").onclick = () => { delete localStorage.senha; location.reload(); };
+$("#sair").onclick = () => { delete localStorage.senha; delete localStorage.usuario; location.reload(); };
 window.onhashchange = () => { if (!$("#app").hidden) daUrl(); };
 
 if (PROXY.includes("SEU-SUBDOMINIO"))
   document.body.innerHTML = '<div class="msg">Falta publicar o proxy e pôr a URL dele em PROXY, no index.html.</div>';
-else if (localStorage.senha) entrar(localStorage.senha);
+else if (localStorage.usuario && localStorage.senha) entrar(localStorage.usuario, localStorage.senha);
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");
 </script>
 </body>
