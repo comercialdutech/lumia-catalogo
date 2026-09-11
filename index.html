@@ -5,16 +5,30 @@
 <style>
 @font-face{font-family:Buvera;src:url(marca/Buvera-Regular.ttf) format('truetype');font-weight:400;font-display:swap}
 @font-face{font-family:Buvera;src:url(marca/Buvera-ExtraBold.ttf) format('truetype');font-weight:800;font-display:swap}
-:root{--bg:#f4f4f5;--card:#fff;--ink:#0a0a0b;--mut:#6b6b70;--ac:#ffd100;--bd:#e4e4e7}
+:root{--bg:#f4f4f5;--card:#fff;--ink:#0a0a0b;--mut:#6b6b70;--ac:#ffd100;--bd:#e4e4e7;--barra:56px}
 *{box-sizing:border-box}
 body{margin:0;font:16px/1.45 Buvera,Poppins,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink)}
-header{position:sticky;top:0;background:var(--ink);border-bottom:3px solid var(--ac);padding:14px 18px;z-index:2}
-.topo{max-width:1200px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:14px 24px}
-.logo{height:34px;width:auto;flex:none}
-#busca{flex:1;min-width:220px;max-width:480px;padding:10px 14px;border:1px solid #3a3a3d;border-radius:999px;font:inherit;font-size:15px;background:#17171a;color:#fff}
+header{position:sticky;top:0;background:var(--ink);border-bottom:3px solid var(--ac);padding:12px 18px;z-index:20}
+.topo{max-width:1400px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px}
+.marca{display:flex;align-items:center;gap:10px;flex:none;text-decoration:none}
+.logo{height:30px;width:auto;display:block}
+.tag{color:#fff;font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;border-left:1px solid #3a3a3d;padding-left:10px}
+#busca{flex:1;min-width:180px;max-width:440px;padding:10px 14px;border:1px solid #3a3a3d;border-radius:999px;font:inherit;font-size:15px;background:#17171a;color:#fff}
 #busca::placeholder{color:#8a8a90}
-#busca:focus{outline:2px solid var(--ac);outline-offset:1px;border-color:transparent}
-main{max-width:1200px;margin:0 auto;padding:24px 18px;display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+#busca:focus,.filtro:focus-visible{outline:2px solid var(--ac);outline-offset:1px;border-color:transparent}
+.bt{flex:none;padding:9px 16px;border:0;border-radius:999px;background:var(--ac);color:var(--ink);font:inherit;font-size:14px;font-weight:800;cursor:pointer}
+.bt:hover{filter:brightness(.92)}
+.bt-ghost{background:transparent;color:#fff;border:1px solid #3a3a3d}
+#n-cart{display:inline-block;min-width:20px;padding:0 6px;margin-left:6px;border-radius:999px;background:var(--ink);color:var(--ac);font-size:12px}
+.corpo{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:236px 1fr;gap:22px;padding:22px 18px;align-items:start}
+#filtros{position:sticky;top:calc(var(--barra) + 22px);background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:6px 14px 14px;max-height:calc(100vh - var(--barra) - 44px);overflow:auto}
+.grupo{border:0;border-top:1px solid var(--bd);margin:0;padding:10px 0 4px}
+.grupo:first-of-type{border-top:0}
+.grupo legend{padding:8px 0 4px;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
+.grupo label{display:flex;gap:8px;align-items:flex-start;padding:4px 0;font-size:13px;line-height:1.3;cursor:pointer}
+.grupo input{margin:2px 0 0;accent-color:var(--ink);flex:none}
+#limpar{width:100%;margin-top:12px;padding:8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);font:inherit;font-size:13px;cursor:pointer}
+main{display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
 .card{background:var(--card);border:1px solid var(--bd);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;transition:border-color .15s,transform .15s,box-shadow .15s}
 .card:hover{border-color:var(--ac);transform:translateY(-2px);box-shadow:0 6px 18px rgba(10,10,11,.08)}
 .foto{aspect-ratio:1;background:#fff;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--bd)}
@@ -28,1479 +42,1954 @@ main{max-width:1200px;margin:0 auto;padding:24px 18px;display:grid;gap:18px;grid
 .est.tem{color:#0b6b2f;background:#e6f5ec;border:1px solid #bde3ca}
 .est.sem{color:#6b6b70;background:var(--bg);border:1px solid var(--bd)}
 .preco{margin:auto 0 0;font-size:18px;font-weight:800;color:var(--ink)}
-.filtro{flex:none;padding:9px 12px;border:1px solid #3a3a3d;border-radius:999px;font:inherit;font-size:14px;background:#17171a;color:#fff}
-.filtro:focus{outline:2px solid var(--ac);outline-offset:1px;border-color:transparent}
-.app{flex:none;padding:9px 16px;border-radius:999px;background:var(--ac);color:var(--ink);font:inherit;font-size:14px;font-weight:800;text-decoration:none}
-.app:hover{filter:brightness(.92)}
+.add{margin-top:10px;padding:9px;border:0;border-radius:8px;background:var(--ink);color:#fff;font:inherit;font-size:13px;font-weight:800;cursor:pointer}
+.add:hover{background:#26262b}
+.add.ok{background:#0b6b2f}
+.add-off{margin-top:10px;padding:9px;text-align:center;font-size:12px;color:var(--mut);border:1px dashed var(--bd);border-radius:8px}
 #vazio{display:none;text-align:center;color:var(--mut);padding:40px}
 footer{text-align:center;color:var(--mut);padding:28px 18px;font-size:13px;border-top:1px solid var(--bd)}
 footer b{color:var(--ink);font-weight:800}
 footer a{color:var(--ink);font-weight:800}
+#fundo{position:fixed;inset:0;background:rgba(10,10,11,.45);z-index:28;display:none}
+#fundo.on{display:block}
+#carrinho{position:fixed;top:0;right:0;width:min(380px,100%);height:100%;background:var(--card);border-left:1px solid var(--bd);z-index:30;transform:translateX(100%);transition:transform .2s;display:flex;flex-direction:column}
+#carrinho.on{transform:none}
+.cab-cart{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px;border-bottom:1px solid var(--bd)}
+.cab-cart h2{margin:0;font-size:16px;font-weight:800}
+.fecha{border:0;background:transparent;font-size:22px;line-height:1;cursor:pointer;color:var(--mut)}
+#itens{flex:1;overflow:auto;padding:8px 16px}
+.item{display:grid;grid-template-columns:1fr auto;gap:4px 10px;padding:12px 0;border-bottom:1px solid var(--bd)}
+.item .n{font-size:13px;line-height:1.3}
+.item .s{font-size:11px;color:var(--mut);letter-spacing:.05em}
+.qtd{display:flex;align-items:center;gap:6px}
+.qtd button{width:26px;height:26px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);font:inherit;font-weight:800;cursor:pointer}
+.qtd b{min-width:22px;text-align:center}
+.lixo{border:0;background:transparent;color:var(--mut);cursor:pointer;font-size:12px;text-decoration:underline;padding:0;justify-self:start}
+.pe{padding:16px;border-top:1px solid var(--bd)}
+.total{display:flex;justify-content:space-between;font-weight:800;font-size:17px;margin-bottom:12px}
+#zap{display:block;width:100%;padding:13px;border:0;border-radius:10px;background:#0b6b2f;color:#fff;font:inherit;font-size:15px;font-weight:800;text-align:center;text-decoration:none;cursor:pointer}
+#zap[aria-disabled="true"]{background:var(--bd);color:var(--mut);pointer-events:none}
+.so-mob{display:none}
+@media(max-width:900px){
+  .corpo{grid-template-columns:1fr}
+  .so-mob{display:inline-block}
+  #filtros{position:fixed;top:0;left:0;width:min(300px,100%);height:100%;max-height:none;border-radius:0;z-index:30;transform:translateX(-100%);transition:transform .2s;padding-top:16px}
+  #filtros.on{transform:none}
+}
 </style></head><body>
 <header><div class="topo">
-<img class="logo" src="marca/logo.png" alt="Lumia Comunicacao Visual">
+<a class="marca" href="."><img class="logo" src="marca/logo.png" alt="Lumia Suprimentos 3D"><span class="tag">Suprimentos 3D</span></a>
 <input id="busca" type="search" placeholder="Buscar por nome ou SKU..." autocomplete="off">
-<select class="filtro" data-campo="marca" aria-label="Marca / compatível"><option value="">Marca / compatível</option><option>Anycubic</option><option>Bambu Lab</option><option>Creality</option><option>Flashforge</option><option>MASTERPRINT</option><option>Outras</option><option>XFULL</option></select><select class="filtro" data-campo="tipo" aria-label="Tipo"><option value="">Tipo</option><option>Acessórios para Impressão 3D</option><option>Armazenagem de Filamento</option><option>Bicos (Nozzle)</option><option>Ferramentas e Acessórios</option><option>Filamento ABS</option><option>Filamento PETG</option><option>Filamento PLA</option><option>Filamento TPU</option><option>Hotend</option><option>Impressoras 3D</option><option>Peças e Reposição</option><option>Sensores e Eletrônica</option></select><select class="filtro" data-campo="aplic" aria-label="Aplicação"><option value="">Aplicação</option><option>Acabamento</option><option>Acessório</option><option>Alta temperatura</option><option>Armazenagem</option><option>Decorativo / uso interno</option><option>Equipamento</option><option>Flexível</option><option>Funcional / uso externo</option><option>Reposição</option></select>
-<a class="app" href="app/">Estoque ao vivo</a>
+<button class="bt bt-ghost so-mob" id="abre-filtros">Filtros</button>
+<a class="bt bt-ghost" href="app/">Estoque ao vivo</a>
+<button class="bt" id="abre-cart">Carrinho<span id="n-cart">0</span></button>
 </div></header>
+<div class="corpo">
+<aside id="filtros">
+<fieldset class="grupo"><legend>Marca / compatível</legend><label><input type="checkbox" class="filtro" data-campo="marca" value="Anycubic"><span>Anycubic</span></label><label><input type="checkbox" class="filtro" data-campo="marca" value="Bambu Lab"><span>Bambu Lab</span></label><label><input type="checkbox" class="filtro" data-campo="marca" value="Creality"><span>Creality</span></label><label><input type="checkbox" class="filtro" data-campo="marca" value="Flashforge"><span>Flashforge</span></label><label><input type="checkbox" class="filtro" data-campo="marca" value="MASTERPRINT"><span>MASTERPRINT</span></label><label><input type="checkbox" class="filtro" data-campo="marca" value="Outras"><span>Outras</span></label><label><input type="checkbox" class="filtro" data-campo="marca" value="XFULL"><span>XFULL</span></label></fieldset><fieldset class="grupo"><legend>Tipo</legend><label><input type="checkbox" class="filtro" data-campo="tipo" value="Acessórios para Impressão 3D"><span>Acessórios para Impressão 3D</span></label><label><input type="checkbox" class="filtro" data-campo="tipo" value="Armazenagem de Filamento"><span>Armazenagem de Filamento</span></label><label><input type="checkbox" class="filtro" data-campo="tipo" value="Bicos (Nozzle)"><span>Bicos (Nozzle)</span></label><label><input type="checkbox" class="filtro" data-campo="tipo" value="Ferramentas e Acessórios"><span>Ferramentas e Acessórios</span></label><label><input type="checkbox" class="filtro" data-campo="tipo" value="Filamento ABS"><span>Filamento ABS</span></label><label><input type="checkbox" class="filtro" data-campo="tipo" value="Filamento PETG"><span>Filamento PETG</span></label><label><input type="checkbox" class="filtro" data-campo="tipo" value="Filamento PLA"><span>Filamento PLA</span></label><label><input type="checkbox" class="filtro" data-campo="tipo" value="Filamento TPU"><span>Filamento TPU</span></label><label><input type="checkbox" class="filtro" data-campo="tipo" value="Hotend"><span>Hotend</span></label><label><input type="checkbox" class="filtro" data-campo="tipo" value="Impressoras 3D"><span>Impressoras 3D</span></label><label><input type="checkbox" class="filtro" data-campo="tipo" value="Peças e Reposição"><span>Peças e Reposição</span></label><label><input type="checkbox" class="filtro" data-campo="tipo" value="Sensores e Eletrônica"><span>Sensores e Eletrônica</span></label></fieldset><fieldset class="grupo"><legend>Aplicação</legend><label><input type="checkbox" class="filtro" data-campo="aplic" value="Acabamento"><span>Acabamento</span></label><label><input type="checkbox" class="filtro" data-campo="aplic" value="Acessório"><span>Acessório</span></label><label><input type="checkbox" class="filtro" data-campo="aplic" value="Alta temperatura"><span>Alta temperatura</span></label><label><input type="checkbox" class="filtro" data-campo="aplic" value="Armazenagem"><span>Armazenagem</span></label><label><input type="checkbox" class="filtro" data-campo="aplic" value="Decorativo / uso interno"><span>Decorativo / uso interno</span></label><label><input type="checkbox" class="filtro" data-campo="aplic" value="Equipamento"><span>Equipamento</span></label><label><input type="checkbox" class="filtro" data-campo="aplic" value="Flexível"><span>Flexível</span></label><label><input type="checkbox" class="filtro" data-campo="aplic" value="Funcional / uso externo"><span>Funcional / uso externo</span></label><label><input type="checkbox" class="filtro" data-campo="aplic" value="Reposição"><span>Reposição</span></label></fieldset>
+<button id="limpar">Limpar filtros</button>
+</aside>
 <main id="grade">
 <article class="card" data-busca="base sensor de filamento para bambu lab a1 series 1176-86"
- data-marca="Bambu Lab" data-tipo="Sensores e Eletrônica" data-aplic="Reposição">
+ data-marca="Bambu Lab" data-tipo="Sensores e Eletrônica" data-aplic="Reposição"
+ data-sku="1176-86" data-nome="BASE SENSOR DE FILAMENTO PARA BAMBU LAB A1 SERIES" data-preco="75.04">
   <div class="foto"><img src="fotos/1176-86.jpg" alt="BASE SENSOR DE FILAMENTO PARA BAMBU LAB A1 SERIES" loading="lazy"></div>
   <div class="info"><h2>BASE SENSOR DE FILAMENTO PARA BAMBU LAB A1 SERIES</h2>
   <p class="sku">1176-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 75,04</p></div>
+  <p class="preco">R$ 75,04</p>
+  <button class="add" data-sku="1176-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="bico nozzle 0.25mm flashforge ad5x 1206-86"
- data-marca="Flashforge" data-tipo="Bicos (Nozzle)" data-aplic="Reposição">
+ data-marca="Flashforge" data-tipo="Bicos (Nozzle)" data-aplic="Reposição"
+ data-sku="1206-86" data-nome="BICO NOZZLE 0.25MM FLASHFORGE AD5X" data-preco="121.00">
   <div class="foto"><img src="fotos/1206-86.jpg" alt="BICO NOZZLE 0.25MM FLASHFORGE AD5X" loading="lazy"></div>
   <div class="info"><h2>BICO NOZZLE 0.25MM FLASHFORGE AD5X</h2>
   <p class="sku">1206-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 121,00</p></div>
+  <p class="preco">R$ 121,00</p>
+  <button class="add" data-sku="1206-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="bico nozzle 0.4mm flashforge ad5x 1095-86"
- data-marca="Flashforge" data-tipo="Bicos (Nozzle)" data-aplic="Reposição">
+ data-marca="Flashforge" data-tipo="Bicos (Nozzle)" data-aplic="Reposição"
+ data-sku="1095-86" data-nome="BICO NOZZLE 0.4MM FLASHFORGE AD5X" data-preco="77.99">
   <div class="foto"><img src="fotos/1095-86.jpg" alt="BICO NOZZLE 0.4MM FLASHFORGE AD5X" loading="lazy"></div>
   <div class="info"><h2>BICO NOZZLE 0.4MM FLASHFORGE AD5X</h2>
   <p class="sku">1095-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 77,99</p></div>
+  <p class="preco">R$ 77,99</p>
+  <button class="add" data-sku="1095-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="bico nozzle rosqueavel anycubic kobra 3 1104-86"
- data-marca="Anycubic" data-tipo="Bicos (Nozzle)" data-aplic="Reposição">
+ data-marca="Anycubic" data-tipo="Bicos (Nozzle)" data-aplic="Reposição"
+ data-sku="1104-86" data-nome="BICO NOZZLE ROSQUEAVEL ANYCUBIC KOBRA 3" data-preco="29.99">
   <div class="foto"><img src="fotos/1104-86.jpg" alt="BICO NOZZLE ROSQUEAVEL ANYCUBIC KOBRA 3" loading="lazy"></div>
   <div class="info"><h2>BICO NOZZLE ROSQUEAVEL ANYCUBIC KOBRA 3</h2>
   <p class="sku">1104-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 29,99</p></div>
+  <p class="preco">R$ 29,99</p>
+  <button class="add" data-sku="1104-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="bico nozzle rosqueavel bambu a1 series 0.2mm 1080-86"
- data-marca="Bambu Lab" data-tipo="Bicos (Nozzle)" data-aplic="Reposição">
+ data-marca="Bambu Lab" data-tipo="Bicos (Nozzle)" data-aplic="Reposição"
+ data-sku="1080-86" data-nome="BICO NOZZLE ROSQUEAVEL BAMBU A1 SERIES 0.2MM" data-preco="29.09">
   <div class="foto"><img src="fotos/1080-86.jpg" alt="BICO NOZZLE ROSQUEAVEL BAMBU A1 SERIES 0.2MM" loading="lazy"></div>
   <div class="info"><h2>BICO NOZZLE ROSQUEAVEL BAMBU A1 SERIES 0.2MM</h2>
   <p class="sku">1080-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 29,09</p></div>
+  <p class="preco">R$ 29,09</p>
+  <button class="add" data-sku="1080-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="bico nozzle rosqueavel bambu a1 series 0.4mm 1081-86"
- data-marca="Bambu Lab" data-tipo="Bicos (Nozzle)" data-aplic="Reposição">
+ data-marca="Bambu Lab" data-tipo="Bicos (Nozzle)" data-aplic="Reposição"
+ data-sku="1081-86" data-nome="BICO NOZZLE ROSQUEAVEL BAMBU A1 SERIES 0.4MM" data-preco="29.09">
   <div class="foto"><img src="fotos/1081-86.jpg" alt="BICO NOZZLE ROSQUEAVEL BAMBU A1 SERIES 0.4MM" loading="lazy"></div>
   <div class="info"><h2>BICO NOZZLE ROSQUEAVEL BAMBU A1 SERIES 0.4MM</h2>
   <p class="sku">1081-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 29,09</p></div>
+  <p class="preco">R$ 29,09</p>
+  <button class="add" data-sku="1081-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="bico nozzle rosqueavel bambu a1 series 0.6mm 1082-86"
- data-marca="Bambu Lab" data-tipo="Bicos (Nozzle)" data-aplic="Reposição">
+ data-marca="Bambu Lab" data-tipo="Bicos (Nozzle)" data-aplic="Reposição"
+ data-sku="1082-86" data-nome="BICO NOZZLE ROSQUEAVEL BAMBU A1 SERIES 0.6MM" data-preco="42.00">
   <div class="foto"><img src="fotos/1082-86.jpg" alt="BICO NOZZLE ROSQUEAVEL BAMBU A1 SERIES 0.6MM" loading="lazy"></div>
   <div class="info"><h2>BICO NOZZLE ROSQUEAVEL BAMBU A1 SERIES 0.6MM</h2>
   <p class="sku">1082-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 42,00</p></div>
+  <p class="preco">R$ 42,00</p>
+  <button class="add" data-sku="1082-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="ceramica zirconia termistor hotend para bambu lab a1 h2d a1 mini 1205-86"
- data-marca="Bambu Lab" data-tipo="Hotend" data-aplic="Reposição">
+ data-marca="Bambu Lab" data-tipo="Hotend" data-aplic="Reposição"
+ data-sku="1205-86" data-nome="CERAMICA ZIRCONIA TERMISTOR HOTEND PARA BAMBU LAB A1 H2D A1 MINI" data-preco="153.00">
   <div class="foto"><img src="fotos/1205-86.jpg" alt="CERAMICA ZIRCONIA TERMISTOR HOTEND PARA BAMBU LAB A1 H2D A1 MINI" loading="lazy"></div>
   <div class="info"><h2>CERAMICA ZIRCONIA TERMISTOR HOTEND PARA BAMBU LAB A1 H2D A1 MINI</h2>
   <p class="sku">1205-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 153,00</p></div>
+  <p class="preco">R$ 153,00</p>
+  <button class="add" data-sku="1205-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="escareador rebarbador debarbador ferramenta deburring tool 1088-86"
- data-marca="Outras" data-tipo="Ferramentas e Acessórios" data-aplic="Acabamento">
+ data-marca="Outras" data-tipo="Ferramentas e Acessórios" data-aplic="Acabamento"
+ data-sku="1088-86" data-nome="ESCAREADOR REBARBADOR DEBARBADOR FERRAMENTA DEBURRING TOOL" data-preco="29.99">
   <div class="foto"><img src="fotos/1088-86.jpg" alt="ESCAREADOR REBARBADOR DEBARBADOR FERRAMENTA DEBURRING TOOL" loading="lazy"></div>
   <div class="info"><h2>ESCAREADOR REBARBADOR DEBARBADOR FERRAMENTA DEBURRING TOOL</h2>
   <p class="sku">1088-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 29,99</p></div>
+  <p class="preco">R$ 29,99</p>
+  <button class="add" data-sku="1088-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint petg branco 1kg (1.75mm) 1098-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1098-104" data-nome="FILAMENTO MASTERPRINT PETG BRANCO 1KG (1.75MM)" data-preco="69.99">
   <div class="foto"><img src="fotos/1098-104.jpg" alt="FILAMENTO MASTERPRINT PETG BRANCO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PETG BRANCO 1KG (1.75MM)</h2>
   <p class="sku">1098-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 69,99</p></div>
+  <p class="preco">R$ 69,99</p>
+  <button class="add" data-sku="1098-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint petg cinza 1kg (1.75mm) 1114-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1114-104" data-nome="FILAMENTO MASTERPRINT PETG CINZA 1KG (1.75MM)" data-preco="69.99">
   <div class="foto"><img src="fotos/1114-104.jpg" alt="FILAMENTO MASTERPRINT PETG CINZA 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PETG CINZA 1KG (1.75MM)</h2>
   <p class="sku">1114-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 69,99</p></div>
+  <p class="preco">R$ 69,99</p>
+  <button class="add" data-sku="1114-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint petg cool grey 1kg (1.75mm) 1208-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1208-104" data-nome="FILAMENTO MASTERPRINT PETG COOL GREY 1KG (1.75MM)" data-preco="69.99">
   <div class="foto"><img src="fotos/1208-104.jpg" alt="FILAMENTO MASTERPRINT PETG COOL GREY 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PETG COOL GREY 1KG (1.75MM)</h2>
   <p class="sku">1208-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 69,99</p></div>
+  <p class="preco">R$ 69,99</p>
+  <button class="add" data-sku="1208-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint petg fibra de carbono 1kg (1.75mm) 1141-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1141-104" data-nome="FILAMENTO MASTERPRINT PETG FIBRA DE CARBONO 1KG (1.75MM)" data-preco="139.99">
   <div class="foto"><img src="fotos/1141-104.jpg" alt="FILAMENTO MASTERPRINT PETG FIBRA DE CARBONO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PETG FIBRA DE CARBONO 1KG (1.75MM)</h2>
   <p class="sku">1141-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 139,99</p></div>
+  <p class="preco">R$ 139,99</p>
+  <button class="add" data-sku="1141-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint petg fosco branco 1kg (1.75mm) 1197-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1197-104" data-nome="FILAMENTO MASTERPRINT PETG FOSCO BRANCO 1KG (1.75MM)" data-preco="69.99">
   <div class="foto"><img src="fotos/1197-104.jpg" alt="FILAMENTO MASTERPRINT PETG FOSCO BRANCO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PETG FOSCO BRANCO 1KG (1.75MM)</h2>
   <p class="sku">1197-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 69,99</p></div>
+  <p class="preco">R$ 69,99</p>
+  <button class="add" data-sku="1197-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint petg green olive 1kg (1.75mm) 1209-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1209-104" data-nome="FILAMENTO MASTERPRINT PETG GREEN OLIVE 1KG (1.75MM)" data-preco="69.99">
   <div class="foto"><img src="fotos/1209-104.jpg" alt="FILAMENTO MASTERPRINT PETG GREEN OLIVE 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PETG GREEN OLIVE 1KG (1.75MM)</h2>
   <p class="sku">1209-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 69,99</p></div>
+  <p class="preco">R$ 69,99</p>
+  <button class="add" data-sku="1209-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint petg luminous rainbow 1kg (1.75mm) 1182-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1182-104" data-nome="FILAMENTO MASTERPRINT PETG LUMINOUS RAINBOW 1KG (1.75MM)" data-preco="129.99">
   <div class="foto"><img src="fotos/1182-104.jpg" alt="FILAMENTO MASTERPRINT PETG LUMINOUS RAINBOW 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PETG LUMINOUS RAINBOW 1KG (1.75MM)</h2>
   <p class="sku">1182-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 129,99</p></div>
+  <p class="preco">R$ 129,99</p>
+  <button class="add" data-sku="1182-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint petg pcv outdoor branco 1kg (1.75mm) 1110-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1110-104" data-nome="FILAMENTO MASTERPRINT PETG PCV OUTDOOR BRANCO 1KG (1.75MM)" data-preco="74.99">
   <div class="foto"><img src="fotos/1110-104.jpg" alt="FILAMENTO MASTERPRINT PETG PCV OUTDOOR BRANCO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PETG PCV OUTDOOR BRANCO 1KG (1.75MM)</h2>
   <p class="sku">1110-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 74,99</p></div>
+  <p class="preco">R$ 74,99</p>
+  <button class="add" data-sku="1110-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint petg preto 1kg (1.75mm) 1097-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1097-104" data-nome="FILAMENTO MASTERPRINT PETG PRETO 1KG (1.75MM)" data-preco="69.99">
   <div class="foto"><img src="fotos/1097-104.jpg" alt="FILAMENTO MASTERPRINT PETG PRETO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PETG PRETO 1KG (1.75MM)</h2>
   <p class="sku">1097-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 69,99</p></div>
+  <p class="preco">R$ 69,99</p>
+  <button class="add" data-sku="1097-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint petg translucido amarelo 1kg (1.75mm) 1151-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1151-104" data-nome="FILAMENTO MASTERPRINT PETG TRANSLUCIDO AMARELO 1KG (1.75MM)" data-preco="69.99">
   <div class="foto"><img src="fotos/1151-104.jpg" alt="FILAMENTO MASTERPRINT PETG TRANSLUCIDO AMARELO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PETG TRANSLUCIDO AMARELO 1KG (1.75MM)</h2>
   <p class="sku">1151-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 69,99</p></div>
+  <p class="preco">R$ 69,99</p>
+  <button class="add" data-sku="1151-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint petg translucido azul 1kg (1.75mm) 1152-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1152-104" data-nome="FILAMENTO MASTERPRINT PETG TRANSLUCIDO AZUL 1KG (1.75MM)" data-preco="69.99">
   <div class="foto"><img src="fotos/1152-104.jpg" alt="FILAMENTO MASTERPRINT PETG TRANSLUCIDO AZUL 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PETG TRANSLUCIDO AZUL 1KG (1.75MM)</h2>
   <p class="sku">1152-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 69,99</p></div>
+  <p class="preco">R$ 69,99</p>
+  <button class="add" data-sku="1152-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint petg translucido branco 1kg (1.75mm) 1105-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1105-104" data-nome="FILAMENTO MASTERPRINT PETG TRANSLUCIDO BRANCO 1KG (1.75MM)" data-preco="69.99">
   <div class="foto"><img src="fotos/1105-104.jpg" alt="FILAMENTO MASTERPRINT PETG TRANSLUCIDO BRANCO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PETG TRANSLUCIDO BRANCO 1KG (1.75MM)</h2>
   <p class="sku">1105-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 69,99</p></div>
+  <p class="preco">R$ 69,99</p>
+  <button class="add" data-sku="1105-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint petg translucido verde 1kg (1.75mm) 1142-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1142-104" data-nome="FILAMENTO MASTERPRINT PETG TRANSLUCIDO VERDE 1KG (1.75MM)" data-preco="69.99">
   <div class="foto"><img src="fotos/1142-104.jpg" alt="FILAMENTO MASTERPRINT PETG TRANSLUCIDO VERDE 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PETG TRANSLUCIDO VERDE 1KG (1.75MM)</h2>
   <p class="sku">1142-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 69,99</p></div>
+  <p class="preco">R$ 69,99</p>
+  <button class="add" data-sku="1142-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint petg translucido vermelho 1kg (1.75mm) 1153-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1153-104" data-nome="FILAMENTO MASTERPRINT PETG TRANSLUCIDO VERMELHO 1KG (1.75MM)" data-preco="69.99">
   <div class="foto"><img src="fotos/1153-104.jpg" alt="FILAMENTO MASTERPRINT PETG TRANSLUCIDO VERMELHO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PETG TRANSLUCIDO VERMELHO 1KG (1.75MM)</h2>
   <p class="sku">1153-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 69,99</p></div>
+  <p class="preco">R$ 69,99</p>
+  <button class="add" data-sku="1153-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint petg transparente 1kg (1.75mm) 1210-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1210-104" data-nome="FILAMENTO MASTERPRINT PETG TRANSPARENTE 1KG (1.75MM)" data-preco="69.99">
   <div class="foto"><img src="fotos/1210-104.jpg" alt="FILAMENTO MASTERPRINT PETG TRANSPARENTE 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PETG TRANSPARENTE 1KG (1.75MM)</h2>
   <p class="sku">1210-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 69,99</p></div>
+  <p class="preco">R$ 69,99</p>
+  <button class="add" data-sku="1210-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint petg verde 1kg (1.75mm) 1130-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1130-104" data-nome="FILAMENTO MASTERPRINT PETG VERDE 1KG (1.75MM)" data-preco="69.99">
   <div class="foto"><img src="fotos/1130-104.jpg" alt="FILAMENTO MASTERPRINT PETG VERDE 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PETG VERDE 1KG (1.75MM)</h2>
   <p class="sku">1130-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 69,99</p></div>
+  <p class="preco">R$ 69,99</p>
+  <button class="add" data-sku="1130-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla amarelo gold 1kg (1.75mm) 1213-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1213-104" data-nome="FILAMENTO MASTERPRINT PLA AMARELO GOLD 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1213-104.jpg" alt="FILAMENTO MASTERPRINT PLA AMARELO GOLD 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA AMARELO GOLD 1KG (1.75MM)</h2>
   <p class="sku">1213-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1213-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla azul com glitter 1kg (1.75mm) 1246-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1246-104" data-nome="FILAMENTO MASTERPRINT PLA AZUL COM GLITTER 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1246-104.jpg" alt="FILAMENTO MASTERPRINT PLA AZUL COM GLITTER 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA AZUL COM GLITTER 1KG (1.75MM)</h2>
   <p class="sku">1246-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1246-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla dourado 1kg (1.75mm) 1127-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1127-104" data-nome="FILAMENTO MASTERPRINT PLA DOURADO 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1127-104.jpg" alt="FILAMENTO MASTERPRINT PLA DOURADO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA DOURADO 1KG (1.75MM)</h2>
   <p class="sku">1127-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1127-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla ice cream 1kg (1.75mm) 1118-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1118-104" data-nome="FILAMENTO MASTERPRINT PLA ICE CREAM 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1118-104.jpg" alt="FILAMENTO MASTERPRINT PLA ICE CREAM 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA ICE CREAM 1KG (1.75MM)</h2>
   <p class="sku">1118-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1118-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla marrom com glitter 1kg (1.75mm) 1247-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1247-104" data-nome="FILAMENTO MASTERPRINT PLA MARROM COM GLITTER 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1247-104.jpg" alt="FILAMENTO MASTERPRINT PLA MARROM COM GLITTER 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA MARROM COM GLITTER 1KG (1.75MM)</h2>
   <p class="sku">1247-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1247-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla marrom escuro 1kg (1.75mm) 1204-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1204-104" data-nome="FILAMENTO MASTERPRINT PLA MARROM ESCURO 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1204-104.jpg" alt="FILAMENTO MASTERPRINT PLA MARROM ESCURO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA MARROM ESCURO 1KG (1.75MM)</h2>
   <p class="sku">1204-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1204-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla prata 1kg (1.75mm) 1166-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1166-104" data-nome="FILAMENTO MASTERPRINT PLA PRATA 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1166-104.jpg" alt="FILAMENTO MASTERPRINT PLA PRATA 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA PRATA 1KG (1.75MM)</h2>
   <p class="sku">1166-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1166-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla roxo 1kg (1.75mm) 1194-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1194-104" data-nome="FILAMENTO MASTERPRINT PLA ROXO 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1194-104.jpg" alt="FILAMENTO MASTERPRINT PLA ROXO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA ROXO 1KG (1.75MM)</h2>
   <p class="sku">1194-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1194-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla silk azul 1kg (1.75mm) 1125-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1125-104" data-nome="FILAMENTO MASTERPRINT PLA SILK AZUL 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1125-104.jpg" alt="FILAMENTO MASTERPRINT PLA SILK AZUL 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA SILK AZUL 1KG (1.75MM)</h2>
   <p class="sku">1125-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1125-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla silk branco 1kg (1.75mm) 1123-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1123-104" data-nome="FILAMENTO MASTERPRINT PLA SILK BRANCO 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1123-104.jpg" alt="FILAMENTO MASTERPRINT PLA SILK BRANCO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA SILK BRANCO 1KG (1.75MM)</h2>
   <p class="sku">1123-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1123-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla silk dourado 1kg (1.75mm) 1121-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1121-104" data-nome="FILAMENTO MASTERPRINT PLA SILK DOURADO 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1121-104.jpg" alt="FILAMENTO MASTERPRINT PLA SILK DOURADO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA SILK DOURADO 1KG (1.75MM)</h2>
   <p class="sku">1121-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1121-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla silk lavanda 1kg (1.75mm) 1248-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1248-104" data-nome="FILAMENTO MASTERPRINT PLA SILK LAVANDA 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1248-104.jpg" alt="FILAMENTO MASTERPRINT PLA SILK LAVANDA 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA SILK LAVANDA 1KG (1.75MM)</h2>
   <p class="sku">1248-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1248-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla silk prata 1kg (1.75mm) 1216-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1216-104" data-nome="FILAMENTO MASTERPRINT PLA SILK PRATA 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1216-104.jpg" alt="FILAMENTO MASTERPRINT PLA SILK PRATA 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA SILK PRATA 1KG (1.75MM)</h2>
   <p class="sku">1216-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1216-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla silk preto 1kg (1.75mm) 1122-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1122-104" data-nome="FILAMENTO MASTERPRINT PLA SILK PRETO 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1122-104.jpg" alt="FILAMENTO MASTERPRINT PLA SILK PRETO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA SILK PRETO 1KG (1.75MM)</h2>
   <p class="sku">1122-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1122-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla silk verde 1kg (1.75mm) 1217-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1217-104" data-nome="FILAMENTO MASTERPRINT PLA SILK VERDE 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1217-104.jpg" alt="FILAMENTO MASTERPRINT PLA SILK VERDE 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA SILK VERDE 1KG (1.75MM)</h2>
   <p class="sku">1217-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1217-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla silk vermelho 1kg (1.75mm) 1124-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1124-104" data-nome="FILAMENTO MASTERPRINT PLA SILK VERMELHO 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1124-104.jpg" alt="FILAMENTO MASTERPRINT PLA SILK VERMELHO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA SILK VERMELHO 1KG (1.75MM)</h2>
   <p class="sku">1124-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1124-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla transparente preto/azul c/ glitter 1kg (1.75mm) 1181-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1181-104" data-nome="FILAMENTO MASTERPRINT PLA TRANSPARENTE PRETO/AZUL C/ GLITTER 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1181-104.jpg" alt="FILAMENTO MASTERPRINT PLA TRANSPARENTE PRETO/AZUL C/ GLITTER 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA TRANSPARENTE PRETO/AZUL C/ GLITTER 1KG (1.75MM)</h2>
   <p class="sku">1181-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1181-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla verde com glitter 1kg (1.75mm) 1249-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1249-104" data-nome="FILAMENTO MASTERPRINT PLA VERDE COM GLITTER 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1249-104.jpg" alt="FILAMENTO MASTERPRINT PLA VERDE COM GLITTER 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA VERDE COM GLITTER 1KG (1.75MM)</h2>
   <p class="sku">1249-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1249-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla verde limao 1kg (1.75mm) 1183-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1183-104" data-nome="FILAMENTO MASTERPRINT PLA VERDE LIMAO 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1183-104.jpg" alt="FILAMENTO MASTERPRINT PLA VERDE LIMAO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA VERDE LIMAO 1KG (1.75MM)</h2>
   <p class="sku">1183-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1183-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint tpu branco 1kg (1.75mm) 1175-104"
- data-marca="MASTERPRINT" data-tipo="Filamento TPU" data-aplic="Flexível">
+ data-marca="MASTERPRINT" data-tipo="Filamento TPU" data-aplic="Flexível"
+ data-sku="1175-104" data-nome="FILAMENTO MASTERPRINT TPU BRANCO 1KG (1.75MM)" data-preco="129.99">
   <div class="foto"><img src="fotos/1175-104.jpg" alt="FILAMENTO MASTERPRINT TPU BRANCO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT TPU BRANCO 1KG (1.75MM)</h2>
   <p class="sku">1175-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 129,99</p></div>
+  <p class="preco">R$ 129,99</p>
+  <button class="add" data-sku="1175-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint tpu transparente 1kg (1.75mm) 1212-104"
- data-marca="MASTERPRINT" data-tipo="Filamento TPU" data-aplic="Flexível">
+ data-marca="MASTERPRINT" data-tipo="Filamento TPU" data-aplic="Flexível"
+ data-sku="1212-104" data-nome="FILAMENTO MASTERPRINT TPU TRANSPARENTE 1KG (1.75MM)" data-preco="129.99">
   <div class="foto"><img src="fotos/1212-104.jpg" alt="FILAMENTO MASTERPRINT TPU TRANSPARENTE 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT TPU TRANSPARENTE 1KG (1.75MM)</h2>
   <p class="sku">1212-104</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 129,99</p></div>
+  <p class="preco">R$ 129,99</p>
+  <button class="add" data-sku="1212-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento xfull petg amarelo 1kg (1.75mm) 1218-101"
- data-marca="XFULL" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="XFULL" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1218-101" data-nome="FILAMENTO XFULL PETG AMARELO 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1218-101.jpg" alt="FILAMENTO XFULL PETG AMARELO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO XFULL PETG AMARELO 1KG (1.75MM)</h2>
   <p class="sku">1218-101</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1218-101">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento xfull petg bege 1kg (1.75mm) 1219-101"
- data-marca="XFULL" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="XFULL" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1219-101" data-nome="FILAMENTO XFULL PETG BEGE 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1219-101.jpg" alt="FILAMENTO XFULL PETG BEGE 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO XFULL PETG BEGE 1KG (1.75MM)</h2>
   <p class="sku">1219-101</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1219-101">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento xfull petg branco 1kg (1.75mm) 1220-101"
- data-marca="XFULL" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="XFULL" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1220-101" data-nome="FILAMENTO XFULL PETG BRANCO 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1220-101.jpg" alt="FILAMENTO XFULL PETG BRANCO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO XFULL PETG BRANCO 1KG (1.75MM)</h2>
   <p class="sku">1220-101</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1220-101">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento xfull petg bronze 1kg (1.75mm) 1221-101"
- data-marca="XFULL" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="XFULL" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1221-101" data-nome="FILAMENTO XFULL PETG BRONZE 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1221-101.jpg" alt="FILAMENTO XFULL PETG BRONZE 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO XFULL PETG BRONZE 1KG (1.75MM)</h2>
   <p class="sku">1221-101</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1221-101">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento xfull petg cinza claro 1kg (1.75mm) 1222-101"
- data-marca="XFULL" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="XFULL" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1222-101" data-nome="FILAMENTO XFULL PETG CINZA CLARO 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1222-101.jpg" alt="FILAMENTO XFULL PETG CINZA CLARO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO XFULL PETG CINZA CLARO 1KG (1.75MM)</h2>
   <p class="sku">1222-101</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1222-101">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento xfull petg laranja 1kg (1.75mm) 1224-101"
- data-marca="XFULL" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="XFULL" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1224-101" data-nome="FILAMENTO XFULL PETG LARANJA 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1224-101.jpg" alt="FILAMENTO XFULL PETG LARANJA 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO XFULL PETG LARANJA 1KG (1.75MM)</h2>
   <p class="sku">1224-101</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1224-101">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento xfull petg prata 1kg (1.75mm) 1225-101"
- data-marca="XFULL" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="XFULL" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1225-101" data-nome="FILAMENTO XFULL PETG PRATA 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1225-101.jpg" alt="FILAMENTO XFULL PETG PRATA 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO XFULL PETG PRATA 1KG (1.75MM)</h2>
   <p class="sku">1225-101</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1225-101">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento xfull petg preto 1kg (1.75mm) 1226-101"
- data-marca="XFULL" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="XFULL" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1226-101" data-nome="FILAMENTO XFULL PETG PRETO 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1226-101.jpg" alt="FILAMENTO XFULL PETG PRETO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO XFULL PETG PRETO 1KG (1.75MM)</h2>
   <p class="sku">1226-101</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1226-101">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento xfull pla+ azul safira 1kg (1.75mm) 1230-101"
- data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1230-101" data-nome="FILAMENTO XFULL PLA+ AZUL SAFIRA 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1230-101.jpg" alt="FILAMENTO XFULL PLA+ AZUL SAFIRA 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO XFULL PLA+ AZUL SAFIRA 1KG (1.75MM)</h2>
   <p class="sku">1230-101</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1230-101">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento xfull pla+ bege 1kg (1.75mm) 1231-101"
- data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1231-101" data-nome="FILAMENTO XFULL PLA+ BEGE 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1231-101.jpg" alt="FILAMENTO XFULL PLA+ BEGE 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO XFULL PLA+ BEGE 1KG (1.75MM)</h2>
   <p class="sku">1231-101</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1231-101">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento xfull pla+ branco 1kg (1.75mm) 1232-101"
- data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1232-101" data-nome="FILAMENTO XFULL PLA+ BRANCO 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1232-101.jpg" alt="FILAMENTO XFULL PLA+ BRANCO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO XFULL PLA+ BRANCO 1KG (1.75MM)</h2>
   <p class="sku">1232-101</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1232-101">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento xfull pla+ fosco cinza claro 1kg (1.75mm) 1233-101"
- data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1233-101" data-nome="FILAMENTO XFULL PLA+ FOSCO CINZA CLARO 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1233-101.jpg" alt="FILAMENTO XFULL PLA+ FOSCO CINZA CLARO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO XFULL PLA+ FOSCO CINZA CLARO 1KG (1.75MM)</h2>
   <p class="sku">1233-101</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1233-101">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento xfull pla+ marrom madeira 1kg (1.75mm) 1235-101"
- data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1235-101" data-nome="FILAMENTO XFULL PLA+ MARROM MADEIRA 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1235-101.jpg" alt="FILAMENTO XFULL PLA+ MARROM MADEIRA 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO XFULL PLA+ MARROM MADEIRA 1KG (1.75MM)</h2>
   <p class="sku">1235-101</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1235-101">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento xfull pla+ prata 1kg (1.75mm) 1238-101"
- data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1238-101" data-nome="FILAMENTO XFULL PLA+ PRATA 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1238-101.jpg" alt="FILAMENTO XFULL PLA+ PRATA 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO XFULL PLA+ PRATA 1KG (1.75MM)</h2>
   <p class="sku">1238-101</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1238-101">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento xfull pla+ preto 1kg (1.75mm) 1239-101"
- data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1239-101" data-nome="FILAMENTO XFULL PLA+ PRETO 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1239-101.jpg" alt="FILAMENTO XFULL PLA+ PRETO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO XFULL PLA+ PRETO 1KG (1.75MM)</h2>
   <p class="sku">1239-101</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1239-101">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento xfull pla+ roxo 1kg (1.75mm) 1240-101"
- data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1240-101" data-nome="FILAMENTO XFULL PLA+ ROXO 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1240-101.jpg" alt="FILAMENTO XFULL PLA+ ROXO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO XFULL PLA+ ROXO 1KG (1.75MM)</h2>
   <p class="sku">1240-101</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1240-101">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento xfull pla+ silk bronze 1kg (1.75mm) 1242-101"
- data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1242-101" data-nome="FILAMENTO XFULL PLA+ SILK BRONZE 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1242-101.jpg" alt="FILAMENTO XFULL PLA+ SILK BRONZE 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO XFULL PLA+ SILK BRONZE 1KG (1.75MM)</h2>
   <p class="sku">1242-101</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1242-101">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento xfull pla+ silk prata 1kg (1.75mm) 1243-101"
- data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1243-101" data-nome="FILAMENTO XFULL PLA+ SILK PRATA 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1243-101.jpg" alt="FILAMENTO XFULL PLA+ SILK PRATA 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO XFULL PLA+ SILK PRATA 1KG (1.75MM)</h2>
   <p class="sku">1243-101</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1243-101">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento xfull pla+ silk vermelho 1kg (1.75mm) 1245-101"
- data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1245-101" data-nome="FILAMENTO XFULL PLA+ SILK VERMELHO 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1245-101.jpg" alt="FILAMENTO XFULL PLA+ SILK VERMELHO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO XFULL PLA+ SILK VERMELHO 1KG (1.75MM)</h2>
   <p class="sku">1245-101</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1245-101">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="hub de filamento para ams lite para bambu lab x1/p1 series 1250-86"
- data-marca="Bambu Lab" data-tipo="Ferramentas e Acessórios" data-aplic="Acabamento">
+ data-marca="Bambu Lab" data-tipo="Ferramentas e Acessórios" data-aplic="Acabamento"
+ data-sku="1250-86" data-nome="HUB DE FILAMENTO PARA AMS LITE PARA BAMBU LAB X1/P1 SERIES" data-preco="0.00">
   <div class="foto"><div class="sem-foto">sem foto</div></div>
   <div class="info"><h2>HUB DE FILAMENTO PARA AMS LITE PARA BAMBU LAB X1/P1 SERIES</h2>
   <p class="sku">1250-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">Sob consulta</p></div>
+  <p class="preco">Sob consulta</p>
+  <span class="add-off">Sob consulta</span></div>
 </article>
 <article class="card" data-busca="impressora 3d bambu lab a1 combo 1196-108"
- data-marca="Bambu Lab" data-tipo="Impressoras 3D" data-aplic="Equipamento">
+ data-marca="Bambu Lab" data-tipo="Impressoras 3D" data-aplic="Equipamento"
+ data-sku="1196-108" data-nome="IMPRESSORA 3D BAMBU LAB A1 COMBO" data-preco="4799.00">
   <div class="foto"><div class="sem-foto">sem foto</div></div>
   <div class="info"><h2>IMPRESSORA 3D BAMBU LAB A1 COMBO</h2>
   <p class="sku">1196-108</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 4.799,00</p></div>
+  <p class="preco">R$ 4.799,00</p>
+  <button class="add" data-sku="1196-108">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="impressora 3d flashforge ad5x 1198-109"
- data-marca="Flashforge" data-tipo="Impressoras 3D" data-aplic="Equipamento">
+ data-marca="Flashforge" data-tipo="Impressoras 3D" data-aplic="Equipamento"
+ data-sku="1198-109" data-nome="IMPRESSORA 3D FLASHFORGE AD5X" data-preco="3999.00">
   <div class="foto"><div class="sem-foto">sem foto</div></div>
   <div class="info"><h2>IMPRESSORA 3D FLASHFORGE AD5X</h2>
   <p class="sku">1198-109</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 3.999,00</p></div>
+  <p class="preco">R$ 3.999,00</p>
+  <button class="add" data-sku="1198-109">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="impressora 3d snapmaker u1 1199-110"
- data-marca="Outras" data-tipo="Impressoras 3D" data-aplic="Equipamento">
+ data-marca="Outras" data-tipo="Impressoras 3D" data-aplic="Equipamento"
+ data-sku="1199-110" data-nome="IMPRESSORA 3D SNAPMAKER U1" data-preco="15999.00">
   <div class="foto"><div class="sem-foto">sem foto</div></div>
   <div class="info"><h2>IMPRESSORA 3D SNAPMAKER U1</h2>
   <p class="sku">1199-110</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 15.999,00</p></div>
+  <p class="preco">R$ 15.999,00</p>
+  <button class="add" data-sku="1199-110">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="kit 04 filtro limpeza filamento impressora 3d 1093-86"
- data-marca="Outras" data-tipo="Impressoras 3D" data-aplic="Equipamento">
+ data-marca="Outras" data-tipo="Impressoras 3D" data-aplic="Equipamento"
+ data-sku="1093-86" data-nome="KIT 04 FILTRO LIMPEZA FILAMENTO IMPRESSORA 3D" data-preco="35.80">
   <div class="foto"><img src="fotos/1093-86.jpg" alt="KIT 04 FILTRO LIMPEZA FILAMENTO IMPRESSORA 3D" loading="lazy"></div>
   <div class="info"><h2>KIT 04 FILTRO LIMPEZA FILAMENTO IMPRESSORA 3D</h2>
   <p class="sku">1093-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 35,80</p></div>
+  <p class="preco">R$ 35,80</p>
+  <button class="add" data-sku="1093-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="kit 08 filtro limpeza filamento impressora 3d 1093-kit08"
- data-marca="Outras" data-tipo="Impressoras 3D" data-aplic="Equipamento">
+ data-marca="Outras" data-tipo="Impressoras 3D" data-aplic="Equipamento"
+ data-sku="1093-KIT08" data-nome="KIT 08 FILTRO LIMPEZA FILAMENTO IMPRESSORA 3D" data-preco="71.60">
   <div class="foto"><img src="fotos/1093-KIT08.jpg" alt="KIT 08 FILTRO LIMPEZA FILAMENTO IMPRESSORA 3D" loading="lazy"></div>
   <div class="info"><h2>KIT 08 FILTRO LIMPEZA FILAMENTO IMPRESSORA 3D</h2>
   <p class="sku">1093-KIT08</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 71,60</p></div>
+  <p class="preco">R$ 71,60</p>
+  <button class="add" data-sku="1093-KIT08">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="kit 10 agulhas desentupir bico nozzle hotend 1042-86"
- data-marca="Outras" data-tipo="Hotend" data-aplic="Reposição">
+ data-marca="Outras" data-tipo="Hotend" data-aplic="Reposição"
+ data-sku="1042-86" data-nome="KIT 10 AGULHAS DESENTUPIR BICO NOZZLE HOTEND" data-preco="29.99">
   <div class="foto"><img src="fotos/1042-86.jpg" alt="KIT 10 AGULHAS DESENTUPIR BICO NOZZLE HOTEND" loading="lazy"></div>
   <div class="info"><h2>KIT 10 AGULHAS DESENTUPIR BICO NOZZLE HOTEND</h2>
   <p class="sku">1042-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 29,99</p></div>
+  <p class="preco">R$ 29,99</p>
+  <button class="add" data-sku="1042-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="kit 16 filtro limpeza filamento impressora 3d 1093-kit16"
- data-marca="Outras" data-tipo="Impressoras 3D" data-aplic="Equipamento">
+ data-marca="Outras" data-tipo="Impressoras 3D" data-aplic="Equipamento"
+ data-sku="1093-KIT16" data-nome="KIT 16 FILTRO LIMPEZA FILAMENTO IMPRESSORA 3D" data-preco="143.20">
   <div class="foto"><img src="fotos/1093-KIT16.jpg" alt="KIT 16 FILTRO LIMPEZA FILAMENTO IMPRESSORA 3D" loading="lazy"></div>
   <div class="info"><h2>KIT 16 FILTRO LIMPEZA FILAMENTO IMPRESSORA 3D</h2>
   <p class="sku">1093-KIT16</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 143,20</p></div>
+  <p class="preco">R$ 143,20</p>
+  <button class="add" data-sku="1093-KIT16">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="kit 24 ferramentas para impressão 3d 1252-86"
- data-marca="Outras" data-tipo="Ferramentas e Acessórios" data-aplic="Acabamento">
+ data-marca="Outras" data-tipo="Ferramentas e Acessórios" data-aplic="Acabamento"
+ data-sku="1252-86" data-nome="KIT 24 FERRAMENTAS PARA IMPRESSÃO 3D" data-preco="0.00">
   <div class="foto"><div class="sem-foto">sem foto</div></div>
   <div class="info"><h2>KIT 24 FERRAMENTAS PARA IMPRESSÃO 3D</h2>
   <p class="sku">1252-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">Sob consulta</p></div>
+  <p class="preco">Sob consulta</p>
+  <span class="add-off">Sob consulta</span></div>
 </article>
 <article class="card" data-busca="kit 32 ferramentas para impressão 3d 1043-86"
- data-marca="Outras" data-tipo="Ferramentas e Acessórios" data-aplic="Acabamento">
+ data-marca="Outras" data-tipo="Ferramentas e Acessórios" data-aplic="Acabamento"
+ data-sku="1043-86" data-nome="KIT 32 FERRAMENTAS PARA IMPRESSÃO 3D" data-preco="199.99">
   <div class="foto"><img src="fotos/1043-86.jpg" alt="KIT 32 FERRAMENTAS PARA IMPRESSÃO 3D" loading="lazy"></div>
   <div class="info"><h2>KIT 32 FERRAMENTAS PARA IMPRESSÃO 3D</h2>
   <p class="sku">1043-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 199,99</p></div>
+  <p class="preco">R$ 199,99</p>
+  <button class="add" data-sku="1043-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="kit ferramentas ultimate para impressão 3d 1251-86"
- data-marca="Outras" data-tipo="Ferramentas e Acessórios" data-aplic="Acabamento">
+ data-marca="Outras" data-tipo="Ferramentas e Acessórios" data-aplic="Acabamento"
+ data-sku="1251-86" data-nome="KIT FERRAMENTAS ULTIMATE PARA IMPRESSÃO 3D" data-preco="0.00">
   <div class="foto"><div class="sem-foto">sem foto</div></div>
   <div class="info"><h2>KIT FERRAMENTAS ULTIMATE PARA IMPRESSÃO 3D</h2>
   <p class="sku">1251-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">Sob consulta</p></div>
+  <p class="preco">Sob consulta</p>
+  <span class="add-off">Sob consulta</span></div>
 </article>
 <article class="card" data-busca="kit hotend para anycubic kobra 3 max 0.4mm 1079-86"
- data-marca="Anycubic" data-tipo="Hotend" data-aplic="Reposição">
+ data-marca="Anycubic" data-tipo="Hotend" data-aplic="Reposição"
+ data-sku="1079-86" data-nome="KIT HOTEND PARA ANYCUBIC KOBRA 3 MAX 0.4MM" data-preco="193.93">
   <div class="foto"><img src="fotos/1079-86.jpg" alt="KIT HOTEND PARA ANYCUBIC KOBRA 3 MAX 0.4MM" loading="lazy"></div>
   <div class="info"><h2>KIT HOTEND PARA ANYCUBIC KOBRA 3 MAX 0.4MM</h2>
   <p class="sku">1079-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 193,93</p></div>
+  <p class="preco">R$ 193,93</p>
+  <button class="add" data-sku="1079-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="kit hotend para bambu lab a1 series 0.4mm 1000-86"
- data-marca="Bambu Lab" data-tipo="Hotend" data-aplic="Reposição">
+ data-marca="Bambu Lab" data-tipo="Hotend" data-aplic="Reposição"
+ data-sku="1000-86" data-nome="KIT HOTEND PARA BAMBU LAB A1 SERIES 0.4MM" data-preco="109.99">
   <div class="foto"><img src="fotos/1000-86.jpg" alt="KIT HOTEND PARA BAMBU LAB A1 SERIES 0.4MM" loading="lazy"></div>
   <div class="info"><h2>KIT HOTEND PARA BAMBU LAB A1 SERIES 0.4MM</h2>
   <p class="sku">1000-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 109,99</p></div>
+  <p class="preco">R$ 109,99</p>
+  <button class="add" data-sku="1000-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="kit hotend para creality ender 3 s1 cr10 1032-86"
- data-marca="Creality" data-tipo="Hotend" data-aplic="Reposição">
+ data-marca="Creality" data-tipo="Hotend" data-aplic="Reposição"
+ data-sku="1032-86" data-nome="KIT HOTEND PARA CREALITY ENDER 3 S1 CR10" data-preco="78.00">
   <div class="foto"><img src="fotos/1032-86.jpg" alt="KIT HOTEND PARA CREALITY ENDER 3 S1 CR10" loading="lazy"></div>
   <div class="info"><h2>KIT HOTEND PARA CREALITY ENDER 3 S1 CR10</h2>
   <p class="sku">1032-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 78,00</p></div>
+  <p class="preco">R$ 78,00</p>
+  <button class="add" data-sku="1032-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="kit hotend para creality ender 3 v3 ke k1 1031-86"
- data-marca="Creality" data-tipo="Hotend" data-aplic="Reposição">
+ data-marca="Creality" data-tipo="Hotend" data-aplic="Reposição"
+ data-sku="1031-86" data-nome="KIT HOTEND PARA CREALITY ENDER 3 V3 KE K1" data-preco="129.99">
   <div class="foto"><img src="fotos/1031-86.jpg" alt="KIT HOTEND PARA CREALITY ENDER 3 V3 KE K1" loading="lazy"></div>
   <div class="info"><h2>KIT HOTEND PARA CREALITY ENDER 3 V3 KE K1</h2>
   <p class="sku">1031-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 129,99</p></div>
+  <p class="preco">R$ 129,99</p>
+  <button class="add" data-sku="1031-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="kit hotend para creality hi combo upgraded 0.4mm 1085-86"
- data-marca="Creality" data-tipo="Hotend" data-aplic="Reposição">
+ data-marca="Creality" data-tipo="Hotend" data-aplic="Reposição"
+ data-sku="1085-86" data-nome="KIT HOTEND PARA CREALITY HI COMBO UPGRADED 0.4MM" data-preco="184.29">
   <div class="foto"><img src="fotos/1085-86.jpg" alt="KIT HOTEND PARA CREALITY HI COMBO UPGRADED 0.4MM" loading="lazy"></div>
   <div class="info"><h2>KIT HOTEND PARA CREALITY HI COMBO UPGRADED 0.4MM</h2>
   <p class="sku">1085-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 184,29</p></div>
+  <p class="preco">R$ 184,29</p>
+  <button class="add" data-sku="1085-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="kit hotend para creality k1 k1max k1c nozzle 0.4mm 1002-86"
- data-marca="Creality" data-tipo="Hotend" data-aplic="Reposição">
+ data-marca="Creality" data-tipo="Hotend" data-aplic="Reposição"
+ data-sku="1002-86" data-nome="KIT HOTEND PARA CREALITY K1 K1MAX K1C NOZZLE 0.4MM" data-preco="119.99">
   <div class="foto"><img src="fotos/1002-86.jpg" alt="KIT HOTEND PARA CREALITY K1 K1MAX K1C NOZZLE 0.4MM" loading="lazy"></div>
   <div class="info"><h2>KIT HOTEND PARA CREALITY K1 K1MAX K1C NOZZLE 0.4MM</h2>
   <p class="sku">1002-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 119,99</p></div>
+  <p class="preco">R$ 119,99</p>
+  <button class="add" data-sku="1002-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="kit hotend para flashforge creator 5/5 pro 0.4mm 1253-86"
- data-marca="Flashforge" data-tipo="Hotend" data-aplic="Reposição">
+ data-marca="Flashforge" data-tipo="Hotend" data-aplic="Reposição"
+ data-sku="1253-86" data-nome="KIT HOTEND PARA FLASHFORGE CREATOR 5/5 PRO 0.4MM" data-preco="0.00">
   <div class="foto"><div class="sem-foto">sem foto</div></div>
   <div class="info"><h2>KIT HOTEND PARA FLASHFORGE CREATOR 5/5 PRO 0.4MM</h2>
   <p class="sku">1253-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">Sob consulta</p></div>
+  <p class="preco">Sob consulta</p>
+  <span class="add-off">Sob consulta</span></div>
 </article>
 <article class="card" data-busca="kit hotend para snapmaker u1 0.4mm 1254-86"
- data-marca="Outras" data-tipo="Hotend" data-aplic="Reposição">
+ data-marca="Outras" data-tipo="Hotend" data-aplic="Reposição"
+ data-sku="1254-86" data-nome="KIT HOTEND PARA SNAPMAKER U1 0.4MM" data-preco="0.00">
   <div class="foto"><div class="sem-foto">sem foto</div></div>
   <div class="info"><h2>KIT HOTEND PARA SNAPMAKER U1 0.4MM</h2>
   <p class="sku">1254-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">Sob consulta</p></div>
+  <p class="preco">Sob consulta</p>
+  <span class="add-off">Sob consulta</span></div>
 </article>
 <article class="card" data-busca="kit hotend v2.0 para bambu lab p1s / p1p 0.4mm 1177-86"
- data-marca="Bambu Lab" data-tipo="Hotend" data-aplic="Reposição">
+ data-marca="Bambu Lab" data-tipo="Hotend" data-aplic="Reposição"
+ data-sku="1177-86" data-nome="KIT HOTEND V2.0 PARA BAMBU LAB P1S / P1P 0.4MM" data-preco="153.00">
   <div class="foto"><img src="fotos/1177-86.jpg" alt="KIT HOTEND V2.0 PARA BAMBU LAB P1S / P1P 0.4MM" loading="lazy"></div>
   <div class="info"><h2>KIT HOTEND V2.0 PARA BAMBU LAB P1S / P1P 0.4MM</h2>
   <p class="sku">1177-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 153,00</p></div>
+  <p class="preco">R$ 153,00</p>
+  <button class="add" data-sku="1177-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="kit hotend v2.0 para bambu lab x1/x1c 0.4mm 1178-86"
- data-marca="Bambu Lab" data-tipo="Hotend" data-aplic="Reposição">
+ data-marca="Bambu Lab" data-tipo="Hotend" data-aplic="Reposição"
+ data-sku="1178-86" data-nome="KIT HOTEND V2.0 PARA BAMBU LAB X1/X1C 0.4MM" data-preco="141.00">
   <div class="foto"><img src="fotos/1178-86.jpg" alt="KIT HOTEND V2.0 PARA BAMBU LAB X1/X1C 0.4MM" loading="lazy"></div>
   <div class="info"><h2>KIT HOTEND V2.0 PARA BAMBU LAB X1/X1C 0.4MM</h2>
   <p class="sku">1178-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 141,00</p></div>
+  <p class="preco">R$ 141,00</p>
+  <button class="add" data-sku="1178-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="lampada led lamp para luminarias redondo 1077-86"
- data-marca="Outras" data-tipo="Acessórios para Impressão 3D" data-aplic="Acessório">
+ data-marca="Outras" data-tipo="Acessórios para Impressão 3D" data-aplic="Acessório"
+ data-sku="1077-86" data-nome="LAMPADA LED LAMP PARA LUMINARIAS REDONDO" data-preco="39.99">
   <div class="foto"><img src="fotos/1077-86.jpg" alt="LAMPADA LED LAMP PARA LUMINARIAS REDONDO" loading="lazy"></div>
   <div class="info"><h2>LAMPADA LED LAMP PARA LUMINARIAS REDONDO</h2>
   <p class="sku">1077-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 39,99</p></div>
+  <p class="preco">R$ 39,99</p>
+  <button class="add" data-sku="1077-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="nozzle bico anycubic kobra 3 max 0.4mm 1078-86"
- data-marca="Anycubic" data-tipo="Bicos (Nozzle)" data-aplic="Reposição">
+ data-marca="Anycubic" data-tipo="Bicos (Nozzle)" data-aplic="Reposição"
+ data-sku="1078-86" data-nome="NOZZLE BICO ANYCUBIC KOBRA 3 MAX 0.4MM" data-preco="69.00">
   <div class="foto"><img src="fotos/1078-86.jpg" alt="NOZZLE BICO ANYCUBIC KOBRA 3 MAX 0.4MM" loading="lazy"></div>
   <div class="info"><h2>NOZZLE BICO ANYCUBIC KOBRA 3 MAX 0.4MM</h2>
   <p class="sku">1078-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 69,00</p></div>
+  <p class="preco">R$ 69,00</p>
+  <button class="add" data-sku="1078-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="nozzle bico creality (unicornio) k1 k1max k1c 0.2mm 1059-86"
- data-marca="Creality" data-tipo="Bicos (Nozzle)" data-aplic="Reposição">
+ data-marca="Creality" data-tipo="Bicos (Nozzle)" data-aplic="Reposição"
+ data-sku="1059-86" data-nome="NOZZLE BICO CREALITY (UNICORNIO) K1 K1MAX K1C 0.2MM" data-preco="78.90">
   <div class="foto"><img src="fotos/1059-86.jpg" alt="NOZZLE BICO CREALITY (UNICORNIO) K1 K1MAX K1C 0.2MM" loading="lazy"></div>
   <div class="info"><h2>NOZZLE BICO CREALITY (UNICORNIO) K1 K1MAX K1C 0.2MM</h2>
   <p class="sku">1059-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 78,90</p></div>
+  <p class="preco">R$ 78,90</p>
+  <button class="add" data-sku="1059-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="nozzle bico creality (unicornio) k1 k1max k1c 0.4mm 1001-86"
- data-marca="Creality" data-tipo="Bicos (Nozzle)" data-aplic="Reposição">
+ data-marca="Creality" data-tipo="Bicos (Nozzle)" data-aplic="Reposição"
+ data-sku="1001-86" data-nome="NOZZLE BICO CREALITY (UNICORNIO) K1 K1MAX K1C 0.4MM" data-preco="78.00">
   <div class="foto"><img src="fotos/1001-86.jpg" alt="NOZZLE BICO CREALITY (UNICORNIO) K1 K1MAX K1C 0.4MM" loading="lazy"></div>
   <div class="info"><h2>NOZZLE BICO CREALITY (UNICORNIO) K1 K1MAX K1C 0.4MM</h2>
   <p class="sku">1001-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 78,00</p></div>
+  <p class="preco">R$ 78,00</p>
+  <button class="add" data-sku="1001-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="nozzle bico creality (unicornio) k2 hi plus 0.4mm 1060-86"
- data-marca="Creality" data-tipo="Bicos (Nozzle)" data-aplic="Reposição">
+ data-marca="Creality" data-tipo="Bicos (Nozzle)" data-aplic="Reposição"
+ data-sku="1060-86" data-nome="NOZZLE BICO CREALITY (UNICORNIO) K2 HI PLUS 0.4MM" data-preco="78.90">
   <div class="foto"><img src="fotos/1060-86.jpg" alt="NOZZLE BICO CREALITY (UNICORNIO) K2 HI PLUS 0.4MM" loading="lazy"></div>
   <div class="info"><h2>NOZZLE BICO CREALITY (UNICORNIO) K2 HI PLUS 0.4MM</h2>
   <p class="sku">1060-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 78,90</p></div>
+  <p class="preco">R$ 78,90</p>
+  <button class="add" data-sku="1060-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="placa mãe extrusora toolhead board bambu lab a1 series 1149-86"
- data-marca="Bambu Lab" data-tipo="Sensores e Eletrônica" data-aplic="Reposição">
+ data-marca="Bambu Lab" data-tipo="Sensores e Eletrônica" data-aplic="Reposição"
+ data-sku="1149-86" data-nome="PLACA MÃE EXTRUSORA TOOLHEAD BOARD BAMBU LAB A1 SERIES" data-preco="464.10">
   <div class="foto"><img src="fotos/1149-86.jpg" alt="PLACA MÃE EXTRUSORA TOOLHEAD BOARD BAMBU LAB A1 SERIES" loading="lazy"></div>
   <div class="info"><h2>PLACA MÃE EXTRUSORA TOOLHEAD BOARD BAMBU LAB A1 SERIES</h2>
   <p class="sku">1149-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 464,10</p></div>
+  <p class="preco">R$ 464,10</p>
+  <button class="add" data-sku="1149-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="ptfe tubo para bambu lab 2.5mmx4mm 4 metros/pcs 1083-86"
- data-marca="Bambu Lab" data-tipo="Peças e Reposição" data-aplic="Reposição">
+ data-marca="Bambu Lab" data-tipo="Peças e Reposição" data-aplic="Reposição"
+ data-sku="1083-86" data-nome="PTFE TUBO PARA BAMBU LAB 2.5MMX4MM 4 METROS/PCS" data-preco="69.99">
   <div class="foto"><img src="fotos/1083-86.jpg" alt="PTFE TUBO PARA BAMBU LAB 2.5MMX4MM 4 METROS/PCS" loading="lazy"></div>
   <div class="info"><h2>PTFE TUBO PARA BAMBU LAB 2.5MMX4MM 4 METROS/PCS</h2>
   <p class="sku">1083-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 69,99</p></div>
+  <p class="preco">R$ 69,99</p>
+  <button class="add" data-sku="1083-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="sensor de filamento para bambu lab a1 series 1207-86"
- data-marca="Bambu Lab" data-tipo="Sensores e Eletrônica" data-aplic="Reposição">
+ data-marca="Bambu Lab" data-tipo="Sensores e Eletrônica" data-aplic="Reposição"
+ data-sku="1207-86" data-nome="SENSOR DE FILAMENTO PARA BAMBU LAB A1 SERIES" data-preco="89.00">
   <div class="foto"><img src="fotos/1207-86.jpg" alt="SENSOR DE FILAMENTO PARA BAMBU LAB A1 SERIES" loading="lazy"></div>
   <div class="info"><h2>SENSOR DE FILAMENTO PARA BAMBU LAB A1 SERIES</h2>
   <p class="sku">1207-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 89,00</p></div>
+  <p class="preco">R$ 89,00</p>
+  <button class="add" data-sku="1207-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="termistor do hotend transmissor para anycubic kobra x aquecimento heating 1255-86"
- data-marca="Anycubic" data-tipo="Hotend" data-aplic="Reposição">
+ data-marca="Anycubic" data-tipo="Hotend" data-aplic="Reposição"
+ data-sku="1255-86" data-nome="TERMISTOR DO HOTEND TRANSMISSOR PARA ANYCUBIC KOBRA X AQUECIMENTO HEATING" data-preco="0.00">
   <div class="foto"><div class="sem-foto">sem foto</div></div>
   <div class="info"><h2>TERMISTOR DO HOTEND TRANSMISSOR PARA ANYCUBIC KOBRA X AQUECIMENTO HEATING</h2>
   <p class="sku">1255-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">Sob consulta</p></div>
+  <p class="preco">Sob consulta</p>
+  <span class="add-off">Sob consulta</span></div>
 </article>
 <article class="card" data-busca="termistor do hotend transmissor para bambu lab a1 series aquecimento heating a1 series 1076-86"
- data-marca="Bambu Lab" data-tipo="Hotend" data-aplic="Reposição">
+ data-marca="Bambu Lab" data-tipo="Hotend" data-aplic="Reposição"
+ data-sku="1076-86" data-nome="TERMISTOR DO HOTEND TRANSMISSOR PARA BAMBU LAB A1 SERIES AQUECIMENTO HEATING A1 SERIES" data-preco="184.29">
   <div class="foto"><img src="fotos/1076-86.jpg" alt="TERMISTOR DO HOTEND TRANSMISSOR PARA BAMBU LAB A1 SERIES AQUECIMENTO HEATING A1 SERIES" loading="lazy"></div>
   <div class="info"><h2>TERMISTOR DO HOTEND TRANSMISSOR PARA BAMBU LAB A1 SERIES AQUECIMENTO HEATING A1 SERIES</h2>
   <p class="sku">1076-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 184,29</p></div>
+  <p class="preco">R$ 184,29</p>
+  <button class="add" data-sku="1076-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="termistor zirconia do hotend transmissor para bambu lab a1 series aquecimento heating a1 series 1202-86"
- data-marca="Bambu Lab" data-tipo="Hotend" data-aplic="Reposição">
+ data-marca="Bambu Lab" data-tipo="Hotend" data-aplic="Reposição"
+ data-sku="1202-86" data-nome="TERMISTOR ZIRCONIA DO HOTEND TRANSMISSOR PARA BAMBU LAB A1 SERIES AQUECIMENTO HEATING A1 SERIES" data-preco="214.14">
   <div class="foto"><img src="fotos/1202-86.jpg" alt="TERMISTOR ZIRCONIA DO HOTEND TRANSMISSOR PARA BAMBU LAB A1 SERIES AQUECIMENTO HEATING A1 SERIES" loading="lazy"></div>
   <div class="info"><h2>TERMISTOR ZIRCONIA DO HOTEND TRANSMISSOR PARA BAMBU LAB A1 SERIES AQUECIMENTO HEATING A1 SERIES</h2>
   <p class="sku">1202-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 214,14</p></div>
+  <p class="preco">R$ 214,14</p>
+  <button class="add" data-sku="1202-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="termo-higrômetro digital termômetro e medidor de umidade eletrônico 1096-86"
- data-marca="Outras" data-tipo="Armazenagem de Filamento" data-aplic="Armazenagem">
+ data-marca="Outras" data-tipo="Armazenagem de Filamento" data-aplic="Armazenagem"
+ data-sku="1096-86" data-nome="TERMO-HIGRÔMETRO DIGITAL TERMÔMETRO E MEDIDOR DE UMIDADE ELETRÔNICO" data-preco="29.99">
   <div class="foto"><img src="fotos/1096-86.jpg" alt="TERMO-HIGRÔMETRO DIGITAL TERMÔMETRO E MEDIDOR DE UMIDADE ELETRÔNICO" loading="lazy"></div>
   <div class="info"><h2>TERMO-HIGRÔMETRO DIGITAL TERMÔMETRO E MEDIDOR DE UMIDADE ELETRÔNICO</h2>
   <p class="sku">1096-86</p>
   <p class="est tem">Disponivel</p>
-  <p class="preco">R$ 29,99</p></div>
+  <p class="preco">R$ 29,99</p>
+  <button class="add" data-sku="1096-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="alicate corte diagonal plato cortador de fio e filamento 170 wire cutter 1086-86"
- data-marca="Outras" data-tipo="Ferramentas e Acessórios" data-aplic="Acabamento">
+ data-marca="Outras" data-tipo="Ferramentas e Acessórios" data-aplic="Acabamento"
+ data-sku="1086-86" data-nome="ALICATE CORTE DIAGONAL PLATO CORTADOR DE FIO E FILAMENTO 170 WIRE CUTTER" data-preco="24.24">
   <div class="foto"><img src="fotos/1086-86.jpg" alt="ALICATE CORTE DIAGONAL PLATO CORTADOR DE FIO E FILAMENTO 170 WIRE CUTTER" loading="lazy"></div>
   <div class="info"><h2>ALICATE CORTE DIAGONAL PLATO CORTADOR DE FIO E FILAMENTO 170 WIRE CUTTER</h2>
   <p class="sku">1086-86</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 24,24</p></div>
+  <p class="preco">R$ 24,24</p>
+  <button class="add" data-sku="1086-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint abs branco 1kg (1.75mm) 1211-104"
- data-marca="MASTERPRINT" data-tipo="Filamento ABS" data-aplic="Alta temperatura">
+ data-marca="MASTERPRINT" data-tipo="Filamento ABS" data-aplic="Alta temperatura"
+ data-sku="1211-104" data-nome="FILAMENTO MASTERPRINT ABS BRANCO 1KG (1.75MM)" data-preco="129.00">
   <div class="foto"><img src="fotos/1211-104.jpg" alt="FILAMENTO MASTERPRINT ABS BRANCO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT ABS BRANCO 1KG (1.75MM)</h2>
   <p class="sku">1211-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 129,00</p></div>
+  <p class="preco">R$ 129,00</p>
+  <button class="add" data-sku="1211-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint petg amarelo 1kg (1.75mm) 1115-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1115-104" data-nome="FILAMENTO MASTERPRINT PETG AMARELO 1KG (1.75MM)" data-preco="69.99">
   <div class="foto"><img src="fotos/1115-104.jpg" alt="FILAMENTO MASTERPRINT PETG AMARELO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PETG AMARELO 1KG (1.75MM)</h2>
   <p class="sku">1115-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 69,99</p></div>
+  <p class="preco">R$ 69,99</p>
+  <button class="add" data-sku="1115-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint petg azul 1kg (1.75mm) 1132-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1132-104" data-nome="FILAMENTO MASTERPRINT PETG AZUL 1KG (1.75MM)" data-preco="69.99">
   <div class="foto"><img src="fotos/1132-104.jpg" alt="FILAMENTO MASTERPRINT PETG AZUL 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PETG AZUL 1KG (1.75MM)</h2>
   <p class="sku">1132-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 69,99</p></div>
+  <p class="preco">R$ 69,99</p>
+  <button class="add" data-sku="1132-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint petg bronze 1kg (1.75mm) 1129-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1129-104" data-nome="FILAMENTO MASTERPRINT PETG BRONZE 1KG (1.75MM)" data-preco="69.99">
   <div class="foto"><img src="fotos/1129-104.jpg" alt="FILAMENTO MASTERPRINT PETG BRONZE 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PETG BRONZE 1KG (1.75MM)</h2>
   <p class="sku">1129-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 69,99</p></div>
+  <p class="preco">R$ 69,99</p>
+  <button class="add" data-sku="1129-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint petg dourado 1kg (1.75mm) 1140-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1140-104" data-nome="FILAMENTO MASTERPRINT PETG DOURADO 1KG (1.75MM)" data-preco="69.99">
   <div class="foto"><img src="fotos/1140-104.jpg" alt="FILAMENTO MASTERPRINT PETG DOURADO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PETG DOURADO 1KG (1.75MM)</h2>
   <p class="sku">1140-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 69,99</p></div>
+  <p class="preco">R$ 69,99</p>
+  <button class="add" data-sku="1140-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint petg fluorescente roxo 1kg (1.75mm) 1111-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1111-104" data-nome="FILAMENTO MASTERPRINT PETG FLUORESCENTE ROXO 1KG (1.75MM)" data-preco="69.99">
   <div class="foto"><img src="fotos/1111-104.jpg" alt="FILAMENTO MASTERPRINT PETG FLUORESCENTE ROXO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PETG FLUORESCENTE ROXO 1KG (1.75MM)</h2>
   <p class="sku">1111-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 69,99</p></div>
+  <p class="preco">R$ 69,99</p>
+  <button class="add" data-sku="1111-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint petg laranja 1kg (1.75mm) 1128-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1128-104" data-nome="FILAMENTO MASTERPRINT PETG LARANJA 1KG (1.75MM)" data-preco="69.99">
   <div class="foto"><img src="fotos/1128-104.jpg" alt="FILAMENTO MASTERPRINT PETG LARANJA 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PETG LARANJA 1KG (1.75MM)</h2>
   <p class="sku">1128-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 69,99</p></div>
+  <p class="preco">R$ 69,99</p>
+  <button class="add" data-sku="1128-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint petg lavanda 1kg (1.75mm) 1112-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1112-104" data-nome="FILAMENTO MASTERPRINT PETG LAVANDA 1KG (1.75MM)" data-preco="69.99">
   <div class="foto"><img src="fotos/1112-104.jpg" alt="FILAMENTO MASTERPRINT PETG LAVANDA 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PETG LAVANDA 1KG (1.75MM)</h2>
   <p class="sku">1112-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 69,99</p></div>
+  <p class="preco">R$ 69,99</p>
+  <button class="add" data-sku="1112-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint petg madeira 1kg (1.75mm) 1139-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1139-104" data-nome="FILAMENTO MASTERPRINT PETG MADEIRA 1KG (1.75MM)" data-preco="69.99">
   <div class="foto"><img src="fotos/1139-104.jpg" alt="FILAMENTO MASTERPRINT PETG MADEIRA 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PETG MADEIRA 1KG (1.75MM)</h2>
   <p class="sku">1139-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 69,99</p></div>
+  <p class="preco">R$ 69,99</p>
+  <button class="add" data-sku="1139-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint petg marrom 1kg (1.75mm) 1138-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1138-104" data-nome="FILAMENTO MASTERPRINT PETG MARROM 1KG (1.75MM)" data-preco="69.99">
   <div class="foto"><img src="fotos/1138-104.jpg" alt="FILAMENTO MASTERPRINT PETG MARROM 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PETG MARROM 1KG (1.75MM)</h2>
   <p class="sku">1138-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 69,99</p></div>
+  <p class="preco">R$ 69,99</p>
+  <button class="add" data-sku="1138-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint petg pcv indoor  branco 1kg (1.75mm) 1184-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1184-104" data-nome="FILAMENTO MASTERPRINT PETG PCV INDOOR  BRANCO 1KG (1.75MM)" data-preco="110.00">
   <div class="foto"><img src="fotos/1184-104.jpg" alt="FILAMENTO MASTERPRINT PETG PCV INDOOR  BRANCO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PETG PCV INDOOR  BRANCO 1KG (1.75MM)</h2>
   <p class="sku">1184-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 110,00</p></div>
+  <p class="preco">R$ 110,00</p>
+  <button class="add" data-sku="1184-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint petg prata 1kg (1.75mm) 1107-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1107-104" data-nome="FILAMENTO MASTERPRINT PETG PRATA 1KG (1.75MM)" data-preco="69.99">
   <div class="foto"><img src="fotos/1107-104.jpg" alt="FILAMENTO MASTERPRINT PETG PRATA 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PETG PRATA 1KG (1.75MM)</h2>
   <p class="sku">1107-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 69,99</p></div>
+  <p class="preco">R$ 69,99</p>
+  <button class="add" data-sku="1107-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint petg rosa 1kg (1.75mm) 1106-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1106-104" data-nome="FILAMENTO MASTERPRINT PETG ROSA 1KG (1.75MM)" data-preco="69.99">
   <div class="foto"><img src="fotos/1106-104.jpg" alt="FILAMENTO MASTERPRINT PETG ROSA 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PETG ROSA 1KG (1.75MM)</h2>
   <p class="sku">1106-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 69,99</p></div>
+  <p class="preco">R$ 69,99</p>
+  <button class="add" data-sku="1106-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint petg roxo 1kg (1.75mm) 1143-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1143-104" data-nome="FILAMENTO MASTERPRINT PETG ROXO 1KG (1.75MM)" data-preco="69.99">
   <div class="foto"><img src="fotos/1143-104.jpg" alt="FILAMENTO MASTERPRINT PETG ROXO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PETG ROXO 1KG (1.75MM)</h2>
   <p class="sku">1143-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 69,99</p></div>
+  <p class="preco">R$ 69,99</p>
+  <button class="add" data-sku="1143-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint petg skin 1kg (1.75mm) 1113-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1113-104" data-nome="FILAMENTO MASTERPRINT PETG SKIN 1KG (1.75MM)" data-preco="69.99">
   <div class="foto"><img src="fotos/1113-104.jpg" alt="FILAMENTO MASTERPRINT PETG SKIN 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PETG SKIN 1KG (1.75MM)</h2>
   <p class="sku">1113-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 69,99</p></div>
+  <p class="preco">R$ 69,99</p>
+  <button class="add" data-sku="1113-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint petg vermelho 1kg (1.75mm) 1131-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="MASTERPRINT" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1131-104" data-nome="FILAMENTO MASTERPRINT PETG VERMELHO 1KG (1.75MM)" data-preco="69.99">
   <div class="foto"><img src="fotos/1131-104.jpg" alt="FILAMENTO MASTERPRINT PETG VERMELHO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PETG VERMELHO 1KG (1.75MM)</h2>
   <p class="sku">1131-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 69,99</p></div>
+  <p class="preco">R$ 69,99</p>
+  <button class="add" data-sku="1131-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla amarelo 1kg (1.75mm) 1136-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1136-104" data-nome="FILAMENTO MASTERPRINT PLA AMARELO 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1136-104.jpg" alt="FILAMENTO MASTERPRINT PLA AMARELO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA AMARELO 1KG (1.75MM)</h2>
   <p class="sku">1136-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1136-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla azul 1kg (1.75mm) 1137-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1137-104" data-nome="FILAMENTO MASTERPRINT PLA AZUL 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1137-104.jpg" alt="FILAMENTO MASTERPRINT PLA AZUL 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA AZUL 1KG (1.75MM)</h2>
   <p class="sku">1137-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1137-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla azul claro 1kg (1.75mm) 1189-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1189-104" data-nome="FILAMENTO MASTERPRINT PLA AZUL CLARO 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1189-104.jpg" alt="FILAMENTO MASTERPRINT PLA AZUL CLARO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA AZUL CLARO 1KG (1.75MM)</h2>
   <p class="sku">1189-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1189-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla azul escuro 1kg (1.75mm) 1190-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1190-104" data-nome="FILAMENTO MASTERPRINT PLA AZUL ESCURO 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1190-104.jpg" alt="FILAMENTO MASTERPRINT PLA AZUL ESCURO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA AZUL ESCURO 1KG (1.75MM)</h2>
   <p class="sku">1190-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1190-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla branco 1kg (1.75mm) 1099-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1099-104" data-nome="FILAMENTO MASTERPRINT PLA BRANCO 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1099-104.jpg" alt="FILAMENTO MASTERPRINT PLA BRANCO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA BRANCO 1KG (1.75MM)</h2>
   <p class="sku">1099-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1099-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla cafe 1kg (1.75mm) 1203-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1203-104" data-nome="FILAMENTO MASTERPRINT PLA CAFE 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1203-104.jpg" alt="FILAMENTO MASTERPRINT PLA CAFE 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA CAFE 1KG (1.75MM)</h2>
   <p class="sku">1203-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1203-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla cinza 1kg (1.75mm) 1185-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1185-104" data-nome="FILAMENTO MASTERPRINT PLA CINZA 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1185-104.jpg" alt="FILAMENTO MASTERPRINT PLA CINZA 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA CINZA 1KG (1.75MM)</h2>
   <p class="sku">1185-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1185-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla cinza claro 1kg (1.75mm) 1200-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1200-104" data-nome="FILAMENTO MASTERPRINT PLA CINZA CLARO 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1200-104.jpg" alt="FILAMENTO MASTERPRINT PLA CINZA CLARO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA CINZA CLARO 1KG (1.75MM)</h2>
   <p class="sku">1200-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1200-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla cobre 1kg (1.75mm) 1150-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1150-104" data-nome="FILAMENTO MASTERPRINT PLA COBRE 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1150-104.jpg" alt="FILAMENTO MASTERPRINT PLA COBRE 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA COBRE 1KG (1.75MM)</h2>
   <p class="sku">1150-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1150-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla fibra de carbono 1kg (1.75mm) 1154-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1154-104" data-nome="FILAMENTO MASTERPRINT PLA FIBRA DE CARBONO 1KG (1.75MM)" data-preco="139.99">
   <div class="foto"><img src="fotos/1154-104.jpg" alt="FILAMENTO MASTERPRINT PLA FIBRA DE CARBONO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA FIBRA DE CARBONO 1KG (1.75MM)</h2>
   <p class="sku">1154-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 139,99</p></div>
+  <p class="preco">R$ 139,99</p>
+  <button class="add" data-sku="1154-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla fosco cinza fossil 1kg (1.75mm) 1163-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1163-104" data-nome="FILAMENTO MASTERPRINT PLA FOSCO CINZA FOSSIL 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1163-104.jpg" alt="FILAMENTO MASTERPRINT PLA FOSCO CINZA FOSSIL 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA FOSCO CINZA FOSSIL 1KG (1.75MM)</h2>
   <p class="sku">1163-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1163-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla fosco dreamy rainbow 1kg (1.75mm) 1164-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1164-104" data-nome="FILAMENTO MASTERPRINT PLA FOSCO DREAMY RAINBOW 1KG (1.75MM)" data-preco="109.99">
   <div class="foto"><img src="fotos/1164-104.jpg" alt="FILAMENTO MASTERPRINT PLA FOSCO DREAMY RAINBOW 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA FOSCO DREAMY RAINBOW 1KG (1.75MM)</h2>
   <p class="sku">1164-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 109,99</p></div>
+  <p class="preco">R$ 109,99</p>
+  <button class="add" data-sku="1164-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla fosco roxo 1kg (1.75mm) 1165-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1165-104" data-nome="FILAMENTO MASTERPRINT PLA FOSCO ROXO 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1165-104.jpg" alt="FILAMENTO MASTERPRINT PLA FOSCO ROXO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA FOSCO ROXO 1KG (1.75MM)</h2>
   <p class="sku">1165-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1165-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla fosforescente azul 1kg (1.75mm) 1155-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1155-104" data-nome="FILAMENTO MASTERPRINT PLA FOSFORESCENTE AZUL 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1155-104.jpg" alt="FILAMENTO MASTERPRINT PLA FOSFORESCENTE AZUL 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA FOSFORESCENTE AZUL 1KG (1.75MM)</h2>
   <p class="sku">1155-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1155-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla fosforescente rainbow 1kg (1.75mm) 1156-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1156-104" data-nome="FILAMENTO MASTERPRINT PLA FOSFORESCENTE RAINBOW 1KG (1.75MM)" data-preco="109.99">
   <div class="foto"><img src="fotos/1156-104.jpg" alt="FILAMENTO MASTERPRINT PLA FOSFORESCENTE RAINBOW 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA FOSFORESCENTE RAINBOW 1KG (1.75MM)</h2>
   <p class="sku">1156-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 109,99</p></div>
+  <p class="preco">R$ 109,99</p>
+  <button class="add" data-sku="1156-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla fosforescente verde 1kg (1.75mm) 1157-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1157-104" data-nome="FILAMENTO MASTERPRINT PLA FOSFORESCENTE VERDE 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1157-104.jpg" alt="FILAMENTO MASTERPRINT PLA FOSFORESCENTE VERDE 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA FOSFORESCENTE VERDE 1KG (1.75MM)</h2>
   <p class="sku">1157-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1157-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla laranja 1kg (1.75mm) 1191-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1191-104" data-nome="FILAMENTO MASTERPRINT PLA LARANJA 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1191-104.jpg" alt="FILAMENTO MASTERPRINT PLA LARANJA 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA LARANJA 1KG (1.75MM)</h2>
   <p class="sku">1191-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1191-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla madeira 1kg (1.75mm) 1126-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1126-104" data-nome="FILAMENTO MASTERPRINT PLA MADEIRA 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1126-104.jpg" alt="FILAMENTO MASTERPRINT PLA MADEIRA 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA MADEIRA 1KG (1.75MM)</h2>
   <p class="sku">1126-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1126-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla madeira escura 1kg (1.75mm) 1120-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1120-104" data-nome="FILAMENTO MASTERPRINT PLA MADEIRA ESCURA 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1120-104.jpg" alt="FILAMENTO MASTERPRINT PLA MADEIRA ESCURA 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA MADEIRA ESCURA 1KG (1.75MM)</h2>
   <p class="sku">1120-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1120-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla marmore 1kg (1.75mm) 1119-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1119-104" data-nome="FILAMENTO MASTERPRINT PLA MARMORE 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1119-104.jpg" alt="FILAMENTO MASTERPRINT PLA MARMORE 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA MARMORE 1KG (1.75MM)</h2>
   <p class="sku">1119-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1119-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla marrom 1kg (1.75mm) 1192-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1192-104" data-nome="FILAMENTO MASTERPRINT PLA MARROM 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1192-104.jpg" alt="FILAMENTO MASTERPRINT PLA MARROM 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA MARROM 1KG (1.75MM)</h2>
   <p class="sku">1192-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1192-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla prata grafite 1kg (1.75mm) 1167-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1167-104" data-nome="FILAMENTO MASTERPRINT PLA PRATA GRAFITE 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1167-104.jpg" alt="FILAMENTO MASTERPRINT PLA PRATA GRAFITE 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA PRATA GRAFITE 1KG (1.75MM)</h2>
   <p class="sku">1167-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1167-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla preto 1kg (1.75mm) 1100-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1100-104" data-nome="FILAMENTO MASTERPRINT PLA PRETO 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1100-104.jpg" alt="FILAMENTO MASTERPRINT PLA PRETO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA PRETO 1KG (1.75MM)</h2>
   <p class="sku">1100-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1100-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla preto com glitter 1kg (1.75mm) 1168-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1168-104" data-nome="FILAMENTO MASTERPRINT PLA PRETO COM GLITTER 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1168-104.jpg" alt="FILAMENTO MASTERPRINT PLA PRETO COM GLITTER 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA PRETO COM GLITTER 1KG (1.75MM)</h2>
   <p class="sku">1168-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1168-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla rainbow 1kg (1.75mm) 1214-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1214-104" data-nome="FILAMENTO MASTERPRINT PLA RAINBOW 1KG (1.75MM)" data-preco="109.99">
   <div class="foto"><img src="fotos/1214-104.jpg" alt="FILAMENTO MASTERPRINT PLA RAINBOW 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA RAINBOW 1KG (1.75MM)</h2>
   <p class="sku">1214-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 109,99</p></div>
+  <p class="preco">R$ 109,99</p>
+  <button class="add" data-sku="1214-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla rosa 1kg (1.75mm) 1215-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1215-104" data-nome="FILAMENTO MASTERPRINT PLA ROSA 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1215-104.jpg" alt="FILAMENTO MASTERPRINT PLA ROSA 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA ROSA 1KG (1.75MM)</h2>
   <p class="sku">1215-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1215-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla rosa claro 1kg (1.75mm) 1193-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1193-104" data-nome="FILAMENTO MASTERPRINT PLA ROSA CLARO 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1193-104.jpg" alt="FILAMENTO MASTERPRINT PLA ROSA CLARO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA ROSA CLARO 1KG (1.75MM)</h2>
   <p class="sku">1193-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1193-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla roxo claro 1kg (1.75mm) 1169-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1169-104" data-nome="FILAMENTO MASTERPRINT PLA ROXO CLARO 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1169-104.jpg" alt="FILAMENTO MASTERPRINT PLA ROXO CLARO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA ROXO CLARO 1KG (1.75MM)</h2>
   <p class="sku">1169-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1169-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla roxo com glitter 1kg (1.75mm) 1158-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1158-104" data-nome="FILAMENTO MASTERPRINT PLA ROXO COM GLITTER 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1158-104.jpg" alt="FILAMENTO MASTERPRINT PLA ROXO COM GLITTER 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA ROXO COM GLITTER 1KG (1.75MM)</h2>
   <p class="sku">1158-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1158-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla roxo/preto 1kg (1.75mm) 1159-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1159-104" data-nome="FILAMENTO MASTERPRINT PLA ROXO/PRETO 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1159-104.jpg" alt="FILAMENTO MASTERPRINT PLA ROXO/PRETO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA ROXO/PRETO 1KG (1.75MM)</h2>
   <p class="sku">1159-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1159-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla silk azul/roxo 1kg (1.75mm) 1160-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1160-104" data-nome="FILAMENTO MASTERPRINT PLA SILK AZUL/ROXO 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1160-104.jpg" alt="FILAMENTO MASTERPRINT PLA SILK AZUL/ROXO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA SILK AZUL/ROXO 1KG (1.75MM)</h2>
   <p class="sku">1160-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1160-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla silk bronze 1kg (1.75mm) 1170-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1170-104" data-nome="FILAMENTO MASTERPRINT PLA SILK BRONZE 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1170-104.jpg" alt="FILAMENTO MASTERPRINT PLA SILK BRONZE 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA SILK BRONZE 1KG (1.75MM)</h2>
   <p class="sku">1170-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1170-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla silk fuchsia 1kg (1.75mm) 1161-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1161-104" data-nome="FILAMENTO MASTERPRINT PLA SILK FUCHSIA 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1161-104.jpg" alt="FILAMENTO MASTERPRINT PLA SILK FUCHSIA 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA SILK FUCHSIA 1KG (1.75MM)</h2>
   <p class="sku">1161-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1161-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla silk prata com glitter 1kg (1.75mm) 1186-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1186-104" data-nome="FILAMENTO MASTERPRINT PLA SILK PRATA COM GLITTER 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1186-104.jpg" alt="FILAMENTO MASTERPRINT PLA SILK PRATA COM GLITTER 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA SILK PRATA COM GLITTER 1KG (1.75MM)</h2>
   <p class="sku">1186-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1186-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla silk rainbow 1kg (1.75mm) 1171-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1171-104" data-nome="FILAMENTO MASTERPRINT PLA SILK RAINBOW 1KG (1.75MM)" data-preco="109.99">
   <div class="foto"><img src="fotos/1171-104.jpg" alt="FILAMENTO MASTERPRINT PLA SILK RAINBOW 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA SILK RAINBOW 1KG (1.75MM)</h2>
   <p class="sku">1171-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 109,99</p></div>
+  <p class="preco">R$ 109,99</p>
+  <button class="add" data-sku="1171-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla silk roxo/azul/preto 1kg (1.75mm) 1162-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1162-104" data-nome="FILAMENTO MASTERPRINT PLA SILK ROXO/AZUL/PRETO 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1162-104.jpg" alt="FILAMENTO MASTERPRINT PLA SILK ROXO/AZUL/PRETO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA SILK ROXO/AZUL/PRETO 1KG (1.75MM)</h2>
   <p class="sku">1162-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1162-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla skin 1kg (1.75mm) 1172-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1172-104" data-nome="FILAMENTO MASTERPRINT PLA SKIN 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1172-104.jpg" alt="FILAMENTO MASTERPRINT PLA SKIN 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA SKIN 1KG (1.75MM)</h2>
   <p class="sku">1172-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1172-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla transparente 1kg (1.75mm) 1173-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1173-104" data-nome="FILAMENTO MASTERPRINT PLA TRANSPARENTE 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1173-104.jpg" alt="FILAMENTO MASTERPRINT PLA TRANSPARENTE 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA TRANSPARENTE 1KG (1.75MM)</h2>
   <p class="sku">1173-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1173-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla verde 1kg (1.75mm) 1135-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1135-104" data-nome="FILAMENTO MASTERPRINT PLA VERDE 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1135-104.jpg" alt="FILAMENTO MASTERPRINT PLA VERDE 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA VERDE 1KG (1.75MM)</h2>
   <p class="sku">1135-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1135-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla verde bambu 1 kg (1.75mm) 1117-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1117-104" data-nome="FILAMENTO MASTERPRINT PLA VERDE BAMBU 1 KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1117-104.jpg" alt="FILAMENTO MASTERPRINT PLA VERDE BAMBU 1 KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA VERDE BAMBU 1 KG (1.75MM)</h2>
   <p class="sku">1117-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1117-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla verde escuro 1kg (1.75mm) 1116-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1116-104" data-nome="FILAMENTO MASTERPRINT PLA VERDE ESCURO 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1116-104.jpg" alt="FILAMENTO MASTERPRINT PLA VERDE ESCURO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA VERDE ESCURO 1KG (1.75MM)</h2>
   <p class="sku">1116-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1116-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla vermelho 1kg (1.75mm) 1195-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1195-104" data-nome="FILAMENTO MASTERPRINT PLA VERMELHO 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1195-104.jpg" alt="FILAMENTO MASTERPRINT PLA VERMELHO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA VERMELHO 1KG (1.75MM)</h2>
   <p class="sku">1195-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1195-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint pla vermelho/dourado 1kg (1.75mm) 1174-104"
- data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="MASTERPRINT" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1174-104" data-nome="FILAMENTO MASTERPRINT PLA VERMELHO/DOURADO 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1174-104.jpg" alt="FILAMENTO MASTERPRINT PLA VERMELHO/DOURADO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT PLA VERMELHO/DOURADO 1KG (1.75MM)</h2>
   <p class="sku">1174-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1174-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint tpu cinza 1kg (1.75mm) 1179-104"
- data-marca="MASTERPRINT" data-tipo="Filamento TPU" data-aplic="Flexível">
+ data-marca="MASTERPRINT" data-tipo="Filamento TPU" data-aplic="Flexível"
+ data-sku="1179-104" data-nome="FILAMENTO MASTERPRINT TPU CINZA 1KG (1.75MM)" data-preco="129.99">
   <div class="foto"><img src="fotos/1179-104.jpg" alt="FILAMENTO MASTERPRINT TPU CINZA 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT TPU CINZA 1KG (1.75MM)</h2>
   <p class="sku">1179-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 129,99</p></div>
+  <p class="preco">R$ 129,99</p>
+  <button class="add" data-sku="1179-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento masterprint tpu preto 1kg (1.75mm) 1180-104"
- data-marca="MASTERPRINT" data-tipo="Filamento TPU" data-aplic="Flexível">
+ data-marca="MASTERPRINT" data-tipo="Filamento TPU" data-aplic="Flexível"
+ data-sku="1180-104" data-nome="FILAMENTO MASTERPRINT TPU PRETO 1KG (1.75MM)" data-preco="129.99">
   <div class="foto"><img src="fotos/1180-104.jpg" alt="FILAMENTO MASTERPRINT TPU PRETO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO MASTERPRINT TPU PRETO 1KG (1.75MM)</h2>
   <p class="sku">1180-104</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 129,99</p></div>
+  <p class="preco">R$ 129,99</p>
+  <button class="add" data-sku="1180-104">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento xfull petg dourado 1kg (1.75mm) 1223-101"
- data-marca="XFULL" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="XFULL" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1223-101" data-nome="FILAMENTO XFULL PETG DOURADO 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1223-101.jpg" alt="FILAMENTO XFULL PETG DOURADO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO XFULL PETG DOURADO 1KG (1.75MM)</h2>
   <p class="sku">1223-101</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1223-101">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento xfull petg transparente cristal 1kg (1.75mm) 1227-101"
- data-marca="XFULL" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="XFULL" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1227-101" data-nome="FILAMENTO XFULL PETG TRANSPARENTE CRISTAL 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1227-101.jpg" alt="FILAMENTO XFULL PETG TRANSPARENTE CRISTAL 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO XFULL PETG TRANSPARENTE CRISTAL 1KG (1.75MM)</h2>
   <p class="sku">1227-101</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1227-101">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento xfull petg verde 1kg (1.75mm) 1228-101"
- data-marca="XFULL" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo">
+ data-marca="XFULL" data-tipo="Filamento PETG" data-aplic="Funcional / uso externo"
+ data-sku="1228-101" data-nome="FILAMENTO XFULL PETG VERDE 1KG (1.75MM)" data-preco="89.99">
   <div class="foto"><img src="fotos/1228-101.jpg" alt="FILAMENTO XFULL PETG VERDE 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO XFULL PETG VERDE 1KG (1.75MM)</h2>
   <p class="sku">1228-101</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 89,99</p></div>
+  <p class="preco">R$ 89,99</p>
+  <button class="add" data-sku="1228-101">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento xfull pla+ azul claro 1kg (1.75mm) 1229-101"
- data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1229-101" data-nome="FILAMENTO XFULL PLA+ AZUL CLARO 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1229-101.jpg" alt="FILAMENTO XFULL PLA+ AZUL CLARO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO XFULL PLA+ AZUL CLARO 1KG (1.75MM)</h2>
   <p class="sku">1229-101</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1229-101">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento xfull pla+ laranja 1kg (1.75mm) 1234-101"
- data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1234-101" data-nome="FILAMENTO XFULL PLA+ LARANJA 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1234-101.jpg" alt="FILAMENTO XFULL PLA+ LARANJA 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO XFULL PLA+ LARANJA 1KG (1.75MM)</h2>
   <p class="sku">1234-101</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1234-101">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento xfull pla+ marrom mogno 1kg (1.75mm) 1236-101"
- data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1236-101" data-nome="FILAMENTO XFULL PLA+ MARROM MOGNO 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1236-101.jpg" alt="FILAMENTO XFULL PLA+ MARROM MOGNO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO XFULL PLA+ MARROM MOGNO 1KG (1.75MM)</h2>
   <p class="sku">1236-101</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1236-101">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento xfull pla+ marrom terra 1kg (1.75mm) 1237-101"
- data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1237-101" data-nome="FILAMENTO XFULL PLA+ MARROM TERRA 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1237-101.jpg" alt="FILAMENTO XFULL PLA+ MARROM TERRA 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO XFULL PLA+ MARROM TERRA 1KG (1.75MM)</h2>
   <p class="sku">1237-101</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1237-101">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento xfull pla+ silk azul cobalto 1kg (1.75mm) 1241-101"
- data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1241-101" data-nome="FILAMENTO XFULL PLA+ SILK AZUL COBALTO 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1241-101.jpg" alt="FILAMENTO XFULL PLA+ SILK AZUL COBALTO 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO XFULL PLA+ SILK AZUL COBALTO 1KG (1.75MM)</h2>
   <p class="sku">1241-101</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1241-101">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="filamento xfull pla+ silk verde esmeralda 1kg (1.75mm) 1244-101"
- data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno">
+ data-marca="XFULL" data-tipo="Filamento PLA" data-aplic="Decorativo / uso interno"
+ data-sku="1244-101" data-nome="FILAMENTO XFULL PLA+ SILK VERDE ESMERALDA 1KG (1.75MM)" data-preco="99.99">
   <div class="foto"><img src="fotos/1244-101.jpg" alt="FILAMENTO XFULL PLA+ SILK VERDE ESMERALDA 1KG (1.75MM)" loading="lazy"></div>
   <div class="info"><h2>FILAMENTO XFULL PLA+ SILK VERDE ESMERALDA 1KG (1.75MM)</h2>
   <p class="sku">1244-101</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 99,99</p></div>
+  <p class="preco">R$ 99,99</p>
+  <button class="add" data-sku="1244-101">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="hub de filamento para ams lite com 5 vias para bambu lab a1 series 1084-86"
- data-marca="Bambu Lab" data-tipo="Ferramentas e Acessórios" data-aplic="Acabamento">
+ data-marca="Bambu Lab" data-tipo="Ferramentas e Acessórios" data-aplic="Acabamento"
+ data-sku="1084-86" data-nome="HUB DE FILAMENTO PARA AMS LITE COM 5 VIAS PARA BAMBU LAB A1 SERIES" data-preco="145.49">
   <div class="foto"><img src="fotos/1084-86.jpg" alt="HUB DE FILAMENTO PARA AMS LITE COM 5 VIAS PARA BAMBU LAB A1 SERIES" loading="lazy"></div>
   <div class="info"><h2>HUB DE FILAMENTO PARA AMS LITE COM 5 VIAS PARA BAMBU LAB A1 SERIES</h2>
   <p class="sku">1084-86</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 145,49</p></div>
+  <p class="preco">R$ 145,49</p>
+  <button class="add" data-sku="1084-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="kit hotend para anycubic kobra s1 0.4mm 1075-86"
- data-marca="Anycubic" data-tipo="Hotend" data-aplic="Reposição">
+ data-marca="Anycubic" data-tipo="Hotend" data-aplic="Reposição"
+ data-sku="1075-86" data-nome="KIT HOTEND PARA ANYCUBIC KOBRA S1 0.4MM" data-preco="126.09">
   <div class="foto"><img src="fotos/1075-86.jpg" alt="KIT HOTEND PARA ANYCUBIC KOBRA S1 0.4MM" loading="lazy"></div>
   <div class="info"><h2>KIT HOTEND PARA ANYCUBIC KOBRA S1 0.4MM</h2>
   <p class="sku">1075-86</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 126,09</p></div>
+  <p class="preco">R$ 126,09</p>
+  <button class="add" data-sku="1075-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="kit hotend v2.0 para anycubic kobra 3 1103-86"
- data-marca="Anycubic" data-tipo="Hotend" data-aplic="Reposição">
+ data-marca="Anycubic" data-tipo="Hotend" data-aplic="Reposição"
+ data-sku="1103-86" data-nome="KIT HOTEND V2.0 PARA ANYCUBIC KOBRA 3" data-preco="129.99">
   <div class="foto"><img src="fotos/1103-86.jpg" alt="KIT HOTEND V2.0 PARA ANYCUBIC KOBRA 3" loading="lazy"></div>
   <div class="info"><h2>KIT HOTEND V2.0 PARA ANYCUBIC KOBRA 3</h2>
   <p class="sku">1103-86</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 129,99</p></div>
+  <p class="preco">R$ 129,99</p>
+  <button class="add" data-sku="1103-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="kit saco bag plastica a vacuo 10 unidades + pistola para bag plastica a vacuo 1040-86"
- data-marca="Outras" data-tipo="Armazenagem de Filamento" data-aplic="Armazenagem">
+ data-marca="Outras" data-tipo="Armazenagem de Filamento" data-aplic="Armazenagem"
+ data-sku="1040-86" data-nome="KIT SACO BAG PLASTICA A VACUO 10 UNIDADES + PISTOLA PARA BAG PLASTICA A VACUO" data-preco="78.99">
   <div class="foto"><img src="fotos/1040-86.jpg" alt="KIT SACO BAG PLASTICA A VACUO 10 UNIDADES + PISTOLA PARA BAG PLASTICA A VACUO" loading="lazy"></div>
   <div class="info"><h2>KIT SACO BAG PLASTICA A VACUO 10 UNIDADES + PISTOLA PARA BAG PLASTICA A VACUO</h2>
   <p class="sku">1040-86</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 78,99</p></div>
+  <p class="preco">R$ 78,99</p>
+  <button class="add" data-sku="1040-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="laminas para rebarbador debarbador escareador manual rasquete 1089-86"
- data-marca="Outras" data-tipo="Ferramentas e Acessórios" data-aplic="Acabamento">
+ data-marca="Outras" data-tipo="Ferramentas e Acessórios" data-aplic="Acabamento"
+ data-sku="1089-86" data-nome="LAMINAS PARA REBARBADOR DEBARBADOR ESCAREADOR MANUAL RASQUETE" data-preco="29.99">
   <div class="foto"><img src="fotos/1089-86.jpg" alt="LAMINAS PARA REBARBADOR DEBARBADOR ESCAREADOR MANUAL RASQUETE" loading="lazy"></div>
   <div class="info"><h2>LAMINAS PARA REBARBADOR DEBARBADOR ESCAREADOR MANUAL RASQUETE</h2>
   <p class="sku">1089-86</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 29,99</p></div>
+  <p class="preco">R$ 29,99</p>
+  <button class="add" data-sku="1089-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="limpador de bico purge wiper purga purgador impressora 3d bambu lab a1 series 1148-86"
- data-marca="Bambu Lab" data-tipo="Impressoras 3D" data-aplic="Equipamento">
+ data-marca="Bambu Lab" data-tipo="Impressoras 3D" data-aplic="Equipamento"
+ data-sku="1148-86" data-nome="LIMPADOR DE BICO PURGE WIPER PURGA PURGADOR IMPRESSORA 3D BAMBU LAB A1 SERIES" data-preco="129.99">
   <div class="foto"><img src="fotos/1148-86.jpg" alt="LIMPADOR DE BICO PURGE WIPER PURGA PURGADOR IMPRESSORA 3D BAMBU LAB A1 SERIES" loading="lazy"></div>
   <div class="info"><h2>LIMPADOR DE BICO PURGE WIPER PURGA PURGADOR IMPRESSORA 3D BAMBU LAB A1 SERIES</h2>
   <p class="sku">1148-86</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 129,99</p></div>
+  <p class="preco">R$ 129,99</p>
+  <button class="add" data-sku="1148-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="marcadores 24 cores canetinha acrilica acabamento pintura em pecas 3d 1101-86"
- data-marca="Outras" data-tipo="Ferramentas e Acessórios" data-aplic="Acabamento">
+ data-marca="Outras" data-tipo="Ferramentas e Acessórios" data-aplic="Acabamento"
+ data-sku="1101-86" data-nome="MARCADORES 24 CORES CANETINHA ACRILICA ACABAMENTO PINTURA EM PECAS 3D" data-preco="96.99">
   <div class="foto"><img src="fotos/1101-86.jpg" alt="MARCADORES 24 CORES CANETINHA ACRILICA ACABAMENTO PINTURA EM PECAS 3D" loading="lazy"></div>
   <div class="info"><h2>MARCADORES 24 CORES CANETINHA ACRILICA ACABAMENTO PINTURA EM PECAS 3D</h2>
   <p class="sku">1101-86</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 96,99</p></div>
+  <p class="preco">R$ 96,99</p>
+  <button class="add" data-sku="1101-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="nozzle bico creality (unicornio) k1 k1max k1c 0.6mm 1044-86"
- data-marca="Creality" data-tipo="Bicos (Nozzle)" data-aplic="Reposição">
+ data-marca="Creality" data-tipo="Bicos (Nozzle)" data-aplic="Reposição"
+ data-sku="1044-86" data-nome="NOZZLE BICO CREALITY (UNICORNIO) K1 K1MAX K1C 0.6MM" data-preco="78.90">
   <div class="foto"><img src="fotos/1044-86.jpg" alt="NOZZLE BICO CREALITY (UNICORNIO) K1 K1MAX K1C 0.6MM" loading="lazy"></div>
   <div class="info"><h2>NOZZLE BICO CREALITY (UNICORNIO) K1 K1MAX K1C 0.6MM</h2>
   <p class="sku">1044-86</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 78,90</p></div>
+  <p class="preco">R$ 78,90</p>
+  <button class="add" data-sku="1044-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="nozzle bico creality (unicornio) k1 k1max k1c 0.8mm 1017-86"
- data-marca="Creality" data-tipo="Bicos (Nozzle)" data-aplic="Reposição">
+ data-marca="Creality" data-tipo="Bicos (Nozzle)" data-aplic="Reposição"
+ data-sku="1017-86" data-nome="NOZZLE BICO CREALITY (UNICORNIO) K1 K1MAX K1C 0.8MM" data-preco="78.00">
   <div class="foto"><img src="fotos/1017-86.jpg" alt="NOZZLE BICO CREALITY (UNICORNIO) K1 K1MAX K1C 0.8MM" loading="lazy"></div>
   <div class="info"><h2>NOZZLE BICO CREALITY (UNICORNIO) K1 K1MAX K1C 0.8MM</h2>
   <p class="sku">1017-86</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 78,00</p></div>
+  <p class="preco">R$ 78,00</p>
+  <button class="add" data-sku="1017-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="nozzle bico creality (unicornio) k2 hi plus 0.2mm 1201-86"
- data-marca="Creality" data-tipo="Bicos (Nozzle)" data-aplic="Reposição">
+ data-marca="Creality" data-tipo="Bicos (Nozzle)" data-aplic="Reposição"
+ data-sku="1201-86" data-nome="NOZZLE BICO CREALITY (UNICORNIO) K2 HI PLUS 0.2MM" data-preco="78.99">
   <div class="foto"><img src="fotos/1201-86.jpg" alt="NOZZLE BICO CREALITY (UNICORNIO) K2 HI PLUS 0.2MM" loading="lazy"></div>
   <div class="info"><h2>NOZZLE BICO CREALITY (UNICORNIO) K2 HI PLUS 0.2MM</h2>
   <p class="sku">1201-86</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 78,99</p></div>
+  <p class="preco">R$ 78,99</p>
+  <button class="add" data-sku="1201-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="par parafuso m2 hotend creality k1 k1max aço 1061-86"
- data-marca="Creality" data-tipo="Hotend" data-aplic="Reposição">
+ data-marca="Creality" data-tipo="Hotend" data-aplic="Reposição"
+ data-sku="1061-86" data-nome="PAR PARAFUSO M2 HOTEND CREALITY K1 K1MAX AÇO" data-preco="19.31">
   <div class="foto"><img src="fotos/1061-86.jpg" alt="PAR PARAFUSO M2 HOTEND CREALITY K1 K1MAX AÇO" loading="lazy"></div>
   <div class="info"><h2>PAR PARAFUSO M2 HOTEND CREALITY K1 K1MAX AÇO</h2>
   <p class="sku">1061-86</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 19,31</p></div>
+  <p class="preco">R$ 19,31</p>
+  <button class="add" data-sku="1061-86">+ Adicionar</button></div>
 </article>
 <article class="card" data-busca="suporte para placa de video com regulador de altura 1091-001"
- data-marca="Outras" data-tipo="Sensores e Eletrônica" data-aplic="Reposição">
+ data-marca="Outras" data-tipo="Sensores e Eletrônica" data-aplic="Reposição"
+ data-sku="1091-001" data-nome="SUPORTE PARA PLACA DE VIDEO COM REGULADOR DE ALTURA" data-preco="9.99">
   <div class="foto"><img src="fotos/1091-001.jpg" alt="SUPORTE PARA PLACA DE VIDEO COM REGULADOR DE ALTURA" loading="lazy"></div>
   <div class="info"><h2>SUPORTE PARA PLACA DE VIDEO COM REGULADOR DE ALTURA</h2>
   <p class="sku">1091-001</p>
   <p class="est sem">Sem estoque</p>
-  <p class="preco">R$ 9,99</p></div>
+  <p class="preco">R$ 9,99</p>
+  <button class="add" data-sku="1091-001">+ Adicionar</button></div>
 </article>
 </main>
+</div>
 <p id="vazio">Nenhum produto encontrado.</p>
 <footer><b><span id="conta">181</span> produtos</b> no catalogo Lumia &middot; estoque de 11/09/2026 12:11 &middot; <a href="app/">ao vivo no app</a></footer>
+<div id="fundo"></div>
+<aside id="carrinho" aria-label="Carrinho">
+  <div class="cab-cart"><h2>Seu pedido</h2><button class="fecha" id="fecha-cart" aria-label="Fechar">&times;</button></div>
+  <div id="itens"></div>
+  <div class="pe">
+    <div class="total"><span>Total</span><span id="total">R$ 0,00</span></div>
+    <a id="zap" href="#" aria-disabled="true">Enviar pedido no WhatsApp</a>
+  </div>
+</aside>
 <script>
-const b=document.getElementById('busca'),cs=[...document.querySelectorAll('.card')],v=document.getElementById('vazio');
-const fs=[...document.querySelectorAll('.filtro')],conta=document.getElementById('conta');
-function aplicar(){const t=b.value.trim().toLowerCase();let n=0;
-cs.forEach(c=>{const ok=c.dataset.busca.includes(t)&&fs.every(f=>!f.value||c.dataset[f.dataset.campo]===f.value);
-c.style.display=ok?'':'none';if(ok)n++;});
-v.style.display=n?'none':'block';conta.textContent=n;}
-b.addEventListener('input',aplicar);fs.forEach(f=>f.addEventListener('change',aplicar));
+const ZAP = "5544988320238";                       // numero da Lumia 3D, formato internacional
+const $ = s => document.querySelector(s);
+const cs = [...document.querySelectorAll('.card')];
+const brl = n => n.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+
+// --- filtros: dentro do grupo e OU, entre grupos e E (marcar PETG e PLA mostra os dois) ---
+function aplicar() {
+  const t = $('#busca').value.trim().toLowerCase();
+  const sel = {};
+  document.querySelectorAll('.filtro:checked').forEach(f => (sel[f.dataset.campo] ||= []).push(f.value));
+  let n = 0;
+  cs.forEach(c => {
+    const ok = c.dataset.busca.includes(t)
+      && Object.entries(sel).every(([campo, vals]) => vals.includes(c.dataset[campo]));
+    c.style.display = ok ? '' : 'none';
+    if (ok) n++;
+  });
+  $('#vazio').style.display = n ? 'none' : 'block';
+  $('#conta').textContent = n;
+}
+$('#busca').addEventListener('input', aplicar);
+document.querySelectorAll('.filtro').forEach(f => f.addEventListener('change', aplicar));
+$('#limpar').addEventListener('click', () => {
+  document.querySelectorAll('.filtro:checked').forEach(f => (f.checked = false));
+  $('#busca').value = '';
+  aplicar();
+});
+
+// --- carrinho. localStorage e conveniencia: se o navegador barrar, o carrinho so nao sobrevive
+// ao refresh. Por isso toda leitura/escrita e protegida e a pagina funciona sem ela. ---
+let cart = {};
+try { cart = JSON.parse(localStorage.pedido || '{}'); } catch (e) { cart = {}; }
+const salvar = () => { try { localStorage.pedido = JSON.stringify(cart); } catch (e) {} };
+const totalItens = () => Object.values(cart).reduce((s, i) => s + i.qtd, 0);
+const totalValor = () => Object.values(cart).reduce((s, i) => s + i.preco * i.qtd, 0);
+
+function pintar() {
+  const itens = Object.entries(cart);
+  $('#n-cart').textContent = totalItens();
+  $('#total').textContent = brl(totalValor());
+  $('#itens').innerHTML = itens.length ? itens.map(([sku, i]) => `
+    <div class="item">
+      <div><div class="n">${i.nome}</div><div class="s">${sku} &middot; ${brl(i.preco)}</div></div>
+      <div class="qtd"><button data-menos="${sku}">-</button><b>${i.qtd}</b><button data-mais="${sku}">+</button></div>
+      <button class="lixo" data-tira="${sku}">remover</button>
+      <div class="qtd"><b>${brl(i.preco * i.qtd)}</b></div>
+    </div>`).join('') : '<p style="color:var(--mut);font-size:13px;padding:16px 0">Carrinho vazio.</p>';
+  const z = $('#zap');
+  z.setAttribute('aria-disabled', itens.length ? 'false' : 'true');
+  const linhas = itens.map(([sku, i]) => `${i.qtd}x ${sku} - ${i.nome} - ${brl(i.preco * i.qtd)}`);
+  const msg = `Ola! Quero fazer um pedido pelo catalogo:\n\n${linhas.join('\n')}\n\nTotal: ${brl(totalValor())}`;
+  z.href = `https://wa.me/${ZAP}?text=${encodeURIComponent(msg)}`;
+}
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  if (b.dataset.sku) {                      // + Adicionar, no card
+    const c = b.closest('.card'), sku = b.dataset.sku;
+    cart[sku] = cart[sku] || {nome: c.dataset.nome, preco: +c.dataset.preco, qtd: 0};
+    cart[sku].qtd++;
+    b.textContent = 'Adicionado'; b.classList.add('ok');
+    setTimeout(() => { b.textContent = '+ Adicionar'; b.classList.remove('ok'); }, 900);
+  } else if (b.dataset.mais) { cart[b.dataset.mais].qtd++; }
+  else if (b.dataset.menos) { cart[b.dataset.menos].qtd = Math.max(1, cart[b.dataset.menos].qtd - 1); }
+  else if (b.dataset.tira) { delete cart[b.dataset.tira]; }
+  else return;
+  salvar(); pintar();
+});
+
+const abre = (el, on) => el.classList.toggle('on', on);
+$('#abre-cart').addEventListener('click', () => { abre($('#carrinho'), true); abre($('#fundo'), true); });
+$('#fecha-cart').addEventListener('click', () => { abre($('#carrinho'), false); abre($('#fundo'), false); });
+$('#abre-filtros').addEventListener('click', () => { abre($('#filtros'), true); abre($('#fundo'), true); });
+$('#fundo').addEventListener('click', () => {
+  abre($('#carrinho'), false); abre($('#filtros'), false); abre($('#fundo'), false);
+});
+pintar();
 </script></body></html>
