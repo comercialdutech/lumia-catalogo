@@ -53,7 +53,7 @@ function mascaraFone(v){
   return `(${n.slice(0,2)}) ${n[2]} ${n.slice(3,7)}-${n.slice(7)}`;
 }
 const tela = $("tela");
-let contato = null;
+let contato = null, extra = {};
 
 function telaLogin(aviso){
   tela.innerHTML = `<div class="cx">
@@ -92,18 +92,22 @@ async function buscar(){
   const j = await r.json();
   if(j.erro) return telaBusca(j.erro);
   contato = j.contato;
+  extra = j.extra || {};
   telaForm();
 }
 
 function telaForm(){
   tela.innerHTML = `<div class="cx">
     <b>${contato.nome}</b><div class="mini">${contato.fone}</div>
+    ${extra.codigoTiny ? `<p class="falta">Este contato já tem código ${extra.codigoTiny} no CRM —
+       cadastrar de novo só completa o que faltar.</p>` : ""}
     <label>Nome para a nota fiscal</label>
     <input id="nome" value="${contato.nome.replace(/\s*-\s*\d{3,6}\s*$/,"")}">
-    <label>CPF ou CNPJ</label><input id="cpf" inputmode="numeric">
+    <label>CPF ou CNPJ${extra.cpf || extra.cnpj ? ' <span class="ok">· veio do CRM</span>' : ""}</label>
+    <input id="cpf" inputmode="numeric" value="${extra.cnpj || extra.cpf || ""}">
     <div class="linha">
-      <div><label>CEP</label><input id="cep" inputmode="numeric"></div>
-      <div><label>Número</label><input id="numero" inputmode="numeric"></div>
+      <div><label>CEP</label><input id="cep" inputmode="numeric" value="${extra.cep || ""}"></div>
+      <div><label>Número</label><input id="numero" inputmode="numeric" value="${extra.numero || ""}"></div>
     </div>
     <div id="end" class="mini"></div>
     <label>Complemento (opcional)</label><input id="compl">
