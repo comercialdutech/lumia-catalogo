@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cotar frete</title>
+<meta name="theme-color" content="#111111">
+<link rel="apple-touch-icon" href="../app/icone-192.png">
+<meta name="robots" content="noindex">
+<style>
+ :root{--am:#F8CF39}
+ *{box-sizing:border-box}
+ body{font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#111;color:#eee;
+      margin:0;padding:22px 16px 70px;max-width:620px;margin-inline:auto}
+ h1{font-size:20px;margin:0 0 2px}
+ .sub{color:#8d8d8d;font-size:13px;margin:0 0 18px}
+ label{display:block;margin:12px 0 4px;color:#b4b4b4;font-size:13px}
+ input{width:100%;padding:11px;border-radius:9px;border:1px solid #333;background:#1b1b1b;
+       color:#eee;font:16px system-ui}
+ input:focus{outline:2px solid var(--am);outline-offset:1px}
+ button{background:var(--am);color:#000;font-weight:700;border:0;border-radius:10px;
+        padding:13px 20px;font-size:16px;cursor:pointer;margin-top:16px;width:100%}
+ button.sec{background:#262626;color:#ddd;font-weight:600;margin-top:8px}
+ .linha{display:flex;gap:10px}.linha>div{flex:1}
+ .cx{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:13px;padding:15px;margin-top:16px}
+ .erro{color:#ff8d8d}.mini{color:#8d8d8d;font-size:12px;margin-top:6px}
+ table{width:100%;border-collapse:collapse;margin-top:4px}
+ td{padding:9px 0;border-bottom:1px solid #262626;font-size:15px}
+ td.p{text-align:right;font-weight:700;white-space:nowrap}
+ tr:first-child td{color:var(--am)}
+ tr:first-child td.p{font-size:19px}
+ .volta{color:#777;text-decoration:none;font-size:13px}
+</style></head><body>
+
+<a class="volta" href="../hub/">‹ Ferramentas</a>
+<h1>Cotar frete</h1>
+<p class="sub">Sai de Maringá · usa a embalagem real da Dutech</p>
+
+<div id="tela"></div>
+
+<script>
+const PROXY = "https://estoque-olist.dutech.workers.dev";
+const cab = () => ({authorization: `Bearer ${localStorage.usuario || ""}:${localStorage.senha || ""}`});
+const $ = id => document.getElementById(id);
+const tela = $("tela");
+const brl = n => n.toLocaleString("pt-BR", {style:"currency", currency:"BRL"});
+
+function telaLogin(aviso){
+  tela.innerHTML = `<div class="cx">${aviso ? `<p class="erro">${aviso}</p>` : ""}
+    <label>Usuário</label><input id="u" autocapitalize="none">
+    <label>Senha</label><input id="s" type="password">
+    <button onclick="entrar()">Entrar</button></div>`;
+}
+function entrar(){ localStorage.usuario = $("u").value.trim(); localStorage.senha = $("s").value; telaForm(); }
+
+function telaForm(aviso, valores = {}){
+  tela.innerHTML = `<div class="cx">${aviso ? `<p class="erro">${aviso}</p>` : ""}
+    <div class="linha">
+      <div><label>CEP de destino</label>
+           <input id="cep" inputmode="numeric" placeholder="01310-100" value="${valores.cep || ""}"></div>
+      <div><label>Rolos</label>
+           <input id="rolos" inputmode="numeric" placeholder="6" value="${valores.rolos || ""}"></div>
+    </div>
+    <div id="pac" class="mini"></div>
+    <button onclick="cotar()">Cotar</button>
+    <button class="sec" onclick="telaForm()">Limpar</button></div>
+    <div id="res"></div>`;
+  $("rolos").addEventListener("input", mostraPacotes);
+  $("cep").addEventListener("keydown", e => { if(e.key === "Enter") cotar(); });
+  $("rolos").addEventListener("keydown", e => { if(e.key === "Enter") cotar(); });
+  mostraPacotes();
+}
+
+// mesma regra do worker, so pra mostrar antes de cotar
+function pacotesLocal(n){
+  n = Math.max(0, parseInt(n || 0, 10)); const out = [];
+  while (n >= 10){ const v = Math.min(n, 12); out.push(`44x44x24 (${v})`); n -= v; }
+  const resto = {0:[0,0],1:[0,1],2:[1,0],3:[1,0],4:[1,1],5:[2,0],6:[2,0],7:[2,1],8:[3,0],9:[3,0]}[n] || [0,0];
+  let r = n - (resto[1] ? 1 : 0);
+  for (let i = 0; i < resto[0]; i++){ const v = Math.min(r, 3); out.push(`22x22x24 (${v})`); r -= v; }
+  if (resto[1]) out.push("saco 25x25x10 (1)");
+  return out;
+}
+function mostraPacotes(){
+  const p = pacotesLocal($("rolos").value);
+  $("pac").textContent = p.length ? "Vai em: " + p.join(" + ") : "";
+}
+
+async function cotar(){
+  const cep = $("cep").value.replace(/\D/g,""), rolos = parseInt($("rolos").value || 0, 10);
+  const valores = {cep: $("cep").value, rolos: $("rolos").value};
+  if (cep.length !== 8) return telaForm("CEP precisa ter 8 dígitos", valores);
+  if (!rolos) return telaForm("informe a quantidade de rolos", valores);
+  $("res").innerHTML = `<div class="cx">cotando...</div>`;
+  let r;
+  try { r = await fetch(`${PROXY}/?frete=1&cep=${cep}&rolos=${rolos}`, {headers: cab()}); }
+  catch { return telaForm("sem conexão", valores); }
+  if (r.status === 401) return telaLogin("usuário ou senha inválidos");
+  if (r.status === 403) return telaForm("seu usuário não pode cotar frete", valores);
+  const j = await r.json();
+  if (j.erro) return telaForm(j.erro, valores);
+  if (!j.opcoes.length) return telaForm("nenhuma transportadora atende esse CEP", valores);
+  $("res").innerHTML = `<div class="cx">
+    <table>${j.opcoes.map(o => `<tr>
+      <td>${o.transportadora} · ${o.servico}<div class="mini">${o.prazo || "?"} dias</div></td>
+      <td class="p">${brl(o.preco)}</td></tr>`).join("")}</table>
+    <p class="mini">${j.pacotes.length} volume(s), ${j.pacotes.reduce((s,p)=>s+p.peso,0).toFixed(1)} kg no total.
+    ${j.recusados.length ? "Fora: " + j.recusados.join("; ") : ""}</p></div>`;
+}
+
+(localStorage.usuario && localStorage.senha) ? telaForm() : telaLogin();
+</script></body></html>
