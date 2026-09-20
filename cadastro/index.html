@@ -40,6 +40,18 @@ const PROXY = "https://estoque-olist.dutech.workers.dev";
 const cab = () => ({authorization: `Bearer ${localStorage.usuario || ""}:${localStorage.senha || ""}`});
 const cabPost = () => ({...cab(), "content-type": "application/json"});
 const $ = id => document.getElementById(id);
+
+// Formato do cadastro: (44) 9 9883-7242. Escreve enquanto digita, tirando o 55 se o vendedor
+// colar o numero do jeito que o CRM mostra. O worker devolve o 55 antes de buscar no iPro.
+function mascaraFone(v){
+  let n = String(v||"").replace(/\D/g,"");
+  if(n.startsWith("55") && n.length > 11) n = n.slice(2);
+  n = n.slice(0,11);
+  if(n.length <= 2) return n.length ? `(${n}` : "";
+  if(n.length <= 6) return `(${n.slice(0,2)}) ${n.slice(2)}`;
+  if(n.length <= 10) return `(${n.slice(0,2)}) ${n.slice(2,6)}-${n.slice(6)}`;
+  return `(${n.slice(0,2)}) ${n[2]} ${n.slice(3,7)}-${n.slice(7)}`;
+}
 const tela = $("tela");
 let contato = null;
 
@@ -61,10 +73,11 @@ function telaBusca(aviso){
   tela.innerHTML = `<div class="cx">
     ${aviso ? `<p class="erro">${aviso}</p>` : ""}
     <label>Telefone do cliente (como está no CRM)</label>
-    <input id="fone" inputmode="numeric" placeholder="5544998837242" autofocus>
+    <input id="fone" inputmode="numeric" placeholder="(44) 9 9883-7242" autofocus>
     <button onclick="buscar()">Buscar no CRM</button>
     <button class="sec" onclick="sair()">Trocar de usuário</button></div>`;
   $("fone").addEventListener("keydown", e => { if(e.key === "Enter") buscar(); });
+  $("fone").addEventListener("input", e => { e.target.value = mascaraFone(e.target.value); });
 }
 
 async function buscar(){
