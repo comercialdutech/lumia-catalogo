@@ -96,6 +96,12 @@ async function buscar(){
   telaForm();
 }
 
+// de onde veio o dado: cadastro do CRM ou o que o cliente escreveu na conversa
+const de = campo => {
+  const f = (extra.fonte || {})[campo];
+  return f ? ` <span class="ok">· ${f}</span>` : "";
+};
+
 function telaForm(){
   tela.innerHTML = `<div class="cx">
     <b>${contato.nome}</b><div class="mini">${contato.fone}</div>
@@ -103,11 +109,13 @@ function telaForm(){
        cadastrar de novo só completa o que faltar.</p>` : ""}
     <label>Nome para a nota fiscal</label>
     <input id="nome" value="${contato.nome.replace(/\s*-\s*\d{3,6}\s*$/,"")}">
-    <label>CPF ou CNPJ${extra.cpf || extra.cnpj ? ' <span class="ok">· veio do CRM</span>' : ""}</label>
-    <input id="cpf" inputmode="numeric" value="${extra.cnpj || extra.cpf || ""}">
+    <label>CPF ou CNPJ${de("cpf")}</label>
+    <input id="cpf" inputmode="numeric" value="${extra.cpf || ""}">
     <div class="linha">
-      <div><label>CEP</label><input id="cep" inputmode="numeric" value="${extra.cep || ""}"></div>
-      <div><label>Número</label><input id="numero" inputmode="numeric" value="${extra.numero || ""}"></div>
+      <div><label>CEP${de("cep")}</label>
+           <input id="cep" inputmode="numeric" value="${extra.cep || ""}"></div>
+      <div><label>Número${de("numero")}</label>
+           <input id="numero" inputmode="numeric" value="${extra.numero || ""}"></div>
     </div>
     <div id="end" class="mini"></div>
     <label>Complemento (opcional)</label><input id="compl">
