@@ -53,8 +53,10 @@ function entrar(){ localStorage.usuario = $("u").value.trim(); localStorage.senh
 
 function telaForm(aviso, valores = {}){
   tela.innerHTML = `<div class="cx">${aviso ? `<p class="erro">${aviso}</p>` : ""}
+    <label>Código do cliente <span class="mini">· busca o CEP na Olist</span></label>
+    <input id="codigo" inputmode="numeric" placeholder="16114" value="${valores.codigo || ""}">
     <div class="linha">
-      <div><label>CEP de destino</label>
+      <div><label>ou CEP de destino</label>
            <input id="cep" inputmode="numeric" placeholder="01310-100" value="${valores.cep || ""}"></div>
       <div><label>Rolos</label>
            <input id="rolos" inputmode="numeric" placeholder="6" value="${valores.rolos || ""}"></div>
@@ -86,12 +88,14 @@ function mostraPacotes(){
 
 async function cotar(){
   const cep = $("cep").value.replace(/\D/g,""), rolos = parseInt($("rolos").value || 0, 10);
-  const valores = {cep: $("cep").value, rolos: $("rolos").value};
-  if (cep.length !== 8) return telaForm("CEP precisa ter 8 dígitos", valores);
+  const codigo = $("codigo").value.trim();
+  const valores = {cep: $("cep").value, rolos: $("rolos").value, codigo};
+  if (!codigo && cep.length !== 8) return telaForm("informe o código do cliente ou o CEP", valores);
   if (!rolos) return telaForm("informe a quantidade de rolos", valores);
   $("res").innerHTML = `<div class="cx">cotando...</div>`;
   let r;
-  try { r = await fetch(`${PROXY}/?frete=1&cep=${cep}&rolos=${rolos}`, {headers: cab()}); }
+  try { r = await fetch(`${PROXY}/?frete=1&cep=${cep}&codigo=${encodeURIComponent(codigo)}&rolos=${rolos}`,
+                        {headers: cab()}); }
   catch { return telaForm("sem conexão", valores); }
   if (r.status === 401) return telaLogin("usuário ou senha inválidos");
   if (r.status === 403) return telaForm("seu usuário não pode cotar frete", valores);
@@ -99,6 +103,7 @@ async function cotar(){
   if (j.erro) return telaForm(j.erro, valores);
   if (!j.opcoes.length) return telaForm("nenhuma transportadora atende esse CEP", valores);
   $("res").innerHTML = `<div class="cx">
+    ${j.cliente ? `<p><b>${j.cliente.nome}</b><span class="mini"> · CEP ${j.cep}</span></p>` : ""}
     <table>${j.opcoes.map(o => `<tr>
       <td>${o.transportadora} · ${o.servico}<div class="mini">${o.prazo || "?"} dias</div></td>
       <td class="p">${brl(o.preco)}</td></tr>`).join("")}</table>
