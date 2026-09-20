@@ -35,8 +35,10 @@
 
 <script>
 const PROXY = "https://estoque-olist.dutech.workers.dev";
-const cab = () => ({authorization: `Bearer ${localStorage.usuario || ""}:${localStorage.senha || ""}`,
-                    "content-type": "application/json"});
+// GET vai so com authorization (chamada simples, sem preflight). O content-type entra
+// so no POST, que precisa dele - e o worker autoriza os dois no CORS.
+const cab = () => ({authorization: `Bearer ${localStorage.usuario || ""}:${localStorage.senha || ""}`});
+const cabPost = () => ({...cab(), "content-type": "application/json"});
 const $ = id => document.getElementById(id);
 const tela = $("tela");
 let contato = null;
@@ -112,7 +114,7 @@ async function gravar(){
                  complemento: $("compl").value, email: $("email").value};
   const antes = tela.innerHTML;
   tela.innerHTML = `<div class="cx">cadastrando...</div>`;
-  const r = await fetch(`${PROXY}/?cadastro=gravar`, {method:"POST", headers: cab(),
+  const r = await fetch(`${PROXY}/?cadastro=gravar`, {method:"POST", headers: cabPost(),
                                                       body: JSON.stringify(corpo)});
   const j = await r.json();
   if(j.erro){ tela.innerHTML = antes; telaForm(); $("cpf").value = corpo.cpf_cnpj;
