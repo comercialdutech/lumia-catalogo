@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cadastrar cliente no Tiny</title>
+<meta name="theme-color" content="#111111">
+<link rel="apple-touch-icon" href="../app/icone-192.png">
+<meta name="robots" content="noindex">
+<style>
+ :root{--am:#F8CF39}
+ *{box-sizing:border-box}
+ body{font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#111;color:#eee;
+      margin:0;padding:22px 16px 70px;max-width:620px;margin-inline:auto}
+ h1{font-size:20px;margin:0 0 2px}
+ .sub{color:#8d8d8d;font-size:13px;margin:0 0 18px}
+ label{display:block;margin:12px 0 4px;color:#b4b4b4;font-size:13px}
+ input{width:100%;padding:11px;border-radius:9px;border:1px solid #333;background:#1b1b1b;
+       color:#eee;font:16px system-ui}
+ input:focus{outline:2px solid var(--am);outline-offset:1px}
+ button{background:var(--am);color:#000;font-weight:700;border:0;border-radius:10px;
+        padding:13px 20px;font-size:16px;cursor:pointer;margin-top:16px;width:100%}
+ button.sec{background:#262626;color:#ddd;font-weight:600;margin-top:8px}
+ .linha{display:flex;gap:10px}.linha>div{flex:1}
+ .cx{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:13px;padding:15px;margin-top:16px}
+ .ok{color:#7ddf7d}.erro{color:#ff8d8d}.falta{color:var(--am)}
+ .cod{font-size:34px;font-weight:800;color:var(--am);letter-spacing:.5px;margin:6px 0}
+ .volta{color:#777;text-decoration:none;font-size:13px}
+ .mini{color:#8d8d8d;font-size:12px;margin-top:6px}
+</style></head><body>
+
+<a class="volta" href="../hub/">‹ Ferramentas</a>
+<h1>Cadastrar cliente no Tiny</h1>
+<p class="sub">Conta Dutech · o código volta para o nome do contato no CRM</p>
+
+<div id="tela"></div>
+
+<script>
+const PROXY = "https://estoque-olist.dutech.workers.dev";
+const cab = () => ({authorization: `Bearer ${localStorage.usuario || ""}:${localStorage.senha || ""}`,
+                    "content-type": "application/json"});
+const $ = id => document.getElementById(id);
+const tela = $("tela");
+let contato = null;
+
+function telaLogin(aviso){
+  tela.innerHTML = `<div class="cx">
+    ${aviso ? `<p class="erro">${aviso}</p>` : ""}
+    <label>Usuário</label><input id="u" autocapitalize="none">
+    <label>Senha</label><input id="s" type="password">
+    <button onclick="entrar()">Entrar</button></div>`;
+}
+async function entrar(){
+  localStorage.usuario = $("u").value.trim();
+  localStorage.senha = $("s").value;
+  telaBusca();
+}
+function sair(){ delete localStorage.usuario; delete localStorage.senha; telaLogin(); }
+
+function telaBusca(aviso){
+  tela.innerHTML = `<div class="cx">
+    ${aviso ? `<p class="erro">${aviso}</p>` : ""}
+    <label>Telefone do cliente (como está no CRM)</label>
+    <input id="fone" inputmode="numeric" placeholder="5544998837242" autofocus>
+    <button onclick="buscar()">Buscar no CRM</button>
+    <button class="sec" onclick="sair()">Trocar de usuário</button></div>`;
+  $("fone").addEventListener("keydown", e => { if(e.key === "Enter") buscar(); });
+}
+
+async function buscar(){
+  const fone = $("fone").value.replace(/\D/g,"");
+  if(fone.length < 10) return telaBusca("telefone curto demais");
+  tela.innerHTML = `<div class="cx">buscando no CRM...</div>`;
+  let r;
+  try { r = await fetch(`${PROXY}/?cadastro=buscar&fone=${fone}`, {headers: cab()}); }
+  catch { return telaBusca("sem conexão"); }
+  if(r.status === 401) return telaLogin("usuário ou senha inválidos");
+  if(r.status === 403) return telaBusca("seu usuário não pode cadastrar cliente");
+  const j = await r.json();
+  if(j.erro) return telaBusca(j.erro);
+  contato = j.contato;
+  telaForm();
+}
+
+function telaForm(){
+  tela.innerHTML = `<div class="cx">
+    <b>${contato.nome}</b><div class="mini">${contato.fone}</div>
+    <label>Nome para a nota fiscal</label>
+    <input id="nome" value="${contato.nome.replace(/\s*-\s*\d{3,6}\s*$/,"")}">
+    <label>CPF ou CNPJ</label><input id="cpf" inputmode="numeric">
+    <div class="linha">
+      <div><label>CEP</label><input id="cep" inputmode="numeric"></div>
+      <div><label>Número</label><input id="numero" inputmode="numeric"></div>
+    </div>
+    <div id="end" class="mini"></div>
+    <label>Complemento (opcional)</label><input id="compl">
+    <label>E-mail (opcional)</label><input id="email" value="${contato.email || ""}">
+    <button onclick="gravar()">Cadastrar no Tiny</button>
+    <button class="sec" onclick="telaBusca()">Cancelar</button></div>`;
+  $("cep").addEventListener("blur", async () => {
+    const c = $("cep").value.replace(/\D/g,"");
+    if(c.length !== 8) return;
+    $("end").textContent = "buscando endereço...";
+    const d = await (await fetch(`https://viacep.com.br/ws/${c}/json/`)).json();
+    $("end").textContent = d.erro ? "CEP não encontrado"
+      : `${d.logradouro}, ${d.bairro} — ${d.localidade}/${d.uf}`;
+  });
+}
+
+async function gravar(){
+  const corpo = {contactId: contato.contactId, fone: contato.fone,
+                 nome: $("nome").value.trim(), nome_crm: contato.nome,
+                 cpf_cnpj: $("cpf").value, cep: $("cep").value, numero: $("numero").value,
+                 complemento: $("compl").value, email: $("email").value};
+  const antes = tela.innerHTML;
+  tela.innerHTML = `<div class="cx">cadastrando...</div>`;
+  const r = await fetch(`${PROXY}/?cadastro=gravar`, {method:"POST", headers: cab(),
+                                                      body: JSON.stringify(corpo)});
+  const j = await r.json();
+  if(j.erro){ tela.innerHTML = antes; telaForm(); $("cpf").value = corpo.cpf_cnpj;
+              $("cep").value = corpo.cep; $("numero").value = corpo.numero;
+              tela.insertAdjacentHTML("afterbegin", `<div class="cx erro">${j.erro}</div>`); return; }
+  tela.innerHTML = `<div class="cx">
+    <p class="ok">Cliente ${j.acao} na Dutech</p>
+    <div class="cod">${j.codigo}</div>
+    <div class="mini">${j.endereco || ""}</div>
+    <p class="mini">No CRM o contato virou <b>${j.nomeCrm || "-"}</b></p>
+    <button onclick="telaBusca()">Cadastrar outro</button></div>`;
+}
+
+(localStorage.usuario && localStorage.senha) ? telaBusca() : telaLogin();
+</script></body></html>
