@@ -1,173 +1,314 @@
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>ML ao vivo</title>
-<meta name="theme-color" content="#111111">
+<title>Mercado Livre ao vivo</title>
+<meta name="theme-color" content="#f4f5f9">
 <link rel="apple-touch-icon" href="../app/icone-192.png">
 <meta name="robots" content="noindex">
 <style>
- :root{--am:#F8CF39;--ok:#6fd08c}
+ :root{--bg:#f4f5f9;--card:#fff;--borda:#e7e9f0;--txt:#1d1f2c;--mut:#7b8095;--roxo:#6c4cf1;--roxo2:#efeafe;
+   --cmv:#5b5fe6;--tarifa:#f2b10c;--imposto:#14b8a6;--frete:#94a3b8;--cancel:#ef4458;--ads:#d946ef;--margem:#22c55e;
+   --verde:#16a34a;--verm:#e0344a}
  *{box-sizing:border-box}
- body{font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#111;color:#eee;
-      margin:0;padding:22px 16px 70px;max-width:760px;margin-inline:auto}
- h1{font-size:20px;margin:0 0 2px}
- .sub{color:#8d8d8d;font-size:13px;margin:0 0 14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
- .ponto{width:8px;height:8px;border-radius:50%;background:#555;display:inline-block}
- .ponto.vivo{background:var(--ok);box-shadow:0 0 0 0 rgba(111,208,140,.6);animation:pulsa 2s infinite}
- @keyframes pulsa{70%{box-shadow:0 0 0 7px rgba(111,208,140,0)}100%{box-shadow:0 0 0 0 rgba(111,208,140,0)}}
- label{display:block;margin:12px 0 4px;color:#b4b4b4;font-size:13px}
- input{width:100%;padding:11px;border-radius:9px;border:1px solid #333;background:#1b1b1b;color:#eee;font:16px system-ui}
- button{background:var(--am);color:#000;font-weight:700;border:0;border-radius:10px;padding:13px 20px;
-        font-size:16px;cursor:pointer;margin-top:16px;width:100%}
- .cx{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:13px;padding:15px;margin-top:14px}
- .cx h2{font-size:13px;color:#9a9a9a;font-weight:600;margin:0 0 10px;text-transform:uppercase;letter-spacing:.04em}
- .erro{color:#ff8d8d}.mini{color:#8d8d8d;font-size:12px}
- .volta{color:#777;text-decoration:none;font-size:13px}
- .barra-dia{display:flex;gap:8px;align-items:center}
- .barra-dia input{width:auto;flex:1;padding:8px}
- .barra-dia button{width:auto;margin:0;padding:9px 14px;font-size:14px;background:#262626;color:#ddd}
- .grande{font-size:34px;font-weight:800;color:var(--am);line-height:1.1;font-variant-numeric:tabular-nums}
- .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
- .kpi{background:#151515;border-radius:10px;padding:9px}
- .kpi b{display:block;font-size:17px;font-variant-numeric:tabular-nums}
- .kpi span{color:#8d8d8d;font-size:11.5px}
- .contas{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
- .conta{background:#151515;border-radius:10px;padding:10px;border-top:3px solid #333}
- .conta .n{font-weight:700;font-size:14px}.conta .v{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:4px}
- .conta .d{color:#8d8d8d;font-size:12px}
- .conta.off{opacity:.45}
- .t-Dutech{border-top-color:#F8CF39}.t-Lumia{border-top-color:#6fb6ff}.t-Oneway{border-top-color:#c58cff}
- .tag{font-size:11px;font-weight:700;padding:1px 7px;border-radius:6px;background:#262626;white-space:nowrap}
- .tag.Dutech{color:#F8CF39}.tag.Lumia{color:#6fb6ff}.tag.Oneway{color:#c58cff}
- .horas{display:flex;align-items:flex-end;gap:3px;height:110px}
- .horas div{flex:1;background:#2c2c2c;border-radius:3px 3px 0 0;min-height:2px;position:relative}
- .horas div.agora{background:var(--am)}
- .horas-leg{display:flex;justify-content:space-between;color:#666;font-size:11px;margin-top:4px}
- .lista{list-style:none;margin:0;padding:0}
- .lista li{display:flex;gap:9px;align-items:center;padding:8px 0;border-bottom:1px solid #232323;font-size:14px}
+ body{font:14px/1.45 Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--txt);
+      margin:0;padding:18px 18px 60px}
+ .max{max-width:1320px;margin:0 auto}
+ a.volta{color:var(--mut);text-decoration:none;font-size:13px}
+ .topo{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:6px 0 16px}
+ .topo h1{font-size:21px;margin:0;font-weight:700}
+ .vivo{display:flex;align-items:center;gap:6px;color:var(--mut);font-size:12.5px}
+ .ponto{width:8px;height:8px;border-radius:50%;background:#c3c6d4}
+ .ponto.on{background:#22c55e;animation:pulsa 2s infinite}
+ @keyframes pulsa{0%{box-shadow:0 0 0 0 rgba(34,197,94,.55)}70%{box-shadow:0 0 0 7px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+ .dir{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+ .chip{background:var(--card);border:1px solid var(--borda);border-radius:10px;padding:7px 12px;color:var(--mut);white-space:nowrap}
+ .chip b{color:var(--txt);font-size:15px;margin-right:4px}
+ .seg{display:inline-flex;background:#eceef4;border-radius:10px;padding:3px;gap:2px}
+ .seg button{border:0;background:transparent;padding:6px 12px;border-radius:8px;font-family:inherit;font-weight:600;font-size:13px;color:var(--mut);cursor:pointer}
+ .seg button.on{background:#fff;color:var(--txt);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+ .aviso{background:#fff8e6;border:1px solid #f6dfa0;color:#7a5b00;border-radius:10px;padding:9px 12px;margin-bottom:10px;font-size:13px}
+ .aviso.info{background:#eef2ff;border-color:#d6defc;color:#3940a0}
+ .grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:16px;align-items:start}
+ .card{background:var(--card);border:1px solid var(--borda);border-radius:16px;padding:20px}
+ .cab{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px}
+ .cab h2{font-size:15px;margin:0;font-weight:700}.cab p{margin:1px 0 0;color:var(--mut);font-size:12px}
+ .cab .seg{margin-left:auto}
+ .fat{background:linear-gradient(135deg,#f3effe,#f8f6ff 60%,#fdfcff);border:1px solid #e3dbfd;border-radius:14px;padding:18px 20px}
+ .fat-l{display:flex;gap:16px;align-items:center}
+ .rot{font-size:11.5px;font-weight:700;letter-spacing:.05em;color:var(--roxo);display:flex;align-items:center;gap:8px}
+ .rot:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--roxo)}
+ .valor-g{font-size:40px;font-weight:800;letter-spacing:-.02em;margin:4px 0 2px;font-variant-numeric:tabular-nums}
+ .valor-g small{font-size:15px;color:var(--mut);font-weight:600;margin-right:2px}
+ .valor-g sub{font-size:18px;color:var(--mut);vertical-align:baseline;font-weight:600}
+ .ant{color:var(--mut);font-size:12.5px}.ant b{color:var(--txt)}
+ .pill{font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:6px;white-space:nowrap}
+ .pill.up{background:#dcfce7;color:var(--verde)}.pill.down{background:#ffe4e8;color:var(--verm)}.pill.neu{background:#eceef4;color:var(--mut)}
+ .donut{margin-left:auto;position:relative;width:104px;height:104px;flex:none}
+ .donut .c{position:absolute;inset:0;display:grid;place-items:center;text-align:center;font-size:10px;color:var(--mut);font-weight:700}
+ .donut .c b{display:block;font-size:17px;color:var(--verde)}
+ .comp{margin-top:14px}.comp-t{display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:var(--mut);letter-spacing:.04em}
+ .barra{display:flex;height:10px;border-radius:6px;overflow:hidden;margin:7px 0 9px;background:#eceef4}
+ .barra i{display:block;height:100%}
+ .leg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:11.5px;color:var(--mut)}
+ .leg span:before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;background:var(--c)}
+ .sec{font-size:11.5px;font-weight:700;color:var(--mut);letter-spacing:.05em;margin:18px 0 9px}
+ .ded{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+ .dc{border:1px solid var(--borda);border-left:4px solid var(--c);border-radius:11px;padding:12px 14px}
+ .dc-t{display:flex;align-items:center;gap:7px;font-weight:700;font-size:13.5px}
+ .dc-t .pill{margin-left:auto;background:color-mix(in srgb,var(--c) 14%,#fff);color:color-mix(in srgb,var(--c) 75%,#000)}
+ .dc-v{font-size:19px;font-weight:800;margin:6px 0 7px;font-variant-numeric:tabular-nums}
+ .dc-v small,.dc-v sub,.km small{font-size:11px;color:var(--mut);font-weight:600;vertical-align:baseline}
+ .mc .v sub{font-size:14px;vertical-align:baseline;opacity:.75}
+ .prog{height:4px;border-radius:3px;background:#eceef4;overflow:hidden}.prog i{display:block;height:100%;background:var(--c)}
+ .ic{width:24px;height:24px;border-radius:7px;display:grid;place-items:center;font-size:13px;background:color-mix(in srgb,var(--c) 14%,#fff)}
+ .baixo{display:grid;grid-template-columns:1fr 1.25fr;gap:10px;margin-top:14px}
+ .tk{border:1px solid var(--borda);border-radius:11px;padding:12px 14px}
+ .tk .l{display:flex;justify-content:space-between;font-size:11.5px;font-weight:700;color:var(--mut);letter-spacing:.04em}
+ .tk .v{display:flex;justify-content:space-between;margin-top:8px;font-size:12px;color:var(--mut)}
+ .tk .v b{display:block;color:var(--txt);font-size:16px;font-variant-numeric:tabular-nums}
+ .mc{border:2px solid #86efac;background:linear-gradient(135deg,#ecfdf3,#f6fef9);border-radius:11px;padding:12px 14px}
+ .mc .l{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;font-weight:800;color:#15803d;letter-spacing:.04em}
+ .mc .l .pill{background:#16a34a;color:#fff}
+ .mc .v{font-size:27px;font-weight:800;color:#15803d;margin-top:6px;font-variant-numeric:tabular-nums}
+ .mc .v small{font-size:13px}.mc .s{font-size:12px;color:#3d7a52}
+ .kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+ .kp{border:1px solid var(--borda);border-left:4px solid var(--c);border-radius:11px;padding:12px 14px}
+ .kp-t{display:flex;align-items:center;gap:7px;font-weight:700;font-size:13px}
+ .kp-t .pill{margin-left:auto}
+ .kp-v{display:flex;justify-content:space-between;align-items:baseline;margin-top:8px}
+ .kp-v b{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}.kp-v span{font-size:11px;color:var(--mut)}
+ .tend{border:1px solid var(--borda);border-radius:12px;padding:14px;margin-top:12px;background:linear-gradient(#fbfaff,#fff)}
+ .tend-t{display:flex;justify-content:space-between;font-size:11.5px;font-weight:700;color:var(--roxo);letter-spacing:.04em}
+ .tend-t span{color:var(--mut);font-weight:600;letter-spacing:0}
+ svg.graf{width:100%;height:230px;display:block;margin-top:6px}
+ .abas{display:flex;gap:4px;border-bottom:1px solid var(--borda);margin:-6px -4px 10px}
+ .abas button{border:0;background:none;padding:10px 12px;font-family:inherit;font-weight:600;font-size:13.5px;color:var(--mut);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+ .abas button.on{color:var(--roxo);border-color:var(--roxo)}
+ .abas button .n{font-size:11px;background:#eceef4;border-radius:10px;padding:0 6px;margin-left:4px}
+ .sub{color:var(--mut);font-size:12px;margin:0 0 6px}
+ .lista{list-style:none;margin:0;padding:0;max-height:560px;overflow:auto}
+ .lista li{display:flex;align-items:center;gap:12px;padding:10px 4px;border-bottom:1px solid #eff0f5}
  .lista li:last-child{border-bottom:0}
- .lista .h{color:#8d8d8d;font-variant-numeric:tabular-nums;width:42px;flex:none}
- .lista .tt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
- .lista .val{font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
- .novo{animation:brilho 2.5s ease-out}
- @keyframes brilho{from{background:rgba(248,207,57,.22)}to{background:transparent}}
- @media (max-width:520px){.kpis{grid-template-columns:repeat(2,1fr)}.contas{grid-template-columns:1fr}.grande{font-size:30px}}
-</style></head><body>
+ .pos{width:20px;color:var(--mut);font-size:12.5px;text-align:center;flex:none}
+ .th{width:46px;height:46px;border-radius:9px;border:1px solid var(--borda);object-fit:contain;background:#fff;flex:none}
+ .nm{flex:1;min-width:0}.nm b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .nm span{font-size:12px;color:var(--roxo)}
+ .num{text-align:right;flex:none}.num b{display:block;font-size:17px;font-variant-numeric:tabular-nums}.num span{font-size:11.5px;color:var(--roxo)}
+ .num.alerta b{color:var(--verm)}
+ .tag{font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:5px;margin-left:6px}
+ .tag.Dutech{background:#fff5d6;color:#946c00}.tag.Lumia{background:#e2f0ff;color:#1d64b8}.tag.Oneway{background:#f3e8ff;color:#7e22ce}
+ .ped li{gap:10px}.ped .h{color:var(--mut);font-variant-numeric:tabular-nums;width:40px;flex:none}
+ .ped .val{font-weight:700;font-variant-numeric:tabular-nums}
+ .ped li.novo{animation:brilho 3s ease-out}
+ @keyframes brilho{from{background:#efe9ff}to{background:transparent}}
+ .vazio{color:var(--mut);text-align:center;padding:26px 8px}
+ .login{max-width:360px;margin:60px auto}
+ .login label{display:block;margin:12px 0 4px;color:var(--mut);font-size:13px}
+ .login input{width:100%;padding:11px;border-radius:9px;border:1px solid var(--borda);font-family:inherit;font-size:15px}
+ .login button{width:100%;margin-top:16px;background:var(--roxo);color:#fff;border:0;border-radius:10px;padding:12px;font-family:inherit;font-weight:700;font-size:15px;cursor:pointer}
+ .erro{color:var(--verm)}
+ @media (max-width:980px){.grid{grid-template-columns:1fr}}
+ @media (max-width:560px){body{padding:12px 10px 50px}.ded,.kpis,.baixo{grid-template-columns:1fr}.valor-g{font-size:32px}
+   .donut{width:84px;height:84px}.card{padding:15px}.dir{margin-left:0}}
+</style></head><body><div class="max">
 
 <a class="volta" href="../hub/">‹ Ferramentas</a>
-<h1>Mercado Livre ao vivo</h1>
-<p class="sub"><span class="ponto" id="ponto"></span><span id="status">carregando…</span></p>
-
+<div class="topo">
+  <h1>Painel Geral · Mercado Livre</h1>
+  <div class="vivo"><span class="ponto" id="ponto"></span><span id="status">carregando…</span></div>
+  <div class="dir" id="dir"></div>
+</div>
 <div id="tela"></div>
 
 <script>
 const PROXY = "https://ml-vivo.dutech.workers.dev";
 const CONTAS = ["Dutech", "Lumia", "Oneway"];
+const PERIODOS = [["hoje", "Hoje"], ["7d", "7d"], ["15d", "15d"], ["30d", "30d"]];
+const COR = {cmv: "--cmv", tarifa: "--tarifa", imposto: "--imposto", frete: "--frete", cancel: "--cancel", ads: "--ads"};
+const ICONE = {cmv: "📦", tarifa: "🏷️", imposto: "🏛️", frete: "🚚", cancel: "⛔", ads: "📣"};
 const cab = () => ({authorization: `Bearer ${localStorage.usuario || ""}:${localStorage.senha || ""}`});
 const $ = id => document.getElementById(id);
-const brl = n => (n || 0).toLocaleString("pt-BR", {style: "currency", currency: "BRL"});
-const brl0 = n => (n || 0).toLocaleString("pt-BR", {style: "currency", currency: "BRL", maximumFractionDigits: 0});
-const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const hojeBR = () => new Intl.DateTimeFormat("en-CA", {timeZone: "America/Sao_Paulo"}).format(new Date());
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+const num = (n, d = 0) => (n || 0).toLocaleString("pt-BR", {minimumFractionDigits: d, maximumFractionDigits: d});
+const brl = n => "R$ " + num(n, 2);
+const reais = n => { const [i, c] = num(n, 2).split(","); return `<small>R$</small>${i}<sub>,${c}</sub>`; };
 const horaDe = iso => new Intl.DateTimeFormat("pt-BR", {timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit"}).format(new Date(iso));
+function pill(d, inverso = false) {          // inverso: cancelado subir e ruim
+  if (d == null) return `<span class="pill neu">—</span>`;
+  const bom = inverso ? d <= 0 : d >= 0;
+  return `<span class="pill ${bom ? "up" : "down"}">${d >= 0 ? "▲" : "▼"} ${num(Math.abs(d), 1)}%</span>`;
+}
 
-let dia = hojeBR(), vistos = null, ultimaOk = 0, timer = null;
+let per = localStorage.mlPer || "7d", conta = localStorage.mlConta || "", dados = null, vistos = null, ultimaOk = 0, aba = "top";
 
 function telaLogin(aviso) {
-  $("status").textContent = "entre para ver";
-  $("tela").innerHTML = `<div class="cx">${aviso ? `<p class="erro">${aviso}</p>` : ""}
+  $("status").textContent = "entre para ver"; $("dir").innerHTML = "";
+  $("tela").innerHTML = `<div class="card login">${aviso ? `<p class="erro">${aviso}</p>` : ""}
+    <b>Entrar</b> <span style="color:var(--mut)">— mesmo usuário e senha do hub</span>
     <label>Usuário</label><input id="u" autocapitalize="none">
-    <label>Senha</label><input id="s" type="password">
+    <label>Senha</label><input id="s" type="password" onkeydown="event.key==='Enter'&&entrar()">
     <button onclick="entrar()">Entrar</button></div>`;
 }
 function entrar() { localStorage.usuario = $("u").value.trim(); localStorage.senha = $("s").value; carregar(); }
 
 async function carregar() {
   let r;
-  try { r = await fetch(`${PROXY}/?dia=${dia}`, {headers: cab()}); }
+  try { r = await fetch(`${PROXY}/?periodo=${per}&conta=${conta}`, {headers: cab()}); }
   catch { $("status").textContent = "sem conexão — tentando de novo"; $("ponto").className = "ponto"; return; }
   if (r.status === 401) return telaLogin(localStorage.usuario ? "Usuário ou senha errados (precisa ser da equipe)." : "");
-  const d = await r.json();
-  ultimaOk = Date.now();
-  desenhar(d);
+  dados = await r.json(); ultimaOk = Date.now(); desenhar();
+}
+function mudar(k, v) { if (k === "per") { per = v; localStorage.mlPer = v; } else { conta = v; localStorage.mlConta = v; }
+  vistos = null; carregar(); }
+
+const seg = (itens, atual, k) => `<div class="seg">${itens.map(([v, t]) =>
+  `<button class="${v === atual ? "on" : ""}" onclick="mudar('${k}','${v}')">${t}</button>`).join("")}</div>`;
+
+function desenhar() {
+  const d = dados, p = d.painel, pr = d.periodo;
+  const rotPer = pr.chave === "hoje" ? "hoje" : `últimos ${pr.n} dias`;
+  const vs = pr.chave === "hoje" ? "vs ontem" : `vs ${pr.n}d atrás`;
+  $("ponto").className = "ponto on";
+  $("dir").innerHTML = seg([["", "Todas"], ...CONTAS.map(c => [c, c])], conta, "conta") +
+    `<span class="chip"><b>${num(d.ativos.anuncios)}</b>anúncios ativos</span><span class="chip"><b>${num(d.ativos.skus)}</b>SKUs ativos</span>`;
+
+  // avisos de qualidade do dado
+  const av = [];
+  const faltam = CONTAS.filter(c => !d.conectadas.includes(c));
+  if (faltam.length) av.push(`Conta${faltam.length > 1 ? "s" : ""} ainda não conectada${faltam.length > 1 ? "s" : ""}: <b>${faltam.join(", ")}</b>.`);
+  const carreg = d.historico.filter(h => !h.completo);
+  if (carreg.length) av.push(`<span data-info>Carregando o histórico de 60 dias (para comparar com o período anterior): ${carreg.map(h => `${h.conta} ${h.pct}%`).join(" · ")}. Os “vs” ficam certos quando terminar.</span>`);
+  if (d.sem_custo.length) av.push(`Sem custo/imposto cadastrado para ${d.sem_custo.join(", ")} — o CMV fica zerado até o envio das 23h.`);
+  if (p.frete_pendente) av.push(`Frete de ${num(p.frete_pendente)} envio(s) ainda sendo buscado no ML — a margem pode cair um pouco.`);
+  if (p.receita && p.cmv_cobertura < 95) av.push(`O custo do Tiny/Bling cobre ${num(p.cmv_cobertura, 0)}% da receita — produto sem custo cadastrado entra com CMV zero.`);
+
+  const fat = p.faturamento || 0, margemPct = fat ? Math.max(0, p.margem / fat * 100) : 0;
+  const comp = [...p.deducoes.map(x => ({id: x.id, nome: x.id === "cmv" ? "Custos (CMV)" : x.nome, v: x.valor, cor: `var(${COR[x.id]})`})),
+                {id: "margem", nome: "Margem", v: Math.max(0, p.margem), cor: "var(--margem)"}];
+  const somaComp = comp.reduce((s, x) => s + x.v, 0) || 1;
+
+  $("tela").innerHTML = `${av.map(t => `<div class="aviso ${t.includes("data-info") ? "info" : ""}">${t}</div>`).join("")}
+  <div class="grid">
+   <div class="card">
+    <div class="cab"><div><h2>🧾 Resumo Financeiro</h2><p>Faturamento ${rotPer}</p></div>${seg(PERIODOS, per, "per")}</div>
+    <div class="fat"><div class="fat-l"><div>
+      <div class="rot">FATURAMENTO ${pill(p.faturamento_delta)}</div>
+      <div class="valor-g">${reais(fat)}</div>
+      <div class="ant">período anterior: <b>${brl(p.faturamento_ant)}</b></div></div>
+      <div class="donut">${donut(margemPct)}<div class="c"><div>MARGEM<b>${num(p.margem_pct, 2)}%</b></div></div></div></div>
+      <div class="comp"><div class="comp-t"><span>COMPOSIÇÃO</span><span style="font-weight:600">6 deduções + margem</span></div>
+        <div class="barra">${comp.map(x => `<i title="${x.nome}: ${brl(x.v)}" style="width:${x.v / somaComp * 100}%;background:${x.cor}"></i>`).join("")}</div>
+        <div class="leg">${comp.map(x => `<span style="--c:${x.cor}">${x.nome}</span>`).join("")}</div></div>
+    </div>
+    <div class="sec">DEDUÇÕES</div>
+    <div class="ded">${p.deducoes.map(x => `<div class="dc" style="--c:var(${COR[x.id]})">
+      <div class="dc-t"><span class="ic">${ICONE[x.id]}</span>${x.id === "cmv" ? "Custos (CMV)" : x.nome}<span class="pill">${num(x.pct, 2)}%</span></div>
+      <div class="dc-v">${reais(x.valor)}</div><div class="prog"><i style="width:${Math.min(100, x.pct * 2)}%"></i></div></div>`).join("")}</div>
+    <div class="baixo">
+      <div class="tk"><div class="l"><span>TICKET MÉDIO</span>${pill(p.ticket_delta)}</div>
+        <div class="v"><span>vendas<b>${brl(p.ticket)}</b></span><span style="text-align:right">margem<b>${brl(p.margem_por_venda)}</b></span></div></div>
+      <div class="mc"><div class="l"><span>✓ MARGEM DE CONTRIBUIÇÃO</span><span class="pill">${num(p.margem_pct, 2)}%</span></div>
+        <div class="v">${reais(p.margem)}</div><div class="s">${pill(p.margem_delta)} ${vs}</div></div>
+    </div>
+   </div>
+
+   <div class="card">
+    <div class="cab"><div><h2>📈 Resumo de Vendas</h2><p>KPIs do período selecionado</p></div>${seg(PERIODOS, per, "per")}</div>
+    <div class="kpis">
+      ${kpi("🛒", "Vendas", num(p.vendas), pill(p.vendas_delta), vs, "#6c4cf1")}
+      ${kpi("⛔", "Cancelados", num(p.cancelados), pill(p.cancelados_delta, true), vs, "#ef4458")}
+      ${kpi("🎯", "Taxa de conversão", p.conversao == null ? "—" : num(p.conversao, 1) + "%", pill(p.conversao_delta),
+            p.visitas ? `${num(p.visitas)} visitas` : "sem visitas ainda", "#6c4cf1")}
+      ${kpi("💲", "Receita", brl(p.receita), pill(p.receita_delta), vs, "#22c55e")}
+    </div>
+    <div class="tend"><div class="tend-t">TENDÊNCIA DE VENDAS <span id="mm"></span></div>${grafico(d.tendencia, pr.chave === "hoje")}</div>
+   </div>
+
+   <div class="card" id="cardAbas"></div>
+
+   <div class="card">
+    <div class="cab"><div><h2>⚡ Pedidos ao vivo</h2><p>Hoje, entrando em tempo real</p></div></div>
+    ${d.ultimos.length ? `<ul class="lista ped">${d.ultimos.map(u => `<li class="${vistos && !vistos.has(u.id) ? "novo" : ""}"
+      style="${u.status === "cancelled" ? "opacity:.45;text-decoration:line-through" : ""}">
+      <span class="h">${horaDe(u.criado)}</span><span class="nm"><b title="${esc(u.titulo)}">${u.unidades > 1 ? u.unidades + "× " : ""}${esc(u.titulo)}</b>
+      <span class="tag ${u.conta}" style="margin:0">${u.conta}</span></span><span class="val">${brl(u.receita)}</span></li>`).join("")}</ul>`
+      : `<div class="vazio">Nenhuma venda hoje ainda.</div>`}
+   </div>
+  </div>`;
+  vistos = new Set(d.ultimos.map(u => u.id));
+  desenharAbas();
 }
 
-function desenhar(d) {
-  const ehHoje = d.dia === hojeBR();
-  $("ponto").className = "ponto" + (ehHoje ? " vivo" : "");
-  const t = d.total, ticket = t.pedidos ? t.faturamento / t.pedidos : 0;
-  const novos = new Set(vistos ? d.ultimos.filter(p => !vistos.has(p.id)).map(p => p.id) : []);
-  vistos = new Set(d.ultimos.map(p => p.id));
+const kpi = (ic, t, v, pl, sub, cor) => `<div class="kp" style="--c:${cor}">
+  <div class="kp-t"><span class="ic" style="--c:${cor}">${ic}</span>${t}${pl}</div>
+  <div class="kp-v"><b>${v}</b><span>${sub}</span></div></div>`;
 
-  const max = Math.max(...d.porHora, 1), hAgora = ehHoje ? +new Intl.DateTimeFormat("en-GB",
-    {timeZone: "America/Sao_Paulo", hour: "2-digit", hourCycle: "h23"}).format(new Date()) : -1;
-
-  const semConta = CONTAS.filter(c => !d.conectadas.includes(c));
-  $("tela").innerHTML = `
-    <div class="barra-dia"><input type="date" id="dia" value="${d.dia}" max="${hojeBR()}">
-      ${ehHoje ? "" : `<button onclick="irPara(hojeBR())">Hoje</button>`}</div>
-
-    ${semConta.length ? `<div class="cx mini">Ainda não conectada${semConta.length > 1 ? "s" : ""}:
-      <b>${semConta.join(", ")}</b> — os números abaixo ${d.conectadas.length ? "não incluem essa(s) conta(s)" : "vão aparecer quando a primeira conta for conectada"}.</div>` : ""}
-
-    <div class="cx">
-      <h2>${ehHoje ? "Hoje" : d.dia.split("-").reverse().join("/")} · 3 contas</h2>
-      <div class="grande">${brl(t.faturamento)}</div>
-      <div class="kpis">
-        <div class="kpi"><b>${t.pedidos}</b><span>pedidos</span></div>
-        <div class="kpi"><b>${t.unidades}</b><span>unidades</span></div>
-        <div class="kpi"><b>${brl(ticket)}</b><span>ticket médio</span></div>
-        <div class="kpi"><b>${brl0(t.tarifa)}</b><span>tarifa ML</span></div>
-      </div>
-    </div>
-
-    <div class="cx"><h2>Por conta</h2><div class="contas">
-      ${d.contas.filter(c => CONTAS.includes(c.conta)).map(c => `
-        <div class="conta t-${c.conta}${d.conectadas.includes(c.conta) ? "" : " off"}">
-          <div class="n">${c.conta}</div><div class="v">${brl0(c.faturamento)}</div>
-          <div class="d">${c.pedidos} pedidos · ${c.unidades} un</div></div>`).join("")}
-    </div></div>
-
-    <div class="cx"><h2>Faturamento por hora</h2>
-      <div class="horas">${d.porHora.map((v, h) =>
-        `<div title="${h}h · ${brl(v)}" class="${h === hAgora ? "agora" : ""}" style="height:${Math.round(v / max * 100)}%"></div>`).join("")}</div>
-      <div class="horas-leg"><span>0h</span><span>6h</span><span>12h</span><span>18h</span><span>23h</span></div>
-    </div>
-
-    <div class="cx"><h2>Últimos pedidos</h2>
-      ${d.ultimos.length ? `<ul class="lista">${d.ultimos.map(p => `
-        <li class="${novos.has(p.id) ? "novo" : ""}"><span class="h">${horaDe(p.criado)}</span>
-          <span class="tag ${p.conta}">${p.conta}</span>
-          <span class="tt" title="${esc(p.titulo)}">${p.unidades > 1 ? `<b>${p.unidades}×</b> ` : ""}${esc(p.titulo)}</span>
-          <span class="val">${brl(p.receita)}</span></li>`).join("")}</ul>` : `<p class="mini">Nenhuma venda ainda.</p>`}
-    </div>
-
-    <div class="cx"><h2>Top itens</h2>
-      ${d.top.length ? `<ul class="lista">${d.top.map((i, n) => `
-        <li><span class="h">${n + 1}º</span><span class="tt" title="${esc(i.titulo)}">${esc(i.titulo)}
-          <span class="mini">${esc(i.sku)}</span></span>
-          <span class="mini">${i.qtd} un</span><span class="val">${brl0(i.valor)}</span></li>`).join("")}</ul>`
-        : `<p class="mini">—</p>`}
-    </div>`;
-  $("dia").onchange = e => irPara(e.target.value);
-  if (novos.size && document.hidden) document.title = `(${novos.size}) ML ao vivo`;
+function donut(pct) {
+  const r = 42, c = 2 * Math.PI * r, v = Math.min(100, pct) / 100 * c;
+  return `<svg viewBox="0 0 104 104" width="100%" height="100%"><circle cx="52" cy="52" r="${r}" fill="none" stroke="#e7f8ee" stroke-width="10"/>
+    <circle cx="52" cy="52" r="${r}" fill="none" stroke="#22c55e" stroke-width="10" stroke-linecap="round"
+      stroke-dasharray="${v} ${c}" transform="rotate(-90 52 52)"/></svg>`;
 }
 
-function irPara(novoDia) { dia = novoDia; vistos = null; carregar(); }
+function grafico(pts, porHora) {
+  if (!pts.length) return "";
+  const W = 600, H = 230, pl = 8, pr = 8, pt = 16, pb = 26;
+  const vals = pts.map(x => x.vendas), max = Math.max(...vals, 1), min = Math.min(...vals);
+  setTimeout(() => { const e = $("mm"); if (e) e.textContent = `máx ${max} · mín ${min}`; });
+  const X = i => pl + i * (W - pl - pr) / Math.max(1, pts.length - 1);
+  const Y = v => pt + (1 - v / max) * (H - pt - pb);
+  const P = pts.map((x, i) => [X(i), Y(x.vendas)]);
+  let d = `M${P[0][0]},${P[0][1]}`;
+  for (let i = 0; i < P.length - 1; i++) {            // curva suave (catmull-rom -> bezier)
+    const p0 = P[i - 1] || P[i], p1 = P[i], p2 = P[i + 1], p3 = P[i + 2] || p2;
+    d += ` C${p1[0] + (p2[0] - p0[0]) / 6},${p1[1] + (p2[1] - p0[1]) / 6} ${p2[0] - (p3[0] - p1[0]) / 6},${p2[1] - (p3[1] - p1[1]) / 6} ${p2[0]},${p2[1]}`;
+  }
+  const dias = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+  const rot = x => porHora ? x.rotulo : (pts.length <= 7 ? dias[new Date(x.rotulo + "T12:00:00").getDay()] : x.rotulo.slice(8) + "/" + x.rotulo.slice(5, 7));
+  const passo = Math.ceil(pts.length / 7);
+  const grade = [0.25, 0.5, 0.75].map(f => `<line x1="${pl}" x2="${W - pr}" y1="${pt + f * (H - pt - pb)}" y2="${pt + f * (H - pt - pb)}" stroke="#eceef4" stroke-dasharray="4 4"/>`).join("");
+  return `<svg class="graf" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+    <defs><linearGradient id="gr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8b6cf5" stop-opacity=".32"/><stop offset="1" stop-color="#8b6cf5" stop-opacity="0"/></linearGradient></defs>
+    ${grade}<path d="${d} L${P.at(-1)[0]},${H - pb} L${P[0][0]},${H - pb} Z" fill="url(#gr)"/>
+    <path d="${d}" fill="none" stroke="#7c4dff" stroke-width="2.5" vector-effect="non-scaling-stroke"/>
+    ${P.map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="3" fill="#fff" stroke="#7c4dff" stroke-width="2" vector-effect="non-scaling-stroke"><title>${rot(pts[i])}: ${pts[i].vendas} vendas · ${brl(pts[i].faturamento)}</title></circle>`).join("")}
+    ${pts.map((x, i) => i % passo === 0 || i === pts.length - 1 ? `<text x="${X(i)}" y="${H - 6}" font-size="11" fill="#7b8095" text-anchor="${i === 0 ? "start" : i === pts.length - 1 ? "end" : "middle"}">${rot(x)}</text>` : "").join("")}
+  </svg>`;
+}
 
-// "atualizado ha Xs" + busca a cada 30s so enquanto a aba esta visivel e o dia e hoje
+function desenharAbas() {
+  const d = dados, todas = !conta;
+  const rotConta = x => todas ? `<span class="tag ${x.conta}">${x.conta}</span>` : "";
+  const img = x => x.thumb ? `<img class="th" loading="lazy" src="${esc(x.thumb)}" alt="">` : `<div class="th"></div>`;
+  const linha = (x, i, dir) => `<li><span class="pos">${i + 1}</span>${img(x)}<div class="nm"><b title="${esc(x.titulo)}">${esc(x.titulo)}</b>
+    <span>${esc(x.sku || "sem SKU")}</span>${rotConta(x)}</div>${dir}</li>`;
+  const listas = {
+    top: [`Vendas ${d.periodo.chave === "hoje" ? "de hoje" : `dos últimos ${d.periodo.n} dias`}`, d.top,
+          x => `<div class="num"><b>${num(x.qtd)}</b><span>unidades</span></div>`],
+    critico: ["Acaba em menos de 15 dias no ritmo de venda dos últimos 30", d.critico,
+          x => `<div class="num alerta"><b>${num(x.estoque)}</b><span>${x.estoque ? `~${num(x.dias, 0)} dias` : "sem estoque"}</span></div>`],
+    inativos: ["Anúncios ativos sem venda há mais de 30 dias", d.inativos,
+          x => `<div class="num"><b>${x.ultima_venda ? diasDesde(x.ultima_venda) : "60+"}</b><span>dias sem venda</span></div>`],
+  };
+  const [sub, itens, dir] = listas[aba];
+  $("cardAbas").innerHTML = `<div class="abas">
+      <button class="${aba === "top" ? "on" : ""}" onclick="trocaAba('top')">📈 Top SKUs</button>
+      <button class="${aba === "critico" ? "on" : ""}" onclick="trocaAba('critico')">⚠️ Estoque crítico<span class="n">${d.critico.length}</span></button>
+      <button class="${aba === "inativos" ? "on" : ""}" onclick="trocaAba('inativos')">🕒 Inatividade<span class="n">${num(d.ativos.inativos || 0)}</span></button></div>
+    <p class="sub">${sub}</p>
+    ${itens.length ? `<ul class="lista">${itens.map((x, i) => linha(x, i, dir(x))).join("")}</ul>` : `<div class="vazio">Nada por aqui.</div>`}`;
+}
+function trocaAba(a) { aba = a; desenharAbas(); }
+const diasDesde = dia => Math.round((new Date(new Intl.DateTimeFormat("en-CA", {timeZone: "America/Sao_Paulo"}).format(new Date()) + "T12:00:00") - new Date(dia + "T12:00:00")) / 864e5);
+
 setInterval(() => {
   if (!ultimaOk) return;
   const s = Math.round((Date.now() - ultimaOk) / 1000);
-  $("status").textContent = dia === hojeBR()
-    ? `ao vivo · atualizado há ${s < 60 ? s + "s" : Math.round(s / 60) + " min"}`
-    : `dia fechado · ${dia.split("-").reverse().join("/")}`;
+  $("status").textContent = `ao vivo · atualizado há ${s < 60 ? s + "s" : Math.round(s / 60) + " min"}`;
 }, 1000);
-setInterval(() => { if (!document.hidden && dia === hojeBR()) carregar(); }, 30000);
-document.addEventListener("visibilitychange", () => {
-  if (!document.hidden) { document.title = "ML ao vivo"; if (dia === hojeBR()) carregar(); }
-});
+setInterval(() => { if (!document.hidden && dados) carregar(); }, 60000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden && dados) carregar(); });
 
 (localStorage.usuario && localStorage.senha) ? carregar() : telaLogin();
 </script>
-</body></html>
+</div></body></html>
