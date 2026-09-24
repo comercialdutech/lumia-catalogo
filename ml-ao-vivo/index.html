@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ML ao vivo</title>
+<meta name="theme-color" content="#111111">
+<link rel="apple-touch-icon" href="../app/icone-192.png">
+<meta name="robots" content="noindex">
+<style>
+ :root{--am:#F8CF39;--ok:#6fd08c}
+ *{box-sizing:border-box}
+ body{font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#111;color:#eee;
+      margin:0;padding:22px 16px 70px;max-width:760px;margin-inline:auto}
+ h1{font-size:20px;margin:0 0 2px}
+ .sub{color:#8d8d8d;font-size:13px;margin:0 0 14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+ .ponto{width:8px;height:8px;border-radius:50%;background:#555;display:inline-block}
+ .ponto.vivo{background:var(--ok);box-shadow:0 0 0 0 rgba(111,208,140,.6);animation:pulsa 2s infinite}
+ @keyframes pulsa{70%{box-shadow:0 0 0 7px rgba(111,208,140,0)}100%{box-shadow:0 0 0 0 rgba(111,208,140,0)}}
+ label{display:block;margin:12px 0 4px;color:#b4b4b4;font-size:13px}
+ input{width:100%;padding:11px;border-radius:9px;border:1px solid #333;background:#1b1b1b;color:#eee;font:16px system-ui}
+ button{background:var(--am);color:#000;font-weight:700;border:0;border-radius:10px;padding:13px 20px;
+        font-size:16px;cursor:pointer;margin-top:16px;width:100%}
+ .cx{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:13px;padding:15px;margin-top:14px}
+ .cx h2{font-size:13px;color:#9a9a9a;font-weight:600;margin:0 0 10px;text-transform:uppercase;letter-spacing:.04em}
+ .erro{color:#ff8d8d}.mini{color:#8d8d8d;font-size:12px}
+ .volta{color:#777;text-decoration:none;font-size:13px}
+ .barra-dia{display:flex;gap:8px;align-items:center}
+ .barra-dia input{width:auto;flex:1;padding:8px}
+ .barra-dia button{width:auto;margin:0;padding:9px 14px;font-size:14px;background:#262626;color:#ddd}
+ .grande{font-size:34px;font-weight:800;color:var(--am);line-height:1.1;font-variant-numeric:tabular-nums}
+ .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+ .kpi{background:#151515;border-radius:10px;padding:9px}
+ .kpi b{display:block;font-size:17px;font-variant-numeric:tabular-nums}
+ .kpi span{color:#8d8d8d;font-size:11.5px}
+ .contas{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+ .conta{background:#151515;border-radius:10px;padding:10px;border-top:3px solid #333}
+ .conta .n{font-weight:700;font-size:14px}.conta .v{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:4px}
+ .conta .d{color:#8d8d8d;font-size:12px}
+ .conta.off{opacity:.45}
+ .t-Dutech{border-top-color:#F8CF39}.t-Lumia{border-top-color:#6fb6ff}.t-Oneway{border-top-color:#c58cff}
+ .tag{font-size:11px;font-weight:700;padding:1px 7px;border-radius:6px;background:#262626;white-space:nowrap}
+ .tag.Dutech{color:#F8CF39}.tag.Lumia{color:#6fb6ff}.tag.Oneway{color:#c58cff}
+ .horas{display:flex;align-items:flex-end;gap:3px;height:110px}
+ .horas div{flex:1;background:#2c2c2c;border-radius:3px 3px 0 0;min-height:2px;position:relative}
+ .horas div.agora{background:var(--am)}
+ .horas-leg{display:flex;justify-content:space-between;color:#666;font-size:11px;margin-top:4px}
+ .lista{list-style:none;margin:0;padding:0}
+ .lista li{display:flex;gap:9px;align-items:center;padding:8px 0;border-bottom:1px solid #232323;font-size:14px}
+ .lista li:last-child{border-bottom:0}
+ .lista .h{color:#8d8d8d;font-variant-numeric:tabular-nums;width:42px;flex:none}
+ .lista .tt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .lista .val{font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+ .novo{animation:brilho 2.5s ease-out}
+ @keyframes brilho{from{background:rgba(248,207,57,.22)}to{background:transparent}}
+ @media (max-width:520px){.kpis{grid-template-columns:repeat(2,1fr)}.contas{grid-template-columns:1fr}.grande{font-size:30px}}
+</style></head><body>
+
+<a class="volta" href="../hub/">‹ Ferramentas</a>
+<h1>Mercado Livre ao vivo</h1>
+<p class="sub"><span class="ponto" id="ponto"></span><span id="status">carregando…</span></p>
+
+<div id="tela"></div>
+
+<script>
+const PROXY = "https://ml-vivo.dutech.workers.dev";
+const CONTAS = ["Dutech", "Lumia", "Oneway"];
+const cab = () => ({authorization: `Bearer ${localStorage.usuario || ""}:${localStorage.senha || ""}`});
+const $ = id => document.getElementById(id);
+const brl = n => (n || 0).toLocaleString("pt-BR", {style: "currency", currency: "BRL"});
+const brl0 = n => (n || 0).toLocaleString("pt-BR", {style: "currency", currency: "BRL", maximumFractionDigits: 0});
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const hojeBR = () => new Intl.DateTimeFormat("en-CA", {timeZone: "America/Sao_Paulo"}).format(new Date());
+const horaDe = iso => new Intl.DateTimeFormat("pt-BR", {timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit"}).format(new Date(iso));
+
+let dia = hojeBR(), vistos = null, ultimaOk = 0, timer = null;
+
+function telaLogin(aviso) {
+  $("status").textContent = "entre para ver";
+  $("tela").innerHTML = `<div class="cx">${aviso ? `<p class="erro">${aviso}</p>` : ""}
+    <label>Usuário</label><input id="u" autocapitalize="none">
+    <label>Senha</label><input id="s" type="password">
+    <button onclick="entrar()">Entrar</button></div>`;
+}
+function entrar() { localStorage.usuario = $("u").value.trim(); localStorage.senha = $("s").value; carregar(); }
+
+async function carregar() {
+  let r;
+  try { r = await fetch(`${PROXY}/?dia=${dia}`, {headers: cab()}); }
+  catch { $("status").textContent = "sem conexão — tentando de novo"; $("ponto").className = "ponto"; return; }
+  if (r.status === 401) return telaLogin(localStorage.usuario ? "Usuário ou senha errados (precisa ser da equipe)." : "");
+  const d = await r.json();
+  ultimaOk = Date.now();
+  desenhar(d);
+}
+
+function desenhar(d) {
+  const ehHoje = d.dia === hojeBR();
+  $("ponto").className = "ponto" + (ehHoje ? " vivo" : "");
+  const t = d.total, ticket = t.pedidos ? t.faturamento / t.pedidos : 0;
+  const novos = new Set(vistos ? d.ultimos.filter(p => !vistos.has(p.id)).map(p => p.id) : []);
+  vistos = new Set(d.ultimos.map(p => p.id));
+
+  const max = Math.max(...d.porHora, 1), hAgora = ehHoje ? +new Intl.DateTimeFormat("en-GB",
+    {timeZone: "America/Sao_Paulo", hour: "2-digit", hourCycle: "h23"}).format(new Date()) : -1;
+
+  const semConta = CONTAS.filter(c => !d.conectadas.includes(c));
+  $("tela").innerHTML = `
+    <div class="barra-dia"><input type="date" id="dia" value="${d.dia}" max="${hojeBR()}">
+      ${ehHoje ? "" : `<button onclick="irPara(hojeBR())">Hoje</button>`}</div>
+
+    ${semConta.length ? `<div class="cx mini">Ainda não conectada${semConta.length > 1 ? "s" : ""}:
+      <b>${semConta.join(", ")}</b> — os números abaixo ${d.conectadas.length ? "não incluem essa(s) conta(s)" : "vão aparecer quando a primeira conta for conectada"}.</div>` : ""}
+
+    <div class="cx">
+      <h2>${ehHoje ? "Hoje" : d.dia.split("-").reverse().join("/")} · 3 contas</h2>
+      <div class="grande">${brl(t.faturamento)}</div>
+      <div class="kpis">
+        <div class="kpi"><b>${t.pedidos}</b><span>pedidos</span></div>
+        <div class="kpi"><b>${t.unidades}</b><span>unidades</span></div>
+        <div class="kpi"><b>${brl(ticket)}</b><span>ticket médio</span></div>
+        <div class="kpi"><b>${brl0(t.tarifa)}</b><span>tarifa ML</span></div>
+      </div>
+    </div>
+
+    <div class="cx"><h2>Por conta</h2><div class="contas">
+      ${d.contas.filter(c => CONTAS.includes(c.conta)).map(c => `
+        <div class="conta t-${c.conta}${d.conectadas.includes(c.conta) ? "" : " off"}">
+          <div class="n">${c.conta}</div><div class="v">${brl0(c.faturamento)}</div>
+          <div class="d">${c.pedidos} pedidos · ${c.unidades} un</div></div>`).join("")}
+    </div></div>
+
+    <div class="cx"><h2>Faturamento por hora</h2>
+      <div class="horas">${d.porHora.map((v, h) =>
+        `<div title="${h}h · ${brl(v)}" class="${h === hAgora ? "agora" : ""}" style="height:${Math.round(v / max * 100)}%"></div>`).join("")}</div>
+      <div class="horas-leg"><span>0h</span><span>6h</span><span>12h</span><span>18h</span><span>23h</span></div>
+    </div>
+
+    <div class="cx"><h2>Últimos pedidos</h2>
+      ${d.ultimos.length ? `<ul class="lista">${d.ultimos.map(p => `
+        <li class="${novos.has(p.id) ? "novo" : ""}"><span class="h">${horaDe(p.criado)}</span>
+          <span class="tag ${p.conta}">${p.conta}</span>
+          <span class="tt" title="${esc(p.titulo)}">${p.unidades > 1 ? `<b>${p.unidades}×</b> ` : ""}${esc(p.titulo)}</span>
+          <span class="val">${brl(p.receita)}</span></li>`).join("")}</ul>` : `<p class="mini">Nenhuma venda ainda.</p>`}
+    </div>
+
+    <div class="cx"><h2>Top itens</h2>
+      ${d.top.length ? `<ul class="lista">${d.top.map((i, n) => `
+        <li><span class="h">${n + 1}º</span><span class="tt" title="${esc(i.titulo)}">${esc(i.titulo)}
+          <span class="mini">${esc(i.sku)}</span></span>
+          <span class="mini">${i.qtd} un</span><span class="val">${brl0(i.valor)}</span></li>`).join("")}</ul>`
+        : `<p class="mini">—</p>`}
+    </div>`;
+  $("dia").onchange = e => irPara(e.target.value);
+  if (novos.size && document.hidden) document.title = `(${novos.size}) ML ao vivo`;
+}
+
+function irPara(novoDia) { dia = novoDia; vistos = null; carregar(); }
+
+// "atualizado ha Xs" + busca a cada 30s so enquanto a aba esta visivel e o dia e hoje
+setInterval(() => {
+  if (!ultimaOk) return;
+  const s = Math.round((Date.now() - ultimaOk) / 1000);
+  $("status").textContent = dia === hojeBR()
+    ? `ao vivo · atualizado há ${s < 60 ? s + "s" : Math.round(s / 60) + " min"}`
+    : `dia fechado · ${dia.split("-").reverse().join("/")}`;
+}, 1000);
+setInterval(() => { if (!document.hidden && dia === hojeBR()) carregar(); }, 30000);
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) { document.title = "ML ao vivo"; if (dia === hojeBR()) carregar(); }
+});
+
+(localStorage.usuario && localStorage.senha) ? carregar() : telaLogin();
+</script>
+</body></html>
