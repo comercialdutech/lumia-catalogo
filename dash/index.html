@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dashboards</title>
+<meta name="theme-color" content="#111111">
+<link rel="apple-touch-icon" href="../app/icone-192.png">
+<meta name="robots" content="noindex">
+<style>
+ @font-face{font-family:"Buvera";font-weight:400;src:url(../marca/Buvera-Regular.ttf) format("truetype");font-display:swap}
+ @font-face{font-family:"Buvera";font-weight:800;src:url(../marca/Buvera-ExtraBold.ttf) format("truetype");font-display:swap}
+ :root{--am:#FFD100}
+ *{box-sizing:border-box}
+ body{font:16px/1.45 "Buvera",system-ui,"Segoe UI",Roboto,sans-serif;background:#111;color:#eee;
+      margin:0;padding:22px 16px 60px;max-width:640px;margin-inline:auto}
+ h1{font-size:22px;font-weight:800;margin:0 0 2px}
+ .sub{color:#8d8d8d;font-size:13px;margin:0 0 20px}
+ .volta{color:#777;text-decoration:none;font-size:13px}
+ a.cartao{display:flex;gap:14px;align-items:center;text-decoration:none;color:inherit;background:#1a1a1a;
+   border:1px solid #2a2a2a;border-left:3px solid var(--am);border-radius:14px;padding:16px;margin-bottom:12px}
+ .tit{font-weight:700}.desc{color:#9a9a9a;font-size:13px}.seta{margin-left:auto;color:#555;font-size:22px}
+ label{display:block;margin:12px 0 4px;color:#b4b4b4;font-size:13px}
+ input{width:100%;padding:11px;border-radius:9px;border:1px solid #333;background:#1b1b1b;color:#eee;font:inherit}
+ button{background:var(--am);color:#000;font-weight:700;border:0;border-radius:10px;padding:13px;font:inherit;
+   font-weight:700;width:100%;margin-top:16px;cursor:pointer}
+ .erro{color:#ff8d8d;margin-top:12px}.msg{color:#9a9a9a;margin-top:30px;text-align:center}
+</style></head><body>
+<a class="volta" href="../hub/">‹ Ferramentas</a>
+<h1>Dashboards</h1>
+<p class="sub">Vendas, estoque e resultado · atualizadas 12h, 18h e 21h</p>
+<div id="tela"><div class="msg">carregando…</div></div>
+<script>
+// Pede a pagina pronta ao worker dash com o login do hub e desenha ela aqui (o HTML das
+// dashboards e autocontido). Quem nao e da equipe so recebe o que pode ver (ex.: so a Oneway).
+const DASH = "https://dash.dutech.workers.dev";
+const NOMES = {Dutech: "Dutech", Lumia: "Lumia", Oneway: "OneWay", MACRO: "MACRO (Dutech + Lumia)", painel: "Painel geral"};
+const $ = id => document.getElementById(id);
+const cab = () => ({authorization: `Bearer ${localStorage.usuario || ""}:${localStorage.senha || ""}`});
+const emp = new URLSearchParams(location.search).get("emp");
+
+function telaLogin(erro) {
+  $("tela").innerHTML = `<label>Usuário</label><input id="u" autocomplete="username">
+    <label>Senha</label><input id="s" type="password" autocomplete="current-password">
+    <button id="ok">Entrar</button>${erro ? `<div class="erro">${erro}</div>` : ""}`;
+  $("ok").onclick = () => { localStorage.usuario = $("u").value.trim(); localStorage.senha = $("s").value; iniciar(); };
+}
+
+async function pedir(caminho) {
+  let r;
+  try { r = await fetch(DASH + caminho, {headers: cab()}); }
+  catch (e) { $("tela").innerHTML = `<div class="erro">Sem conexão com o servidor. Tente de novo.</div>`; return null; }
+  if (r.status === 401) { telaLogin(localStorage.usuario ? "Usuário ou senha errados." : ""); return null; }
+  if (!r.ok) { $("tela").innerHTML = `<div class="erro">${(await r.json()).erro || "erro " + r.status}</div>`; return null; }
+  return r;
+}
+
+async function iniciar() {
+  if (emp) {
+    $("tela").innerHTML = `<div class="msg">abrindo ${NOMES[emp] || emp}…</div>`;
+    const r = await pedir(`/pagina?emp=${encodeURIComponent(emp)}`);
+    if (!r) return;
+    const voltar = `<a href="./" style="position:fixed;left:10px;bottom:10px;z-index:99999;background:#111;color:#FFD100;
+      font:600 13px system-ui;padding:7px 11px;border-radius:9px;text-decoration:none;opacity:.85">‹ Dashboards</a>`;
+    const html = (await r.text()).replace("</body>", voltar + "</body>");
+    document.open(); document.write(html); document.close();
+    return;
+  }
+  const r = await pedir("/lista");
+  if (!r) return;
+  const {paginas} = await r.json();
+  const quando = iso => new Date(iso).toLocaleString("pt-BR", {day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"});
+  $("tela").innerHTML = paginas.length ? paginas.map(p => `<a class="cartao" href="?emp=${p.emp}">
+      <div><div class="tit">${NOMES[p.emp] || p.emp}</div><div class="desc">atualizada em ${quando(p.em)}</div></div>
+      <div class="seta">›</div></a>`).join("") + `<div class="desc" style="text-align:center;margin-top:18px">
+      logado como ${localStorage.usuario} · <a href="#" id="sair" style="color:#999">sair</a></div>`
+    : `<div class="msg">Nenhuma dashboard disponível para este login.</div>`;
+  const s = $("sair"); if (s) s.onclick = e => { e.preventDefault(); delete localStorage.usuario; delete localStorage.senha; telaLogin(); };
+}
+(localStorage.usuario && localStorage.senha) ? iniciar() : telaLogin();
+</script>
+</body></html>
