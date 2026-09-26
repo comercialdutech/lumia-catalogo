@@ -29,6 +29,9 @@
 <p class="sub">Vendas, estoque e resultado · atualizadas 12h, 18h e 21h</p>
 <div id="tela"><div class="msg">carregando…</div></div>
 <script>
+// Tudo dentro de um bloco: o document.write abaixo NAO troca o escopo global da pagina, e a
+// dashboard declara nomes como `cab` -> "already declared" e ela ficava em branco.
+(() => {
 // Pede a pagina pronta ao worker dash com o login do hub e desenha ela aqui (o HTML das
 // dashboards e autocontido). Quem nao e da equipe so recebe o que pode ver (ex.: so a Oneway).
 // passa pelo worker do hub (/dash/...): o endereco proprio do dash nao resolve em alguns roteadores
@@ -62,6 +65,8 @@ async function iniciar() {
     const voltar = `<a href="./" style="position:fixed;left:10px;bottom:10px;z-index:99999;background:#111;color:#FFD100;
       font:600 13px system-ui;padding:7px 11px;border-radius:9px;text-decoration:none;opacity:.85">‹ Dashboards</a>`;
     const html = (await r.text()).replace("</body>", voltar + "</body>");
+    // a dashboard descobre a empresa pelo nome da pasta, que aqui nao existe
+    window.EMP_NUVEM = {Dutech: "DUTECH", Lumia: "LUMIA", Oneway: "ONEWAY", MACRO: "MACRO"}[emp];
     document.open(); document.write(html); document.close();
     return;
   }
@@ -77,5 +82,6 @@ async function iniciar() {
   const s = $("sair"); if (s) s.onclick = e => { e.preventDefault(); delete localStorage.usuario; delete localStorage.senha; telaLogin(); };
 }
 (localStorage.usuario && localStorage.senha) ? iniciar() : telaLogin();
+})();
 </script>
 </body></html>
