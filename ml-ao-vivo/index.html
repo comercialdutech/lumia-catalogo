@@ -25,7 +25,9 @@
  .dir{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
  .chip{background:var(--card);border:1px solid var(--borda);border-radius:10px;padding:7px 12px;color:var(--mut);white-space:nowrap}
  .chip b{color:var(--txt);font-size:15px;margin-right:4px}
- .seg{display:inline-flex;background:#eceef4;border-radius:10px;padding:3px;gap:2px}
+ .seg{display:inline-flex;flex-wrap:wrap;background:#eceef4;border-radius:10px;padding:3px;gap:2px}
+ .datas{display:inline-flex;gap:6px;align-items:center;margin-left:6px;font-size:12.5px;color:var(--mut)}
+ .datas input{border:1px solid var(--borda);border-radius:8px;padding:5px 7px;font-family:inherit;font-size:13px;background:#fff}
  .seg button{border:0;background:transparent;padding:6px 12px;border-radius:8px;font-family:inherit;font-weight:600;font-size:13px;color:var(--mut);cursor:pointer}
  .seg button.on{background:#fff;color:var(--txt);box-shadow:0 1px 2px rgba(0,0,0,.08)}
  .aviso{background:#fff8e6;border:1px solid #f6dfa0;color:#7a5b00;border-radius:10px;padding:9px 12px;margin-bottom:10px;font-size:13px}
@@ -143,7 +145,7 @@
 <script>
 const PROXY = "https://ml-vivo.dutech.workers.dev";
 const CONTAS = ["Dutech", "Lumia", "Oneway"];
-const PERIODOS = [["hoje", "Hoje"], ["7d", "7d"], ["15d", "15d"], ["30d", "30d"]];
+const PERIODOS = [["hoje", "Hoje"], ["7d", "7d"], ["15d", "15d"], ["30d", "30d"], ["mes", "Este mês"], ["mesant", "Mês passado"], ["custom", "Personalizado"]];
 const COR = {cmv: "--cmv", tarifa: "--tarifa", imposto: "--imposto", frete: "--frete", cancel: "--cancel", ads: "--ads"};
 const ICONE = {cmv: "📦", tarifa: "🏷️", imposto: "🏛️", frete: "🚚", cancel: "⛔", ads: "📣"};
 const cab = () => ({authorization: `Bearer ${localStorage.usuario || ""}:${localStorage.senha || ""}`});
@@ -161,6 +163,18 @@ function pill(d, inverso = false) {          // inverso: cancelado subir e ruim
 
 let per = localStorage.mlPer || "7d", conta = localStorage.mlConta || "", dados = null, vistos = null, ultimaOk = 0, aba = "top";
 // "Detalhe financeiro": venda a venda, como o Resumo financeiro das dashboards
+const hojeBR = () => new Intl.DateTimeFormat("en-CA", {timeZone: "America/Sao_Paulo"}).format(new Date());
+const menosDias = (d, n) => new Date(Date.parse(d + "T12:00:00Z") - n * 864e5).toISOString().slice(0, 10);
+const dm = d => d.slice(8) + "/" + d.slice(5, 7);
+let pDe = localStorage.mlDe || menosDias(hojeBR(), 6), pAte = localStorage.mlAte || hojeBR();
+const rotuloPer = pr => ({hoje: "hoje", mes: "este mês", mesant: "mês passado"})[pr.chave]
+  || (pr.chave === "custom" ? (pr.de === pr.ate ? `em ${dm(pr.de)}` : `de ${dm(pr.de)} a ${dm(pr.ate)}`) : `últimos ${pr.n} dias`);
+const vsPer = pr => pr.chave === "hoje" ? "vs ontem" : pr.chave === "mes" ? "vs mesmos dias do mês anterior"
+  : pr.chave === "mesant" ? "vs mês anterior" : pr.chave === "custom" ? `vs ${pr.n} dia(s) antes` : `vs ${pr.n}d atrás`;
+const segPer = () => seg(PERIODOS, per, "per") + (per === "custom" ? `<span class="datas">
+  <input type="date" value="${pDe}" max="${hojeBR()}" onchange="mudaData('de', this.value)"> até
+  <input type="date" value="${pAte}" max="${hojeBR()}" onchange="mudaData('ate', this.value)"></span>` : "");
+function mudaData(k, v) { if (!v) return; if (k === "de") { pDe = v; localStorage.mlDe = v; } else { pAte = v; localStorage.mlAte = v; } carregar(); }
 let vista = localStorage.mlVista || "geral", det = null, detOrd = [1, -1], detBusca = "", detAgr = "venda";
 
 function telaLogin(aviso) {
@@ -175,7 +189,7 @@ function entrar() { localStorage.usuario = $("u").value.trim(); localStorage.sen
 
 async function carregar() {
   let r;
-  const qs = `periodo=${per}&conta=${conta}${vista === "detalhe" ? "&detalhe=1" : ""}`;
+  const qs = `periodo=${per}&conta=${conta}${per === "custom" ? `&de=${pDe}&ate=${pAte}` : ""}${vista === "detalhe" ? "&detalhe=1" : ""}`;
   try { r = await fetch(`${PROXY}/?${qs}`, {headers: cab()}); }
   catch { $("status").textContent = "sem conexão — tentando de novo"; $("ponto").className = "ponto"; return; }
   if (r.status === 401) return telaLogin(localStorage.usuario ? "Usuário ou senha errados (precisa ser da equipe)." : "");
@@ -232,7 +246,7 @@ function desenharDetalhe() {
   const seta = i => ci === i ? (dir > 0 ? " ▲" : " ▼") : "";
   const MAX = 500, foco = document.activeElement && document.activeElement.id === "detBusca";
   $("tela").innerHTML = `<div class="card">
-    <div class="cab"><div><h2>🧾 Detalhe financeiro</h2><p>Venda a venda · ${det.periodo.chave === "hoje" ? "hoje" : `últimos ${det.periodo.n} dias`} · só vendas válidas (canceladas ficam fora) · margem antes dos Ads, que não são por venda</p></div>${seg(PERIODOS, per, "per")}</div>
+    <div class="cab"><div><h2>🧾 Detalhe financeiro</h2><p>Venda a venda · ${rotuloPer(det.periodo)} · só vendas válidas (canceladas ficam fora) · margem antes dos Ads, que não são por venda</p></div>${segPer()}</div>
     ${semCusto || pend ? `<div class="aviso">${semCusto ? `${num(semCusto)} venda(s) sem custo cadastrado no Tiny/Bling — a margem delas não desconta o produto. ` : ""}${pend ? `${num(pend)} com frete ainda sendo buscado no ML.` : ""}</div>` : ""}
     <div class="tot">${[["Receita", T[0]], ["Tarifa ML", T[1]], ["Frete", T[2]], ["Imposto", T[3]], ["Custo (CMV)", T[4]], ["Margem", T[5]]]
       .map(([t, x]) => `<div><span>${t}</span><b class="${t === "Margem" && x < 0 ? "neg-v" : ""}">${brl(x)}</b></div>`).join("")}
@@ -257,18 +271,18 @@ const seg = (itens, atual, k) => `<div class="seg">${itens.map(([v, t]) =>
 
 function desenhar() {
   const d = dados, p = d.painel, pr = d.periodo;
-  const rotPer = pr.chave === "hoje" ? "hoje" : `últimos ${pr.n} dias`;
-  const vs = pr.chave === "hoje" ? "vs ontem" : `vs ${pr.n}d atrás`;
+  const rotPer = rotuloPer(pr), vs = vsPer(pr);
   $("ponto").className = "ponto on";
   $("dir").innerHTML = seg([["", "Todas"], ...CONTAS.map(c => [c, c])], conta, "conta") +
     `<span class="chip"><b>${num(d.ativos.anuncios)}</b>anúncios ativos</span><span class="chip"><b>${num(d.ativos.skus)}</b>SKUs ativos</span>`;
 
   // avisos de qualidade do dado
   const av = [];
-  const faltam = CONTAS.filter(c => !d.conectadas.includes(c));
+  const faltam = (d.conta === "Todas" ? CONTAS : [d.conta]).filter(c => !d.conectadas.includes(c));   // so as que o login ve
   if (faltam.length) av.push(`Conta${faltam.length > 1 ? "s" : ""} ainda não conectada${faltam.length > 1 ? "s" : ""}: <b>${faltam.join(", ")}</b>.`);
   const carreg = d.historico.filter(h => !h.completo);
-  if (carreg.length) av.push(`<span data-info>Carregando o histórico de 60 dias (para comparar com o período anterior): ${carreg.map(h => `${h.conta} ${h.pct}%`).join(" · ")}. Os “vs” ficam certos quando terminar.</span>`);
+  if (carreg.length) av.push(`<span data-info>Carregando o histórico de 95 dias (para comparar com o período anterior): ${carreg.map(h => `${h.conta} ${h.pct}%`).join(" · ")}. Os “vs” ficam certos quando terminar.</span>`);
+  if (pr.corte) av.push(`O painel guarda só os últimos 95 dias: o período foi ajustado para começar em ${dm(pr.de)}.`);
   if (d.sem_custo.length) av.push(`Sem custo/imposto cadastrado para ${d.sem_custo.join(", ")} — o CMV fica zerado até o envio das 23h.`);
   if (p.frete_pendente) av.push(`Frete de ${num(p.frete_pendente)} envio(s) ainda sendo buscado no ML — a margem pode cair um pouco.`);
   if (p.receita && p.cmv_cobertura < 95) av.push(`O custo do Tiny/Bling cobre ${num(p.cmv_cobertura, 0)}% da receita — produto sem custo cadastrado entra com CMV zero.`);
@@ -281,7 +295,7 @@ function desenhar() {
   $("tela").innerHTML = `${av.map(t => `<div class="aviso ${t.includes("data-info") ? "info" : ""}">${t}</div>`).join("")}
   <div class="grid">
    <div class="card">
-    <div class="cab"><div><h2>🧾 Resumo Financeiro</h2><p>Faturamento ${rotPer}</p></div>${seg(PERIODOS, per, "per")}</div>
+    <div class="cab"><div><h2>🧾 Resumo Financeiro</h2><p>Faturamento ${rotPer}</p></div>${segPer()}</div>
     <div class="fat"><div class="fat-l"><div>
       <div class="rot">FATURAMENTO ${pill(p.faturamento_delta)}</div>
       <div class="valor-g">${reais(fat)}</div>
@@ -304,7 +318,7 @@ function desenhar() {
    </div>
 
    <div class="card">
-    <div class="cab"><div><h2>📈 Resumo de Vendas</h2><p>KPIs do período selecionado</p></div>${seg(PERIODOS, per, "per")}</div>
+    <div class="cab"><div><h2>📈 Resumo de Vendas</h2><p>KPIs do período selecionado</p></div>${segPer()}</div>
     <div class="kpis">
       ${kpi("🛒", "Vendas", num(p.vendas), pill(p.vendas_delta), vs, "#0A0A0B")}
       ${kpi("⛔", "Cancelados", num(p.cancelados), pill(p.cancelados_delta, true), vs, "#ef4458")}
@@ -374,7 +388,7 @@ function desenharAbas() {
   const linha = (x, i, dir) => `<li><span class="pos">${i + 1}</span>${img(x)}<div class="nm"><b title="${esc(x.titulo)}">${esc(x.titulo)}</b>
     <span>${esc(x.sku || "sem SKU")}</span>${rotConta(x)}</div>${dir}</li>`;
   const listas = {
-    top: [`Vendas ${d.periodo.chave === "hoje" ? "de hoje" : `dos últimos ${d.periodo.n} dias`}`, d.top,
+    top: [`Vendas ${d.periodo.chave === "hoje" ? "de hoje" : rotuloPer(d.periodo)}`, d.top,
           x => `<div class="num"><b>${num(x.qtd)}</b><span>unidades</span></div>`],
     critico: ["Acaba em menos de 15 dias no ritmo de venda dos últimos 30", d.critico,
           x => `<div class="num alerta"><b>${num(x.estoque)}</b><span>${x.estoque ? `~${num(x.dias, 0)} dias` : "sem estoque"}</span></div>`],
@@ -397,7 +411,7 @@ setInterval(() => {
   const s = Math.round((Date.now() - ultimaOk) / 1000);
   $("status").textContent = `ao vivo · atualizado há ${s < 60 ? s + "s" : Math.round(s / 60) + " min"}`;
 }, 1000);
-setInterval(() => { if (!document.hidden && (dados || det) && document.activeElement?.id !== "detBusca") carregar(); }, 60000);
+setInterval(() => { if (!document.hidden && (dados || det) && document.activeElement?.tagName !== "INPUT") carregar(); }, 60000);   // nao atropela busca/data sendo digitada
 document.addEventListener("visibilitychange", () => { if (!document.hidden && (dados || det)) carregar(); });
 
 (localStorage.usuario && localStorage.senha) ? carregar() : telaLogin();
