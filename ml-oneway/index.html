@@ -109,6 +109,23 @@
  .login input{width:100%;padding:11px;border-radius:9px;border:1px solid var(--borda);font-family:inherit;font-size:15px}
  .login button{width:100%;margin-top:16px;background:var(--roxo);color:#fff;border:0;border-radius:10px;padding:12px;font-family:inherit;font-weight:700;font-size:15px;cursor:pointer}
  .erro{color:var(--verm)}
+ .vistas{display:flex;gap:6px;margin:0 0 14px}
+ .vistas button{border:1px solid var(--borda);background:var(--card);border-radius:10px;padding:8px 14px;font-family:inherit;font-weight:600;font-size:13.5px;color:var(--mut);cursor:pointer}
+ .vistas button.on{color:var(--txt);border-color:var(--txt)}
+ .ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:4px 0 12px}
+ .ctl input,.ctl select{border:1px solid var(--borda);border-radius:9px;padding:8px 10px;font-family:inherit;font-size:13.5px;background:#fff}
+ .ctl input{flex:1;min-width:180px}
+ .tot{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:12px}
+ .tot div{background:#f7f8fb;border-radius:10px;padding:9px 10px}.tot span{display:block;font-size:11px;color:var(--mut);font-weight:600}
+ .tot b{font-size:15px;font-variant-numeric:tabular-nums}
+ .tab{overflow-x:auto;border:1px solid var(--borda);border-radius:12px}
+ .tab table{width:100%;border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums}
+ .tab th{position:sticky;top:0;background:#f7f8fb;text-align:right;padding:9px 10px;font-weight:700;color:var(--mut);cursor:pointer;white-space:nowrap;user-select:none}
+ .tab th:nth-child(-n+3),.tab td:nth-child(-n+3){text-align:left}
+ .tab td{padding:8px 10px;border-top:1px solid var(--borda);text-align:right;white-space:nowrap}
+ .tab td.pr{white-space:normal;min-width:220px}.tab td.pr span{display:block;color:var(--mut);font-size:11.5px}
+ .tab tr.neg td{background:#fff4f5}.neg-v{color:var(--verm);font-weight:700}.sc{color:var(--mut)}
+ @media (max-width:760px){.tot{grid-template-columns:repeat(2,1fr)}}
  @media (max-width:980px){.grid{grid-template-columns:1fr}}
  @media (max-width:560px){body{padding:12px 10px 50px}.ded,.kpis,.baixo{grid-template-columns:1fr}.valor-g{font-size:32px}
    .donut{width:84px;height:84px}.card{padding:15px}.dir{margin-left:0}}
@@ -120,6 +137,7 @@
   <div class="vivo"><span class="ponto" id="ponto"></span><span id="status">carregando…</span></div>
   <div class="dir" id="dir"></div>
 </div>
+<div class="vistas" id="vistas"></div>
 <div id="tela"></div>
 
 <script>
@@ -142,6 +160,8 @@ function pill(d, inverso = false) {          // inverso: cancelado subir e ruim
 }
 
 let per = localStorage.mlPer || "7d", conta = "Oneway", dados = null, vistos = null, ultimaOk = 0, aba = "top";
+// "Detalhe financeiro": venda a venda, como o Resumo financeiro das dashboards
+let vista = localStorage.mlVista || "geral", det = null, detOrd = [1, -1], detBusca = "", detAgr = "venda";
 
 function telaLogin(aviso) {
   $("status").textContent = "entre para ver"; $("dir").innerHTML = "";
@@ -155,11 +175,80 @@ function entrar() { localStorage.usuario = $("u").value.trim(); localStorage.sen
 
 async function carregar() {
   let r;
-  try { r = await fetch(`${PROXY}/?periodo=${per}&conta=${conta}`, {headers: cab()}); }
+  const qs = `periodo=${per}&conta=${conta}${vista === "detalhe" ? "&detalhe=1" : ""}`;
+  try { r = await fetch(`${PROXY}/?${qs}`, {headers: cab()}); }
   catch { $("status").textContent = "sem conexão — tentando de novo"; $("ponto").className = "ponto"; return; }
   if (r.status === 401) return telaLogin(localStorage.usuario ? "Usuário ou senha errados (precisa ser da equipe)." : "");
-  dados = await r.json(); ultimaOk = Date.now(); desenhar();
+  const j = await r.json(); ultimaOk = Date.now();
+  desenharVistas();
+  if (vista === "detalhe") { det = j; desenharDetalhe(); } else { dados = j; desenhar(); }
 }
+function desenharVistas() {
+  $("vistas").innerHTML = [["geral", "📊 Visão geral"], ["detalhe", "🧾 Detalhe financeiro"]].map(([v, t]) =>
+    `<button class="${v === vista ? "on" : ""}" onclick="trocaVista('${v}')">${t}</button>`).join("");
+}
+function trocaVista(v) { vista = v; localStorage.mlVista = v; $("tela").innerHTML = `<div class="vazio">carregando…</div>`; carregar(); }
+
+// linha = [dia, criado, conta, pedido, sku, titulo, qtd, receita, tarifa, frete, imposto, cmv, margem, fretePendente]
+const COLS = [["Data", 0], ["Produto", 5], ["Conta", 2], ["Qtd", 6], ["Receita", 7], ["Tarifa ML", 8], ["Frete", 9],
+              ["Imposto", 10], ["Custo", 11], ["Margem", 12], ["%", 99]];
+function linhasAgrupadas() {
+  const q = detBusca.trim().toLowerCase();
+  const L = det.linhas.filter(l => !q || (l[5] + " " + l[4] + " " + l[3]).toLowerCase().includes(q));
+  if (detAgr === "venda") return L;
+  const g = new Map();
+  for (const l of L) {
+    const k = detAgr === "produto" ? l[2] + "|" + (l[4] || l[5]) : l[0];
+    if (!g.has(k)) g.set(k, [detAgr === "dia" ? l[0] : "", "", detAgr === "produto" ? l[2] : "", "",
+                             detAgr === "produto" ? l[4] : "", detAgr === "produto" ? l[5] : "", 0, 0, 0, 0, 0, null, 0, false, 0]);
+    const a = g.get(k);
+    for (const i of [6, 7, 8, 9, 10, 12]) a[i] += l[i] || 0;
+    if (l[11] == null) a[14]++; else a[11] = (a[11] || 0) + l[11];   // [14] = vendas sem custo no grupo
+    a[13] = a[13] || l[13];
+  }
+  return [...g.values()];
+}
+function desenharDetalhe() {
+  if (!det || !det.linhas) return;
+  
+  const todas = !conta, L = linhasAgrupadas(), [ci, dir] = detOrd;
+  const val = l => ci === 99 ? (l[7] ? l[12] / l[7] : 0) : l[ci];
+  L.sort((a, b) => { const x = val(a), y = val(b); return (x == null) - (y == null) || (x < y ? -dir : x > y ? dir : 0); });
+  const T = [7, 8, 9, 10, 11, 12].map(i => L.reduce((s, l) => s + (l[i] || 0), 0));
+  const semCusto = det.linhas.filter(l => l[11] == null).length, pend = det.linhas.filter(l => l[13]).length;
+  const pct = (a, b) => b ? num(a / b * 100, 1) + "%" : "—";
+  const cols = COLS.filter(([, i]) => todas || i !== 2);
+  const cel = l => cols.map(([, i]) => {
+    if (i === 0) return `<td>${detAgr === "produto" ? "" : l[0].slice(8) + "/" + l[0].slice(5, 7)}${detAgr === "venda" ? `<br><span class="sc">${horaDe(l[1])}</span>` : ""}</td>`;
+    if (i === 5) return `<td class="pr">${detAgr === "dia" ? "todas as vendas do dia" : esc(l[5])}${detAgr === "dia" ? "" : `<span>${esc(l[4] || "sem SKU")}${detAgr === "venda" ? " · pedido " + l[3] : ""}</span>`}</td>`;
+    if (i === 2) return `<td>${l[2] ? `<span class="tag ${l[2]}" style="margin:0">${l[2]}</span>` : ""}</td>`;
+    if (i === 6) return `<td>${num(l[6])}</td>`;
+    if (i === 9) return `<td>${brl(l[9])}${l[13] ? `<br><span class="sc">buscando…</span>` : ""}</td>`;
+    if (i === 11) return `<td>${l[11] == null ? `<span class="sc">sem custo</span>` : brl(l[11])}${l[14] ? `<br><span class="sc">${l[14]} sem custo</span>` : ""}</td>`;
+    if (i === 12) return `<td class="${l[12] < 0 ? "neg-v" : ""}">${brl(l[12])}</td>`;
+    if (i === 99) return `<td class="${l[12] < 0 ? "neg-v" : ""}">${pct(l[12], l[7])}</td>`;
+    return `<td>${brl(l[i])}</td>`;
+  }).join("");
+  const seta = i => ci === i ? (dir > 0 ? " ▲" : " ▼") : "";
+  const MAX = 500, foco = document.activeElement && document.activeElement.id === "detBusca";
+  $("tela").innerHTML = `<div class="card">
+    <div class="cab"><div><h2>🧾 Detalhe financeiro</h2><p>Venda a venda · ${det.periodo.chave === "hoje" ? "hoje" : `últimos ${det.periodo.n} dias`} · só vendas válidas (canceladas ficam fora) · margem antes dos Ads, que não são por venda</p></div>${seg(PERIODOS, per, "per")}</div>
+    ${semCusto || pend ? `<div class="aviso">${semCusto ? `${num(semCusto)} venda(s) sem custo cadastrado no Tiny/Bling — a margem delas não desconta o produto. ` : ""}${pend ? `${num(pend)} com frete ainda sendo buscado no ML.` : ""}</div>` : ""}
+    <div class="tot">${[["Receita", T[0]], ["Tarifa ML", T[1]], ["Frete", T[2]], ["Imposto", T[3]], ["Custo (CMV)", T[4]], ["Margem", T[5]]]
+      .map(([t, x]) => `<div><span>${t}</span><b class="${t === "Margem" && x < 0 ? "neg-v" : ""}">${brl(x)}</b></div>`).join("")}
+      <div><span>Margem %</span><b>${pct(T[5], T[0])}</b></div></div>
+    <div class="ctl"><input id="detBusca" type="search" placeholder="Buscar produto, SKU ou nº do pedido…" value="${esc(detBusca)}"
+        oninput="detBusca=this.value;desenharDetalhe()">
+      <select onchange="detAgr=this.value;desenharDetalhe()">${[["venda", "Ver por venda"], ["produto", "Ver por produto"], ["dia", "Ver por dia"]]
+        .map(([k, t]) => `<option value="${k}" ${k === detAgr ? "selected" : ""}>${t}</option>`).join("")}</select>
+      <span class="sc" style="font-size:12px">${num(L.length)} linha(s)${L.length > MAX ? ` · mostrando ${MAX}` : ""} · clique no título da coluna para ordenar</span></div>
+    <div class="tab"><table><thead><tr>${cols.map(([t, i]) => `<th onclick="ordDet(${i})">${t}${seta(i)}</th>`).join("")}</tr></thead>
+      <tbody>${L.slice(0, MAX).map(l => `<tr class="${l[12] < 0 ? "neg" : ""}">${cel(l)}</tr>`).join("")}</tbody></table></div>
+  </div>`;
+  if (foco) { const e = $("detBusca"); e.focus(); e.setSelectionRange(e.value.length, e.value.length); }
+}
+// margem e % comecam do pior; o resto do maior
+function ordDet(i) { detOrd = [i, detOrd[0] === i ? -detOrd[1] : (i === 12 || i === 99 ? 1 : -1)]; desenharDetalhe(); }
 function mudar(k, v) { if (k === "per") { per = v; localStorage.mlPer = v; } else { conta = v; localStorage.mlConta = v; }
   vistos = null; carregar(); }
 
@@ -308,8 +397,8 @@ setInterval(() => {
   const s = Math.round((Date.now() - ultimaOk) / 1000);
   $("status").textContent = `ao vivo · atualizado há ${s < 60 ? s + "s" : Math.round(s / 60) + " min"}`;
 }, 1000);
-setInterval(() => { if (!document.hidden && dados) carregar(); }, 60000);
-document.addEventListener("visibilitychange", () => { if (!document.hidden && dados) carregar(); });
+setInterval(() => { if (!document.hidden && (dados || det) && document.activeElement?.id !== "detBusca") carregar(); }, 60000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden && (dados || det)) carregar(); });
 
 (localStorage.usuario && localStorage.senha) ? carregar() : telaLogin();
 </script>
