@@ -119,6 +119,10 @@ function telaForm(){
       <div><label>Número${de("numero")}</label>
            <input id="numero" inputmode="numeric" value="${extra.numero || ""}"></div>
     </div>
+    <label>Endereço</label>
+    <input id="endereco" value="${extra.endereco || ''}">
+    <label>Bairro</label>
+    <input id="bairro">
     <div id="end" class="mini"></div>
     <label>Complemento (opcional)</label><input id="compl">
     <label>E-mail${de("email")}</label><input id="email" value="${extra.email || contato.email || ""}">
@@ -129,8 +133,13 @@ function telaForm(){
     if(c.length !== 8) return;
     $("end").textContent = "buscando endereço...";
     const d = await (await fetch(`https://viacep.com.br/ws/${c}/json/`)).json();
-    $("end").textContent = d.erro ? "CEP não encontrado"
-      : `${d.logradouro}, ${d.bairro} — ${d.localidade}/${d.uf}`;
+    if(d.erro){ $("end").textContent = "CEP não encontrado"; return; }
+    // cidade pequena tem UM CEP para a cidade inteira: o ViaCEP devolve rua e bairro vazios.
+    // Nesse caso nao apago o que o vendedor ja digitou — so preencho o que o CEP sabe.
+    if(d.logradouro) $("endereco").value = d.logradouro;
+    if(d.bairro) $("bairro").value = d.bairro;
+    $("end").textContent = (d.logradouro ? "" : "CEP único da cidade — digite rua e bairro. ")
+      + `${d.localidade}/${d.uf}`;
   });
 }
 
@@ -138,6 +147,7 @@ async function gravar(){
   const corpo = {contactId: contato.contactId, fone: contato.fone,
                  nome: $("nome").value.trim(), nome_crm: contato.nome,
                  cpf_cnpj: $("cpf").value, cep: $("cep").value, numero: $("numero").value,
+                 endereco: $("endereco").value, bairro: $("bairro").value,
                  complemento: $("compl").value, email: $("email").value};
   const antes = tela.innerHTML;
   tela.innerHTML = `<div class="cx">cadastrando...</div>`;
@@ -146,6 +156,8 @@ async function gravar(){
   const j = await r.json();
   if(j.erro){ tela.innerHTML = antes; telaForm(); $("cpf").value = corpo.cpf_cnpj;
               $("cep").value = corpo.cep; $("numero").value = corpo.numero;
+              $("endereco").value = corpo.endereco; $("bairro").value = corpo.bairro;
+              $("compl").value = corpo.complemento;
               tela.insertAdjacentHTML("afterbegin", `<div class="cx erro">${j.erro}</div>`); return; }
   tela.innerHTML = `<div class="cx">
     <p class="ok">Cliente ${j.acao} na Dutech</p>
