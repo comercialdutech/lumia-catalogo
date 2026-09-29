@@ -91,7 +91,7 @@ async function buscar(){
   catch { return telaBusca("sem conexão"); }
   if(r.status === 401) return telaLogin("usuário ou senha inválidos");
   if(r.status === 403) return telaBusca("seu usuário não pode cadastrar cliente");
-  const j = await r.json();
+  const j = await r.json().catch(() => ({erro: `servidor respondeu ${r.status} — tente de novo`}));
   if(j.erro) return telaBusca(j.erro);
   contato = j.contato;
   extra = j.extra || {};
@@ -149,15 +149,18 @@ async function gravar(){
                  cpf_cnpj: $("cpf").value, cep: $("cep").value, numero: $("numero").value,
                  endereco: $("endereco").value, bairro: $("bairro").value,
                  complemento: $("compl").value, email: $("email").value};
-  const antes = tela.innerHTML;
   tela.innerHTML = `<div class="cx">cadastrando...</div>`;
-  const r = await fetch(`${PROXY}/?cadastro=gravar`, {method:"POST", headers: cabPost(),
-                                                      body: JSON.stringify(corpo)});
-  const j = await r.json();
-  if(j.erro){ tela.innerHTML = antes; telaForm(); $("cpf").value = corpo.cpf_cnpj;
+  // sem o try a tela ficava presa em "cadastrando..." quando a rede caia ou vinha pagina de erro
+  let j;
+  try {
+    const r = await fetch(`${PROXY}/?cadastro=gravar`, {method:"POST", headers: cabPost(),
+                                                        body: JSON.stringify(corpo)});
+    j = await r.json();
+  } catch { j = {erro: "sem resposta do servidor — CONFIRA NO TINY ANTES DE REPETIR"}; }
+  if(j.erro){ telaForm(); $("nome").value = corpo.nome; $("cpf").value = corpo.cpf_cnpj;
               $("cep").value = corpo.cep; $("numero").value = corpo.numero;
               $("endereco").value = corpo.endereco; $("bairro").value = corpo.bairro;
-              $("compl").value = corpo.complemento;
+              $("compl").value = corpo.complemento; $("email").value = corpo.email;
               tela.insertAdjacentHTML("afterbegin", `<div class="cx erro">${j.erro}</div>`); return; }
   tela.innerHTML = `<div class="cx">
     <p class="ok">Cliente ${j.acao} na Dutech</p>
