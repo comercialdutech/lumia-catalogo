@@ -36,7 +36,7 @@
 // dashboards e autocontido). Quem nao e da equipe so recebe o que pode ver (ex.: so a Oneway).
 // passa pelo worker do hub (/dash/...): o endereco proprio do dash nao resolve em alguns roteadores
 const DASH = "https://estoque-olist.dutech.workers.dev/dash";
-const NOMES = {Dutech: "Dutech", Lumia: "Lumia", Oneway: "OneWay", MACRO: "MACRO (Dutech + Lumia)", painel: "Painel geral"};
+const NOMES = {Dutech: "Dutech", Lumia: "Lumia", Oneway: "OneWay", MACRO: "MACRO (Dutech + Lumia)", painel: "Painel geral", CRM: "CRM — conversão"};
 const $ = id => document.getElementById(id);
 const cab = () => ({authorization: `Bearer ${localStorage.usuario || ""}:${localStorage.senha || ""}`});
 const emp = new URLSearchParams(location.search).get("emp");
