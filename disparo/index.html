@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Disparo</title>
+<meta name="theme-color" content="#111111">
+<link rel="apple-touch-icon" href="../app/icone-192.png">
+<meta name="robots" content="noindex">
+<style>
+ :root{--am:#F8CF39}
+ *{box-sizing:border-box}
+ body{font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#111;color:#eee;
+      margin:0;padding:22px 16px 70px;max-width:620px;margin-inline:auto}
+ h1{font-size:20px;margin:0 0 2px}
+ .sub{color:#8d8d8d;font-size:13px;margin:0 0 18px}
+ label{display:block;margin:12px 0 4px;color:#b4b4b4;font-size:13px}
+ input{width:100%;padding:11px;border-radius:9px;border:1px solid #333;background:#1b1b1b;color:#eee;font:16px system-ui}
+ button{background:var(--am);color:#000;font-weight:700;border:0;border-radius:10px;
+        padding:13px 20px;font-size:16px;cursor:pointer;margin-top:12px;width:100%}
+ button.sec{background:#262626;color:#ddd;font-weight:600}
+ button:disabled{opacity:.5;cursor:default}
+ .cx{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:13px;padding:15px;margin-top:16px}
+ .erro{color:#ff8d8d}.mini{color:#8d8d8d;font-size:12px}
+ .estado{display:flex;align-items:center;gap:9px;font-size:17px;font-weight:700}
+ .bolha{width:11px;height:11px;border-radius:50%;flex:none}
+ .on{background:#7ddf7d}.off{background:#777}
+ .grade{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-top:14px}
+ .num{font-size:24px;font-weight:700;color:var(--am);line-height:1.15}
+ .rot{color:#9a9a9a;font-size:12px}
+ table{width:100%;border-collapse:collapse;margin-top:6px;font-size:14px}
+ td{padding:6px 0;border-bottom:1px solid #262626}
+ td:last-child{text-align:right;color:#9a9a9a;white-space:nowrap}
+ .volta{color:#777;text-decoration:none;font-size:13px}
+</style></head><body>
+
+<a class="volta" href="../hub/">‹ Ferramentas</a>
+<h1>Disparo de campanha</h1>
+<p class="sub">Roda na nuvem: continua com o computador desligado</p>
+
+<div id="tela"></div>
+
+<script>
+(() => {
+const PROXY = "https://estoque-olist.dutech.workers.dev/dash";
+const $ = id => document.getElementById(id);
+const tela = $("tela");
+const cabecalho = () => ({authorization: `Bearer ${localStorage.usuario || ""}:${localStorage.senha || ""}`});
+
+function telaLogin(aviso){
+  tela.innerHTML = `<div class="cx">${aviso ? `<p class="erro">${aviso}</p>` : ""}
+    <label>Usuário</label><input id="u" autocapitalize="none">
+    <label>Senha</label><input id="s" type="password">
+    <button id="entrar">Entrar</button></div>`;
+  $("entrar").onclick = () => { localStorage.usuario = $("u").value.trim(); localStorage.senha = $("s").value; ver(); };
+}
+
+async function chamar(rota){
+  let r;
+  try { r = await fetch(PROXY + rota, {headers: cabecalho()}); }
+  catch { return {erro: "sem conexão"}; }
+  if (r.status === 401) { telaLogin("usuário ou senha inválidos"); return null; }
+  if (r.status === 403) { tela.innerHTML = `<div class="cx erro">seu usuário não pode ver o disparo</div>`; return null; }
+  return await r.json();
+}
+
+function desenhar(e){
+  const restam = e.limite - e.hoje;
+  tela.innerHTML = `<div class="cx">
+    <div class="estado"><span class="bolha ${e.ligado ? "on" : "off"}"></span>
+      ${e.ligado ? (e.janela ? "Disparando" : "Ligado, fora da janela") : "Pausado"}</div>
+    <p class="mini">Janela ${e.de} às ${e.ate} · agora são ${e.agora} · uma mensagem a cada
+      ${Math.round(e.pausa_min / 60)} a ${Math.round(e.pausa_max / 60)} min</p>
+    <div class="grade">
+      <div><div class="num">${e.hoje}/${e.limite}</div><div class="rot">enviadas hoje</div></div>
+      <div><div class="num">${e.fila}</div><div class="rot">na fila</div></div>
+      <div><div class="num">${e.total}</div><div class="rot">total enviadas</div></div>
+      <div><div class="num">${e.erros}</div><div class="rot">erros</div></div>
+    </div>
+    <button id="alterna" class="${e.ligado ? "sec" : ""}">${e.ligado ? "Pausar" : "Iniciar disparo"}</button>
+    <p class="mini">${e.ligado
+      ? `Pausar interrompe na hora; o que já saiu não volta. Restam ${restam} de hoje.`
+      : "Ao iniciar, a primeira mensagem sai em até 1 minuto."}</p>
+  </div>
+  ${e.ultimos.length ? `<div class="cx"><div class="rot">últimos envios</div><table>${
+    e.ultimos.map(u => `<tr><td>${u.nome || u.fone}</td><td>${(u.enviado_em || "").slice(11, 16)}</td></tr>`).join("")
+  }</table></div>` : ""}`;
+  $("alterna").onclick = async () => {
+    $("alterna").disabled = true;
+    const novo = await chamar(e.ligado ? "/disparo/pausar" : "/disparo/ligar");
+    if (novo) desenhar(novo);
+  };
+}
+
+async function ver(){
+  tela.innerHTML = `<div class="cx">carregando…</div>`;
+  const e = await chamar("/disparo");
+  if (e && e.erro) { tela.innerHTML = `<div class="cx erro">${e.erro}</div>`; return; }
+  if (e) desenhar(e);
+}
+
+(localStorage.usuario && localStorage.senha) ? ver() : telaLogin();
+setInterval(() => { if (localStorage.usuario && !document.hidden) ver(); }, 60000);
+})();
+</script></body></html>
