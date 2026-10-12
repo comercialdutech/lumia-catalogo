@@ -80,12 +80,27 @@ function desenhar(e){
       ? `Pausar interrompe na hora; o que já saiu não volta. Restam ${restam} de hoje.`
       : "Ao iniciar, a primeira mensagem sai em até 1 minuto."}</p>
   </div>
+  <div class="cx">
+    <div class="rot">organizar os leads</div>
+    <p class="mini">Quem respondeu ganha a etiqueta da campanha e vai pro kanban de Ativação;
+      quem não respondeu vai pra coluna Não Responde e tem a conversa fechada.</p>
+    <button id="organiza" class="sec" ${e.pedido ? "disabled" : ""}>
+      ${e.pedido ? "Pedido na fila…" : "Organizar leads agora"}</button>
+    <p class="mini">${e.pedido
+      ? "O computador pega esse pedido no próximo check (até 15 min) e leva ~40 min lendo as conversas."
+      : (e.organizado ? "Última organização: " + e.organizado : "Roda no computador do escritório, por isso não é na hora.")}</p>
+  </div>
   ${e.ultimos.length ? `<div class="cx"><div class="rot">últimos envios</div><table>${
     e.ultimos.map(u => `<tr><td>${u.nome || u.fone}</td><td>${(u.enviado_em || "").slice(11, 16)}</td></tr>`).join("")
   }</table></div>` : ""}`;
   $("alterna").onclick = async () => {
     $("alterna").disabled = true;
     const novo = await chamar(e.ligado ? "/disparo/pausar" : "/disparo/ligar");
+    if (novo) desenhar(novo);
+  };
+  $("organiza").onclick = async () => {
+    $("organiza").disabled = true;
+    const novo = await chamar("/disparo/organizar");
     if (novo) desenhar(novo);
   };
 }
