@@ -30,6 +30,13 @@
  td{padding:6px 0;border-bottom:1px solid #262626}
  td:last-child{text-align:right;color:#9a9a9a;white-space:nowrap}
  .volta{color:#777;text-decoration:none;font-size:13px}
+ .dupla{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:0 12px}
+ .numero .topo{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+ .numero .topo b{font-size:16px}
+ .numero p.mini{margin:4px 0 0}
+ .barra{height:6px;background:#262626;border-radius:3px;margin-top:12px;overflow:hidden}
+ .barra i{display:block;height:100%;background:var(--am)}
+ .tag{font-size:11px;color:#bbb;background:#262626;border-radius:5px;padding:2px 6px;margin-right:6px}
 </style></head><body>
 
 <a class="volta" href="../hub/">‹ Ferramentas</a>
@@ -62,23 +69,52 @@ async function chamar(rota){
   return await r.json();
 }
 
+// Dois numeros desde 12/10: clientes (reposicao, VIP) no LUMIA3D; ativacao no PROSPEC, em aquecimento.
+// Cada um tem teto proprio; a nuvem manda `hoje_lumia`/`hoje_prospec` e `fila_lumia` separados.
+const NUMEROS = {20913: "LUMIA3D", 22605: "PROSPEC"};
+
+function cartaoNumero(nome, fone, oque, hoje, limite, fila){
+  const pct = Math.min(100, Math.round(100 * hoje / Math.max(1, limite)));
+  return `<div class="cx numero">
+    <div class="topo"><b>${nome}</b><span class="mini">${fone}</span></div>
+    <p class="mini">${oque}</p>
+    <div class="grade">
+      <div><div class="num">${hoje}/${limite}</div><div class="rot">enviadas hoje</div></div>
+      <div><div class="num">${fila}</div><div class="rot">na fila</div></div>
+    </div>
+    <div class="barra"><i style="width:${pct}%"></i></div>
+    <p class="mini">${hoje >= limite ? "Teto do dia atingido: volta amanhã às " + e_de : `Restam ${limite - hoje} hoje.`}</p>
+  </div>`;
+}
+let e_de = "08:00";
+
 function desenhar(e){
-  const restam = e.limite - e.hoje;
+  e_de = e.de;
+  const limL = Number(e.limite), limP = Number(e.limite_prospec || 30);
+  const hojeL = e.hoje_lumia ?? e.hoje, hojeP = e.hoje_prospec ?? 0;
+  const filaL = e.fila_lumia ?? 0, filaP = Math.max(0, e.fila - filaL);
+  const ativNoProspec = (e.ativacao_conexao || "prospec") === "prospec";
   tela.innerHTML = `<div class="cx">
     <div class="estado"><span class="bolha ${e.ligado ? "on" : "off"}"></span>
       ${e.ligado ? (e.janela ? "Disparando" : "Ligado, fora da janela") : "Pausado"}</div>
-    <p class="mini">Janela ${e.de} às ${e.ate} · agora são ${e.agora} · uma mensagem a cada
+    <p class="mini">Janela ${e.de} às ${e.ate} · agora são ${e.agora} · em cada número, uma mensagem a cada
       ${Math.round(e.pausa_min / 60)} a ${Math.round(e.pausa_max / 60)} min</p>
+    <button id="alterna" class="${e.ligado ? "sec" : ""}">${e.ligado ? "Pausar os dois números" : "Iniciar disparo"}</button>
+    <p class="mini">${e.ligado
+      ? "Pausar interrompe na hora nos dois números; o que já saiu não volta."
+      : "Ao iniciar, a primeira mensagem sai em até 1 minuto."}</p>
+  </div>
+  <div class="dupla">
+    ${cartaoNumero("LUMIA3D", "(44) 9 8832-0238",
+      ativNoProspec ? "Clientes: reposição e VIP" : "Clientes e ativação", hojeL, limL, ativNoProspec ? filaL : e.fila)}
+    ${cartaoNumero("LUMIA3D - PROSPEC", "(44) 9 9155-9771",
+      ativNoProspec ? "Ativação da base · em aquecimento" : "Parado: a ativação voltou pro LUMIA3D", hojeP, limP, ativNoProspec ? filaP : 0)}
+  </div>
+  <div class="cx">
     <div class="grade">
-      <div><div class="num">${e.hoje}/${e.limite}</div><div class="rot">enviadas hoje</div></div>
-      <div><div class="num">${e.fila}</div><div class="rot">na fila</div></div>
       <div><div class="num">${e.total}</div><div class="rot">total enviadas</div></div>
       <div><div class="num">${e.erros}</div><div class="rot">erros</div></div>
     </div>
-    <button id="alterna" class="${e.ligado ? "sec" : ""}">${e.ligado ? "Pausar" : "Iniciar disparo"}</button>
-    <p class="mini">${e.ligado
-      ? `Pausar interrompe na hora; o que já saiu não volta. Restam ${restam} de hoje.`
-      : "Ao iniciar, a primeira mensagem sai em até 1 minuto."}</p>
   </div>
   <div class="cx">
     <div class="rot">organizar os leads</div>
@@ -91,7 +127,7 @@ function desenhar(e){
       : (e.organizado ? "Última organização: " + e.organizado : "Roda no computador do escritório, por isso não é na hora.")}</p>
   </div>
   ${e.ultimos.length ? `<div class="cx"><div class="rot">últimos envios</div><table>${
-    e.ultimos.map(u => `<tr><td>${u.nome || u.fone}</td><td>${(u.enviado_em || "").slice(11, 16)}</td></tr>`).join("")
+    e.ultimos.map(u => `<tr><td>${u.nome || u.fone}</td><td><span class="tag">${NUMEROS[u.conexao] || "LUMIA3D"}</span> ${(u.enviado_em || "").slice(11, 16)}</td></tr>`).join("")
   }</table></div>` : ""}`;
   $("alterna").onclick = async () => {
     $("alterna").disabled = true;
