@@ -65,6 +65,7 @@
  tr.prej td{background:#fef5f5} tr.baixa td{background:#fffaf0}
  .twrap{max-height:560px;overflow:auto;border:1px solid var(--line);border-radius:12px}
  td.sku,td.nw{white-space:nowrap}
+ td.tit-full{min-width:280px;max-width:460px;color:var(--muted);line-height:1.35}   /* Produtos: título inteiro (pedido do dono) */
  .titulo{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}
  input.price{width:92px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;font-family:var(--mono);font-size:13px;text-align:right}
  input.price.man{font-weight:800;border-color:var(--ink)} input.price.dirty{border-color:var(--brand);background:var(--brand-soft)}
@@ -267,7 +268,7 @@ function produtos() {
         const neg = prev?.margem != null && prev.margem < 0;
         return `<tr class="${neg ? "prej" : ""}">
         <td><input type="checkbox" data-p="${esc(l.sku)}" ${marcadosP.has(l.sku) ? "checked" : ""}></td>
-        <td class="sku"><b>${esc(l.sku)}</b></td><td><div class="titulo" title="${esc(l.titulo)}">${esc(l.titulo)}</div></td>
+        <td class="sku"><b>${esc(l.sku)}</b></td><td class="tit-full">${esc(l.titulo)}</td>
         <td class="n">${l.custo > 0 ? brl(l.custo) : `<span class="tag t-sem_custo">sem custo</span>`}</td><td class="n">${brl(l.campanha)}</td>
         <td class="n" title="${esc(contaMin(l, R))}"><b>${l.min ? brl(l.min.venda) : "—"}</b></td>
         <td class="n"><input class="price ${neg ? "abaixo" : ""} ${sujo[l.sku] != null ? "dirty" : ""}" data-v="${esc(l.sku)}" value="${esc(txt)}" placeholder="—"></td>
