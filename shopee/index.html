@@ -22,6 +22,8 @@
  .nav-item{display:flex;align-items:center;gap:11px;width:100%;text-align:left;border:none;background:none;padding:10px 12px;border-radius:10px;font:inherit;font-weight:700;color:var(--muted);cursor:pointer}
  .nav-item:hover{background:#f5f6fa;color:var(--ink)} .nav-item.active{background:var(--brand-soft);color:var(--ink)}
  .nav-item svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+ .t-pendente{background:#fff3c4;color:#854d0e}.t-prejuizo{background:#fde2e6;color:#9f1239}.t-sem_preco{background:#eceef4;color:#555}
+ input.price.abaixo{border-color:var(--danger);color:var(--danger);font-weight:800}
  .volta{color:var(--muted);text-decoration:none;font-size:13px;padding:0 12px;margin-top:auto}
  .maincol{flex:1;min-width:0;display:flex;flex-direction:column}
  .topbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 28px;background:rgba(255,255,255,.85);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
@@ -93,30 +95,30 @@
    <button class="nav-item active" data-tab="painel"><svg viewBox="0 0 24 24"><path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z"/></svg>Painel</button>
    <button class="nav-item" data-tab="produtos"><svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>Produtos</button>
    <button class="nav-item" data-tab="historico"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>Histórico</button>
-   <button class="nav-item" data-tab="regra"><svg viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>Regra</button>
+   <button class="nav-item" data-tab="regra"><svg viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>Taxas</button>
    <button class="nav-item" data-tab="ajuda"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Instruções</button>
   </nav>
   <a class="volta" href="../hub/">‹ voltar ao hub</a>
  </aside>
  <div class="maincol">
   <div class="topbar"><h1 id="titulo">Painel</h1><div class="spacer"></div>
-   <label class="chave hide" id="operBox"><input type="checkbox" id="oper"> Considerar custo operacional</label>
    <span class="pill" id="estado"><span class="dot"></span><span>carregando…</span></span></div>
   <main id="main"></main>
  </div>
 </div>
 <script type="module">
-import {REGRA_PADRAO, alvoDe, situacao} from "./logica.mjs";
+// Modelo do Meli Promos (15/10/2026): Mín. p/ venda = lucro zero (taxas Shopee + imposto + frete, SEM operacional);
+// a equipe digita o Preço mínimo de cada SKU; Rodar coloca a campanha nesse preço (cheio = preço ÷ 0,70).
+import {REGRA_PADRAO, alvoDe, minimoVenda, situacao} from "./logica.mjs";
 const PROXY = "https://estoque-olist.dutech.workers.dev/shopee";
 const $ = id => document.getElementById(id);
 const cab = () => ({authorization: `Bearer ${localStorage.usuario || ""}:${localStorage.senha || ""}`, "content-type": "application/json"});
 const brl = v => v == null || isNaN(v) ? "—" : Number(v).toLocaleString("pt-BR", {minimumFractionDigits: 2, maximumFractionDigits: 2});
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
-const num = s => { const v = Number(String(s ?? "").trim().replace(/\./g, (m, i, t) => t.includes(",") ? "" : m).replace(",", ".")); return v > 0 ? v : null; };
-const igual = (a, b) => a != null && b != null && Math.abs(a - b) < 0.005;
-const NOME = {ok: "OK", abaixo: "Abaixo", acima: "Acima", custo_mudou: "Custo mudou", sem_custo: "Sem custo", fora_campanha: "Fora de campanha", pausado: "Pausado"};
-const TITULOS = {painel: "Painel", produtos: "Produtos e preços", historico: "Histórico", regra: "Regra de preço", ajuda: "Instruções"};
-let D = null, oper = true, aba = localStorage.shAba || "painel", rodando = false, parar = false;
+const num = s => { const t = String(s ?? "").trim(); const v = Number((t.includes(",") ? t.replace(/\./g, "") : t).replace(",", ".")); return v > 0 ? v : null; };
+const NOME = {ok: "OK", pendente: "A aplicar", prejuizo: "Prejuízo", custo_mudou: "Custo mudou", sem_preco: "Sem preço mínimo", sem_custo: "Sem custo", fora_campanha: "Fora de campanha", pausado: "Pausado"};
+const TITULOS = {painel: "Painel", produtos: "Produtos e preços mínimos", historico: "Histórico", regra: "Taxas e imposto", ajuda: "Instruções"};
+let D = null, aba = localStorage.shAba || "painel", rodando = false, parar = false;
 let busca = "", fSit = "", ord = ["sit", 1], buscaP = "";
 const sujo = {}, marcados = new Set(), marcadosP = new Set();
 let logHtml = `<span class="skip">O log aparece aqui quando você clicar em "Simular" ou "Rodar agora".</span>`;
@@ -140,68 +142,60 @@ function telaLogin(msg) {
 async function carregar() {
   try { D = await api("/dados"); }
   catch (e) { if (e.message !== "login") estado("erro: " + e.message, "off"); return; }
-  oper = D.regra.considerar_oper; $("oper").checked = oper;
   const lido = D.lido_em ? new Date(D.lido_em).toLocaleString("pt-BR", {day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"}) : "nunca";
   estado(`loja Dutech · Shopee lida em ${lido}`, "ok");
   desenhar();
 }
-const regra = () => ({...REGRA_PADRAO, ...D.regra, considerar_oper: oper});
-const rotLucro = () => oper ? "Lucro" : "Margem de contribuição";
-// metade do alvo: abaixo disso a linha fica amarela (mesma régua da trava)
-function lucroBaixo(al, R) { return al && al.lucro >= 0 && (R.lucro_modo === "rs" ? al.lucro < R.lucro_rs / 2 : al.lucro_pct < R.lucro_pct / 2); }
+const regra = () => ({...REGRA_PADRAO, ...D.regra});
 function linhas() {
   const R = regra();
   return D.anuncios.map(a => {
-    const man = D.manuais[a.sku], alvo = alvoDe(a, R, man);
-    let sit = a.status !== "NORMAL" ? "pausado" : situacao(a, alvo);
-    const pendente = a.status === "NORMAL" && alvo && (!igual(a.cheio, alvo.cheio) || (a.discount_id && !igual(a.campanha, alvo.venda)));
-    return {...a, man, alvo, sit, pendente, baixo: lucroBaixo(alvo, R)};
+    const salvo = D.manuais[a.sku], alvo = alvoDe(a, R, salvo), min = minimoVenda(a.custo, R);
+    const sit = a.status !== "NORMAL" ? "pausado" : situacao(a, alvo);
+    return {...a, salvo, alvo, min, sit, pendente: a.status === "NORMAL" && ["pendente", "prejuizo", "fora_campanha"].includes(sit) && !!alvo};
   });
 }
-function tagSit(l) {
-  const extra = (l.sit === "abaixo" || l.sit === "acima") && l.alvo ? " " + brl((l.campanha / l.alvo.venda - 1) * 100) + "%" : "";
-  return `<span class="tag t-${l.sit}">${NOME[l.sit]}${extra}</span>`;
-}
-const contaTitulo = l => !l.alvo ? "" : `Venda ${brl(l.alvo.venda)} − comissão ${brl(l.alvo.comissao)} − fixa ${brl(l.alvo.fixa)} − imposto ${brl(l.alvo.imposto)} − operacional ${brl(l.alvo.operacional)} − custo ${brl(l.custo)} = ${brl(l.alvo.lucro)}`;
+const tagSit = l => `<span class="tag t-${l.sit}">${NOME[l.sit]}</span>`;
+const contaMin = (l, R) => !l.min ? "sem custo no Tiny" :
+  `Mínimo ${brl(l.min.venda)} = (custo ${brl(l.custo)} + taxa fixa ${brl(l.min.fixa)}${R.frete ? " + frete " + brl(R.frete) : ""}) ÷ (1 − comissão ${l.min.faixa.split("%")[0]}% − imposto ${R.imposto}%)`;
+const contaMargem = c => !c || c.margem == null ? "" :
+  `Venda ${brl(c.preco)} − comissão ${brl(c.comissao)} − taxa fixa ${brl(c.fixa)} − imposto ${brl(c.imposto)}${c.frete ? " − frete " + brl(c.frete) : ""} − custo ${brl(c.custo)} = ${brl(c.margem)}`;
 
 function desenhar() {
   document.querySelectorAll(".nav-item").forEach(b => b.classList.toggle("active", b.dataset.tab === aba));
   $("titulo").textContent = TITULOS[aba];
-  $("operBox").classList.toggle("hide", !["painel", "produtos"].includes(aba));
   ({painel, produtos, historico, regra: telaRegra, ajuda})[aba]();
 }
 
 // ---------------- PAINEL ----------------
 function painel() {
-  const L = linhas(), at = L.filter(l => l.status === "NORMAL"), com = at.filter(l => l.custo > 0 && l.campanha != null);
-  const n = s => at.filter(l => l.sit === s).length, pend = L.filter(l => l.pendente);
-  const media = com.length ? com.reduce((s, l) => s + alvoDe(l, regra(), l.campanha).lucro_pct, 0) / com.length : 0;
-  const V = L.filter(l => l.status === "NORMAL" && (!busca || (l.sku + " " + l.titulo).toLowerCase().includes(busca.toLowerCase())));
+  const L = linhas(), at = L.filter(l => l.status === "NORMAL"), n = s => at.filter(l => l.sit === s).length, pend = L.filter(l => l.pendente);
+  const V = at.filter(l => !busca || (l.sku + " " + l.titulo).toLowerCase().includes(busca.toLowerCase()));
   $("main").innerHTML = `
    <div class="card"><div class="runbar">
      <div class="stat"><b>${at.length}</b><span>anúncios ativos</span></div>
-     <div class="stat red"><b>${n("abaixo")}</b><span>abaixo da regra</span></div>
-     <div class="stat warn"><b>${n("acima")}</b><span>acima da regra</span></div>
-     <div class="stat azul"><b>${n("custo_mudou")}</b><span>custo mudou</span></div>
-     <div class="stat green"><b>${brl(media)}%</b><span>${oper ? "lucro médio" : "margem contrib. média"} hoje</span></div>
+     <div class="stat green"><b>${at.filter(l => l.alvo).length}</b><span>com preço mínimo</span></div>
+     <div class="stat warn"><b>${pend.length}</b><span>a aplicar</span></div>
+     <div class="stat red"><b>${n("prejuizo")}</b><span>em prejuízo</span></div>
+     <div class="stat"><b>${n("sem_preco") + n("sem_custo")}</b><span>sem preço mínimo</span></div>
      <div class="spacer"></div>
      <button class="btn" id="simular" ${rodando ? "disabled" : ""}>Simular</button>
      <button class="btn primary" id="rodar" ${rodando || !pend.length ? "disabled" : ""}>Rodar agora (${pend.length})</button>
      <button class="btn danger ${rodando ? "" : "hide"}" id="parar">Parar</button></div>
      <div class="console" id="console">${logHtml}</div></div>
    <div class="card"><h2>Aplicar só alguns anúncios</h2>
-     <div class="sub">Marque os anúncios e aplique o preço salvo (aba Produtos) só neles. O andamento aparece no log acima.</div>
+     <div class="sub">Marque os anúncios e coloque na campanha só eles, pelo preço mínimo salvo na aba Produtos.</div>
      <div class="toolbar"><input class="search" id="busca" placeholder="Buscar por SKU ou título…" value="${esc(busca)}">
        <button class="btn primary" id="aplicarSel" ${rodando ? "disabled" : ""}>Aplicar selecionados (${marcados.size})</button></div>
      <div class="twrap" style="max-height:360px"><table><thead><tr><th><input type="checkbox" id="todos"></th><th>SKU</th><th>Título</th>
-       <th class="n">Campanha hoje</th><th class="n">Preço salvo</th><th class="n">${rotLucro()}</th><th>Situação</th></tr></thead><tbody>
+       <th class="n">Campanha hoje</th><th class="n">Preço mínimo</th><th class="n">Margem contrib.</th><th>Situação</th></tr></thead><tbody>
        ${V.map(l => `<tr><td><input type="checkbox" data-m="${l.item_id}" ${marcados.has(l.item_id) ? "checked" : ""} ${l.alvo ? "" : "disabled"}></td>
          <td class="sku"><b>${esc(l.sku)}</b></td><td><div class="titulo">${esc(l.titulo)}</div></td><td class="n">${brl(l.campanha)}</td>
-         <td class="n">${l.alvo ? brl(l.alvo.venda) : "—"}${l.man ? " ✎" : ""}${l.alvo?.travado ? " 🔒" : ""}</td>
-         <td class="n ${l.alvo?.lucro < 0 ? "neg" : l.baixo ? "alerta" : ""}" title="${esc(contaTitulo(l))}">${l.alvo ? brl(l.alvo.lucro) : "—"}</td><td>${tagSit(l)}</td></tr>`).join("")}
+         <td class="n">${l.alvo ? brl(l.alvo.venda) : "—"}</td>
+         <td class="n ${l.alvo?.margem < 0 ? "neg" : ""}" title="${esc(contaMargem(l.alvo))}">${l.alvo?.margem != null ? brl(l.alvo.margem) : "—"}</td><td>${tagSit(l)}</td></tr>`).join("")}
      </tbody></table></div></div>`;
   $("simular").onclick = simular;
-  $("rodar").onclick = () => rodar(linhas().filter(l => l.pendente), "todos os pendentes");
+  $("rodar").onclick = () => rodar(linhas().filter(l => l.pendente), "todos com preço mínimo diferente da loja");
   $("parar").onclick = () => { parar = true; log("sys", "parando depois do lote atual…"); };
   $("aplicarSel").onclick = () => rodar(linhas().filter(l => marcados.has(l.item_id) && l.alvo), "selecionados");
   $("busca").oninput = e => { busca = e.target.value; painel(); $("busca").focus(); $("busca").setSelectionRange(busca.length, busca.length); };
@@ -216,31 +210,29 @@ function log(cls, txt) {
 const hora = () => new Date().toLocaleTimeString("pt-BR");
 function simular() {
   logHtml = "";
-  const P = linhas().filter(l => l.pendente);
-  log("head", `[${hora()}] SIMULAÇÃO — ${P.length} anúncio(s) mudariam (${oper ? "com" : "sem"} custo operacional). Nada foi enviado à Shopee.`);
-  for (const l of P) log(l.alvo.lucro < 0 ? "err" : "ok", `${l.sku.padEnd(10)} cheio ${brl(l.cheio)} → ${brl(l.alvo.cheio)} · campanha ${brl(l.campanha)} → ${brl(l.alvo.venda)} · ${rotLucro().toLowerCase()} ${brl(l.alvo.lucro)}${l.man ? " · preço salvo ✎" : ""}${l.alvo.lucro < 0 ? " · PREJUÍZO" : ""}`);
-  const sem = linhas().filter(l => l.status === "NORMAL" && !l.alvo).length;
-  if (sem) log("skip", `${sem} anúncio(s) sem custo no Tiny ficam de fora.`);
+  const P = linhas().filter(l => l.pendente), sem = linhas().filter(l => l.status === "NORMAL" && !l.alvo).length;
+  log("head", `[${hora()}] SIMULAÇÃO — ${P.length} anúncio(s) mudariam. Nada foi enviado à Shopee.`);
+  for (const l of P) log(l.alvo.margem < 0 ? "err" : "ok", `${l.sku.padEnd(10)} campanha ${brl(l.campanha)} → ${brl(l.alvo.venda)} · cheio ${brl(l.cheio)} → ${brl(l.alvo.cheio)} · margem ${brl(l.alvo.margem)}${l.alvo.margem < 0 ? ` · PREJUÍZO (mínimo ${brl(l.alvo.minimo)})` : ""}`);
+  if (sem) log("skip", `${sem} anúncio(s) sem preço mínimo salvo ficam como estão.`);
 }
 async function rodar(L, oque) {
   if (!L.length) return;
-  const neg = L.filter(l => l.alvo.lucro < 0);
-  if (!confirm(`Mudar o preço de ${L.length} anúncio(s) NA SHOPEE (${oque})?\n\nQuem está em desconto sai e volta para o desconto (alguns segundos sem desconto).`)) return;
+  const neg = L.filter(l => l.alvo.margem < 0);
+  if (!confirm(`Mudar o preço de ${L.length} anúncio(s) NA SHOPEE (${oque})?\n\nCampanha = preço mínimo salvo; cheio = preço ÷ ${brl(1 - regra().desconto / 100)}.\nQuem está em desconto sai e volta (alguns segundos sem desconto).`)) return;
   let aceito = false;
-  if (neg.length) aceito = confirm(`${neg.length} anúncio(s) ficariam com PREJUÍZO: ${neg.map(l => l.sku).join(", ")}.\n\nOK = aplicar mesmo assim · Cancelar = pular esses`);
-  const itens = L.filter(l => aceito || l.alvo.lucro >= 0).map(l => ({item_id: l.item_id, cheio: l.alvo.cheio, venda: l.alvo.venda, aceito_prejuizo: l.alvo.lucro < 0}));
+  if (neg.length) aceito = confirm(`${neg.length} anúncio(s) estão ABAIXO do mínimo p/ venda (prejuízo): ${neg.map(l => l.sku).join(", ")}.\n\nOK = aplicar mesmo assim · Cancelar = pular esses`);
+  const itens = L.filter(l => aceito || !(l.alvo.margem < 0)).map(l => ({item_id: l.item_id, cheio: l.alvo.cheio, venda: l.alvo.venda, aceito_prejuizo: l.alvo.margem < 0}));
   rodando = true; parar = false; logHtml = ""; estado("aplicando na Shopee…", "run"); painel();
-  log("head", `[${hora()}] RODANDO — ${itens.length} anúncio(s), ${oper ? "com" : "sem"} custo operacional`);
+  log("head", `[${hora()}] RODANDO — ${itens.length} anúncio(s)`);
   const cont = {};
   const RES = {aplicado: ["ok", "✅"], igual: ["skip", "="], divergente: ["err", "⚠️ gravou diferente"], falhou: ["err", "❌"], fora_do_desconto: ["err", "🚨 FORA DO DESCONTO"], desatualizado: ["skip", "↻ desatualizado"], recusado: ["skip", "⛔"]};
   try {
-    // lotes de 5: log anda de pouco em pouco e o worker fica longe do limite de subrequests
-    for (let i = 0; i < itens.length && !parar; i += 5) {
-      const j = await api("/aplicar", {considerar_oper: oper, itens: itens.slice(i, i + 5)});
+    for (let i = 0; i < itens.length && !parar; i += 5) {   // lotes de 5: log anda e o worker fica longe do limite de subrequests
+      const j = await api("/aplicar", {itens: itens.slice(i, i + 5)});
       for (const r of j.resultados) {
         cont[r.resultado] = (cont[r.resultado] || 0) + 1;
         const [cls, ic] = RES[r.resultado] || ["sys", r.resultado];
-        log(cls, `${ic} ${String(r.sku || r.item_id).padEnd(10)} ${r.cheio_antes != null ? `cheio ${brl(r.cheio_antes)} → ${brl(r.cheio_depois)} · campanha ${brl(r.campanha_antes)} → ${brl(r.campanha_depois)}` : ""}${r.janela_s != null ? ` (${brl(r.janela_s)} s fora do desconto)` : ""}${r.erro ? " — " + r.erro : ""}`);
+        log(cls, `${ic} ${String(r.sku || r.item_id).padEnd(10)} ${r.cheio_antes != null ? `campanha ${brl(r.campanha_antes)} → ${brl(r.campanha_depois)} · cheio ${brl(r.cheio_antes)} → ${brl(r.cheio_depois)}` : ""}${r.janela_s != null ? ` (${brl(r.janela_s)} s fora do desconto)` : ""}${r.erro ? " — " + r.erro : ""}`);
       }
     }
   } catch (e) { log("err", `ERRO: ${e.message} — confira na Central do Vendedor antes de repetir.`); }
@@ -252,119 +244,112 @@ async function rodar(L, oque) {
 function produtos() {
   const R = regra();
   const L = linhas().filter(l => (!fSit || l.sit === fSit) && (!buscaP || (l.sku + " " + l.titulo).toLowerCase().includes(buscaP.toLowerCase())));
-  const ORD = {sku: l => l.sku, titulo: l => l.titulo, custo: l => l.custo ?? -1, campanha: l => l.campanha ?? -1, venda: l => l.alvo?.venda ?? -1,
-    lucro: l => l.alvo?.lucro ?? -999, sit: l => ["abaixo", "custo_mudou", "acima", "fora_campanha", "sem_custo", "pausado", "ok"].indexOf(l.sit)};
+  const ORD = {sku: l => l.sku, titulo: l => l.titulo, custo: l => l.custo ?? -1, campanha: l => l.campanha ?? -1, min: l => l.min?.venda ?? -1,
+    salvo: l => l.salvo ?? -1, margem: l => l.alvo?.margem ?? -999, sit: l => ["prejuizo", "pendente", "custo_mudou", "fora_campanha", "sem_preco", "sem_custo", "pausado", "ok"].indexOf(l.sit)};
   L.sort((a, b) => { const x = ORD[ord[0]](a), y = ORD[ord[0]](b); return (x > y ? 1 : x < y ? -1 : 0) * ord[1]; });
   const th = (k, t, n = "") => `<th class="sort ${n}" data-ord="${k}">${t}${ord[0] === k ? (ord[1] > 0 ? " ▲" : " ▼") : ""}</th>`;
   const nSujo = Object.keys(sujo).length;
-  $("main").innerHTML = `<div class="card"><h2>Preço de venda por anúncio</h2>
-    <div class="sub">O campo já vem com o preço da regra (${R.lucro_modo === "rs" ? "lucro R$ " + brl(R.lucro_rs) : "lucro " + R.lucro_pct + "%"}, campanha −${R.desconto}%).
-      Digite outro valor para fixar o preço daquele SKU (fica em <b>negrito ✎</b>) e clique em <b>Salvar preços</b>. Apagar o campo volta para a regra.
+  $("main").innerHTML = `<div class="card"><h2>Produtos e preços mínimos</h2>
+    <div class="sub"><b>Mín. p/ venda</b> é o menor preço que não dá prejuízo (margem de contribuição zero: comissão + taxa fixa da Shopee + imposto ${R.imposto}%${R.frete ? " + frete" : ""}; sem custo operacional).
+      Digite o <b>preço mínimo</b> de cada anúncio (o preço da campanha) e clique em <b>Salvar preços</b>. Em <span class="neg">vermelho</span>: abaixo do mínimo = prejuízo.
       Salvar não muda nada na Shopee: para isso use <b>Rodar agora</b> no Painel.</div>
     <div class="toolbar"><input class="search" id="buscaP" placeholder="Buscar por SKU ou título…" value="${esc(buscaP)}">
       <select class="search" id="fsit"><option value="">todas as situações</option>${Object.entries(NOME).map(([k, v]) => `<option value="${k}" ${fSit === k ? "selected" : ""}>${v}</option>`).join("")}</select>
       <span class="pill"><span class="dot"></span><span>${L.length} itens</span></span>
       <button class="btn primary" id="salvar" ${nSujo ? "" : "disabled"}>Salvar preços${nSujo ? ` (${nSujo})` : ""}</button>
       <button class="btn" id="sinc">Sincronizar da Shopee</button>
-      <button class="btn danger" id="voltaRegra">Voltar à regra (${marcadosP.size})</button>
+      <button class="btn danger" id="limpar">Limpar preço dos selecionados (${marcadosP.size})</button>
       <span class="saved" id="salvo">Salvo ✓</span></div>
     <div class="twrap"><table><thead><tr><th><input type="checkbox" id="todosP"></th>${th("sku", "SKU")}${th("titulo", "Título")}${th("custo", "Custo", "n")}
-      <th class="n">Cheio hoje</th>${th("campanha", "Campanha hoje", "n")}${th("venda", "Preço de venda", "n")}<th class="n">Cheio calc.</th>
-      ${th("lucro", rotLucro(), "n")}<th>Faixa</th>${th("sit", "Situação")}</tr></thead><tbody>
-      ${L.map(l => { const v = sujo[l.sku] ?? (l.alvo ? brl(l.alvo.venda) : ""), prev = sujo[l.sku] != null ? alvoDe(l, R, num(sujo[l.sku])) : l.alvo;
-        return `<tr class="${prev?.lucro < 0 ? "prej" : lucroBaixo(prev, R) ? "baixa" : ""}">
+      ${th("campanha", "Campanha hoje", "n")}${th("min", "Mín. p/ venda", "n")}${th("salvo", "Preço mínimo", "n")}<th class="n">Cheio (−${R.desconto}%)</th>
+      ${th("margem", "Margem contrib.", "n")}${th("sit", "Situação")}</tr></thead><tbody>
+      ${L.map(l => { const txt = sujo[l.sku] ?? (l.salvo != null ? brl(l.salvo) : ""), prev = sujo[l.sku] != null ? alvoDe(l, R, num(sujo[l.sku])) : l.alvo;
+        const neg = prev?.margem != null && prev.margem < 0;
+        return `<tr class="${neg ? "prej" : ""}">
         <td><input type="checkbox" data-p="${esc(l.sku)}" ${marcadosP.has(l.sku) ? "checked" : ""}></td>
         <td class="sku"><b>${esc(l.sku)}</b></td><td><div class="titulo" title="${esc(l.titulo)}">${esc(l.titulo)}</div></td>
-        <td class="n">${l.custo > 0 ? brl(l.custo) : `<span class="tag t-sem_custo">sem custo</span>`}</td><td class="n">${brl(l.cheio)}</td><td class="n">${brl(l.campanha)}</td>
-        <td class="n"><input class="price ${l.man ? "man" : ""} ${sujo[l.sku] != null ? "dirty" : ""}" data-v="${esc(l.sku)}" value="${esc(v)}" ${l.custo > 0 ? "" : "disabled"}>${l.alvo?.travado && !l.man ? " 🔒" : ""}</td>
+        <td class="n">${l.custo > 0 ? brl(l.custo) : `<span class="tag t-sem_custo">sem custo</span>`}</td><td class="n">${brl(l.campanha)}</td>
+        <td class="n" title="${esc(contaMin(l, R))}"><b>${l.min ? brl(l.min.venda) : "—"}</b></td>
+        <td class="n"><input class="price ${neg ? "abaixo" : ""} ${sujo[l.sku] != null ? "dirty" : ""}" data-v="${esc(l.sku)}" value="${esc(txt)}" placeholder="—"></td>
         <td class="n">${prev ? brl(prev.cheio) : "—"}</td>
-        <td class="n ${prev?.lucro < 0 ? "neg" : lucroBaixo(prev, R) ? "alerta" : ""}" title="${esc(contaTitulo({...l, alvo: prev}))}">${prev ? `${brl(prev.lucro)}<br><small>${brl(prev.lucro_pct)}%</small>` : "—"}</td>
-        <td class="nw">${prev?.faixa || "—"}</td><td>${tagSit(l)}</td></tr>`; }).join("")}
+        <td class="n ${neg ? "neg" : ""}" title="${esc(contaMargem(prev))}">${prev?.margem != null ? `${brl(prev.margem)}<br><small>${brl(prev.margem_pct)}%</small>` : "—"}</td>
+        <td>${tagSit(l)}</td></tr>`; }).join("")}
     </tbody></table></div></div>`;
   $("buscaP").oninput = e => { buscaP = e.target.value; produtos(); $("buscaP").focus(); $("buscaP").setSelectionRange(buscaP.length, buscaP.length); };
   $("fsit").onchange = e => { fSit = e.target.value; produtos(); };
   document.querySelectorAll("th[data-ord]").forEach(t => t.onclick = () => { const k = t.dataset.ord; ord = [k, ord[0] === k ? -ord[1] : 1]; produtos(); });
-  document.querySelectorAll("[data-p]").forEach(c => c.onchange = () => { c.checked ? marcadosP.add(c.dataset.p) : marcadosP.delete(c.dataset.p); $("voltaRegra").textContent = `Voltar à regra (${marcadosP.size})`; });
+  document.querySelectorAll("[data-p]").forEach(c => c.onchange = () => { c.checked ? marcadosP.add(c.dataset.p) : marcadosP.delete(c.dataset.p); $("limpar").textContent = `Limpar preço dos selecionados (${marcadosP.size})`; });
   $("todosP").onchange = e => { L.forEach(l => e.target.checked ? marcadosP.add(l.sku) : marcadosP.delete(l.sku)); produtos(); };
   document.querySelectorAll("[data-v]").forEach(i => i.onchange = () => { sujo[i.dataset.v] = i.value; produtos(); });
   $("salvar").onclick = salvarPrecos;
   $("sinc").onclick = async () => { $("sinc").disabled = true; $("sinc").textContent = "sincronizando…";
     try { const j = await api("/atualizar", {}); await carregar(); estado(`sincronizado: ${j.n} anúncios`, "ok"); } catch (e) { alert(e.message); produtos(); } };
-  $("voltaRegra").onclick = async () => {
+  $("limpar").onclick = async () => {
     const skus = [...marcadosP].filter(s => D.manuais[s] != null);
-    if (!skus.length) return alert("Nenhum dos marcados tem preço fixado: eles já seguem a regra.");
-    if (!confirm(`Voltar ${skus.length} SKU(s) para o preço da regra?`)) return;
+    if (!skus.length) return alert("Nenhum dos marcados tem preço mínimo salvo.");
+    if (!confirm(`Apagar o preço mínimo de ${skus.length} SKU(s)? Eles deixam de ser mexidos pelo Rodar.`)) return;
     try { await api("/manuais", {precos: Object.fromEntries(skus.map(s => [s, null]))}); marcadosP.clear(); await carregar(); } catch (e) { alert(e.message); }
   };
 }
 async function salvarPrecos() {
   const R = regra(), precos = {};
   for (const [sku, txt] of Object.entries(sujo)) {
-    const l = D.anuncios.find(a => a.sku === sku), v = num(txt);
+    const v = num(txt);
     if (String(txt).trim() && !v) return alert(`Preço inválido em ${sku}: "${txt}"`);
-    const daRegra = l && alvoDe(l, R, null);
-    precos[sku] = !v || (daRegra && igual(daRegra.venda, v)) ? null : v;   // igual à regra = segue a regra
+    precos[sku] = v;   // vazio = apaga o preço mínimo
   }
-  const neg = Object.entries(precos).filter(([s, v]) => v && alvoDe(D.anuncios.find(a => a.sku === s), R, v).lucro < 0);
-  if (neg.length && !confirm(`${neg.length} preço(s) dão PREJUÍZO: ${neg.map(([s]) => s).join(", ")}. Salvar mesmo assim?`)) return;
+  const neg = Object.entries(precos).filter(([s, v]) => { const a = D.anuncios.find(x => x.sku === s); return v && a && alvoDe(a, R, v).margem < 0; });
+  if (neg.length && !confirm(`${neg.length} preço(s) estão ABAIXO do mínimo p/ venda (prejuízo): ${neg.map(([s]) => s).join(", ")}. Salvar mesmo assim?`)) return;
   try { await api("/manuais", {precos}); for (const k in sujo) delete sujo[k]; await carregar(); $("salvo")?.classList.add("show"); setTimeout(() => $("salvo")?.classList.remove("show"), 2000); }
   catch (e) { alert(e.message); }
 }
 
-// ---------------- HISTÓRICO / REGRA / AJUDA ----------------
+// ---------------- HISTÓRICO / TAXAS / AJUDA ----------------
 function historico() {
   const dt = t => new Date(t).toLocaleString("pt-BR", {day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"});
   $("main").innerHTML = `<div class="card"><h2>Últimas 50 aplicações</h2><div class="sub">Quem aplicou, o antes e o depois de cada anúncio.</div>
-    <div class="twrap"><table><thead><tr><th>Quando</th><th>Quem</th><th>SKU</th><th class="n">Cheio</th><th class="n">Campanha</th><th>Resultado</th></tr></thead><tbody>
-    ${D.aplicados.map(a => `<tr><td>${dt(a.quando)}</td><td>${esc(a.usuario)}</td><td><b>${esc(a.sku)}</b></td>
-      <td class="n">${brl(a.cheio_antes)} → ${brl(a.cheio_depois)}</td><td class="n">${brl(a.campanha_antes)} → ${brl(a.campanha_depois)}</td>
-      <td><span class="${["falhou", "fora_do_desconto", "divergente"].includes(a.resultado) ? "neg" : ""}">${esc(a.resultado)}</span>${a.janela_s != null ? ` · ${brl(a.janela_s)} s fora do desconto` : ""}${a.erro ? " — " + esc(a.erro) : ""} · ${a.operacional ? "c/" : "s/"} operacional</td></tr>`).join("") || `<tr><td colspan="6">nada aplicado ainda</td></tr>`}
+    <div class="twrap"><table><thead><tr><th>Quando</th><th>Quem</th><th>SKU</th><th class="n">Campanha</th><th class="n">Cheio</th><th>Resultado</th></tr></thead><tbody>
+    ${D.aplicados.map(a => `<tr><td>${dt(a.quando)}</td><td>${esc(a.usuario)}</td><td class="sku"><b>${esc(a.sku)}</b></td>
+      <td class="n">${brl(a.campanha_antes)} → ${brl(a.campanha_depois)}</td><td class="n">${brl(a.cheio_antes)} → ${brl(a.cheio_depois)}</td>
+      <td><span class="${["falhou", "fora_do_desconto", "divergente"].includes(a.resultado) ? "neg" : ""}">${esc(a.resultado)}</span>${a.janela_s != null ? ` · ${brl(a.janela_s)} s fora do desconto` : ""}${a.erro ? " — " + esc(a.erro) : ""}</td></tr>`).join("") || `<tr><td colspan="6">nada aplicado ainda</td></tr>`}
     </tbody></table></div></div>`;
 }
 function telaRegra() {
-  const R = D.regra;
-  $("main").innerHTML = `<div class="card"><h2>Regra de preço</h2><div class="sub">Vale para todos os anúncios que não têm preço fixado na aba Produtos. A conta: venda = (custo + taxa fixa [+ lucro em R$]) ÷ (1 − imposto − operacional − comissão [− lucro %]); cheio = venda ÷ (1 − desconto).</div>
+  const R = regra();
+  $("main").innerHTML = `<div class="card"><h2>Taxas e imposto</h2><div class="sub">Entram no Mín. p/ venda: (custo + taxa fixa + frete) ÷ (1 − comissão − imposto). Custo operacional não entra.</div>
     <div class="grid">
      <div class="field"><label>Imposto %</label><input id="g_imp" value="${R.imposto}"></div>
-     <div class="field"><label>Custo operacional %</label><input id="g_op" value="${R.operacional}"></div>
-     <div class="field"><label>Desconto da campanha %</label><input id="g_des" value="${R.desconto}"><span class="hint">cheio = venda ÷ (1 − desconto)</span></div>
-     <div class="field"><label>Lucro</label><select id="g_modo"><option value="pct" ${R.lucro_modo === "pct" ? "selected" : ""}>em % da venda</option><option value="rs" ${R.lucro_modo === "rs" ? "selected" : ""}>em R$ por unidade</option></select></div>
-     <div class="field"><label>Lucro %</label><input id="g_pct" value="${R.lucro_pct}"></div>
-     <div class="field"><label>Lucro R$</label><input id="g_rs" value="${R.lucro_rs}"></div></div>
-    <div class="field"><label class="chave"><input type="checkbox" id="g_trava" ${R.trava ? "checked" : ""}> Travar no teto da faixa</label><span class="hint">Se a regra passar um pouco do teto (ex.: 81,08) e ali ainda sobrar pelo menos metade do lucro-alvo, o preço fica no teto (79,99).</span></div>
-    <div class="field"><label class="chave"><input type="checkbox" id="g_oper" ${R.considerar_oper ? "checked" : ""}> Considerar custo operacional por padrão</label></div>
+     <div class="field"><label>Frete por pedido (R$)</label><input id="g_fre" value="${R.frete || 0}"><span class="hint">0: o frete grátis da Shopee já está dentro da comissão</span></div>
+     <div class="field"><label>Desconto da campanha %</label><input id="g_des" value="${R.desconto}"><span class="hint">preço cheio = preço mínimo ÷ (1 − desconto)</span></div></div>
     <h2 style="margin-top:8px">Faixas da Shopee</h2><div class="sub">Comissão e taxa fixa por faixa do preço de venda (o que o cliente paga). Deixe "até" vazio na última.</div>
     <div class="twrap" style="max-width:460px"><table><thead><tr><th>Até (R$)</th><th>Comissão %</th><th>Fixa R$</th></tr></thead><tbody>
     ${R.faixas.map((f, i) => `<tr><td><input class="price" id="f_ate${i}" value="${f.ate ?? ""}" placeholder="sem teto"></td><td><input class="price" id="f_com${i}" value="${f.com}"></td><td><input class="price" id="f_fix${i}" value="${f.fixa}"></td></tr>`).join("")}
     </tbody></table></div>
-    <p><button class="btn primary" id="salvarRegra">Salvar regra</button> <span class="saved" id="salvoR">Salvo ✓</span></p></div>`;
+    <p><button class="btn primary" id="salvarRegra">Salvar</button> <span class="saved" id="salvoR">Salvo ✓</span></p></div>`;
   const n = id => Number(String($(id).value).replace(",", "."));
   $("salvarRegra").onclick = async () => {
-    const r = {imposto: n("g_imp"), operacional: n("g_op"), desconto: n("g_des"), lucro_modo: $("g_modo").value, lucro_pct: n("g_pct"), lucro_rs: n("g_rs"),
-      trava: $("g_trava").checked, considerar_oper: $("g_oper").checked,
+    const r = {...D.regra, imposto: n("g_imp"), frete: n("g_fre") || 0, desconto: n("g_des"),
       faixas: R.faixas.map((_, i) => ({ate: $("f_ate" + i).value.trim() ? n("f_ate" + i) : null, com: n("f_com" + i), fixa: n("f_fix" + i)}))};
     try { await api("/regra", {regra: r}); await carregar(); $("salvoR").classList.add("show"); } catch (e) { alert(e.message); }
   };
 }
 function ajuda() {
   $("main").innerHTML = `<div class="card ajuda"><h2>Como usar</h2><ol>
-    <li><b>Produtos</b>: confira o preço de venda de cada anúncio. Ele vem da regra; para fixar outro, digite e clique em <b>Salvar preços</b>. Salvar não mexe na Shopee.</li>
-    <li><b>Painel → Simular</b>: mostra no log o que mudaria (antes → depois e lucro), sem enviar nada.</li>
-    <li><b>Painel → Rodar agora</b>: aplica o preço salvo em todos os anúncios que estão diferentes. Ou marque alguns e use <b>Aplicar selecionados</b>.</li>
+    <li><b>Produtos</b>: veja o <b>Mín. p/ venda</b> de cada anúncio (o menor preço sem prejuízo) e digite o <b>Preço mínimo</b>, que é o preço da campanha. Clique em <b>Salvar preços</b>. Salvar não mexe na Shopee.</li>
+    <li><b>Painel → Simular</b>: mostra no log o que mudaria, sem enviar nada.</li>
+    <li><b>Painel → Rodar agora</b>: coloca na campanha, pelo preço mínimo salvo, todos os anúncios que estão diferentes. Anúncio sem preço mínimo não é mexido. Ou marque alguns e use <b>Aplicar selecionados</b>.</li>
     <li><b>Parar</b> interrompe depois do lote atual (5 anúncios); o que já foi aplicado fica.</li></ol></div>
-   <div class="card ajuda"><h2>O que cada sinal quer dizer</h2><ul>
-    <li><span class="tag t-abaixo">Abaixo</span> a campanha está vendendo mais barato que o preço salvo · <span class="tag t-acima">Acima</span> mais caro (dinheiro na mesa ou falta de competitividade).</li>
-    <li><span class="tag t-custo_mudou">Custo mudou</span> o custo do Tiny mudou desde o último preço aplicado: rode de novo.</li>
-    <li>Linha <span class="neg">vermelha</span> = prejuízo · linha <span class="alerta">amarela</span> = lucro abaixo da metade do alvo · ✎ = preço fixado à mão · 🔒 = travado no teto da faixa.</li>
-    <li>Passe o mouse no lucro para ver a conta inteira.</li></ul></div>
+   <div class="card ajuda"><h2>A conta</h2><ul>
+    <li><b>Mín. p/ venda</b> = (custo + taxa fixa da Shopee + frete) ÷ (1 − comissão − imposto). É a margem de contribuição zero: <b>não</b> inclui custo operacional (aluguel, folha…) nem lucro.</li>
+    <li><b>Margem de contribuição</b> = preço − comissão − taxa fixa − imposto − frete − custo. Passe o mouse nos valores para ver a conta.</li>
+    <li><b>Preço cheio</b> = preço mínimo ÷ 0,70, para que os 30% de desconto da campanha caiam exatamente no preço mínimo.</li>
+    <li>A comissão depende da faixa do preço: até R$ 79,99 = 20% + R$ 4,50; acima disso 14% + taxa fixa maior (aba Taxas).</li></ul></div>
    <div class="card ajuda"><h2>Como a Shopee funciona aqui</h2><ul>
     <li>A Shopee não deixa mudar o preço cheio de anúncio em desconto. Por isso o anúncio sai do desconto, muda e volta (fica uns segundos sem desconto; o tempo aparece no log e no Histórico). Se algo falhar no meio, ele volta com o preço antigo.</li>
-    <li>Os anúncios são relidos da Shopee a cada 15 minutos; <b>Sincronizar da Shopee</b> relê na hora.</li>
-    <li><b>Considerar custo operacional</b> desligado: o lucro vira <b>margem de contribuição</b> (antes de aluguel, folha etc.).</li></ul></div>`;
+    <li>Os anúncios são relidos da Shopee a cada 15 minutos; <b>Sincronizar da Shopee</b> relê na hora.</li></ul></div>`;
 }
 
 document.querySelectorAll(".nav-item").forEach(b => b.onclick = () => { aba = b.dataset.tab; try { localStorage.shAba = aba; } catch {} if (D) desenhar(); });
-$("oper").onchange = e => { oper = e.target.checked; desenhar(); };
 carregar();
 document.addEventListener("visibilitychange", () => { if (!document.hidden && !rodando && !Object.keys(sujo).length) carregar(); });
 </script></body></html>
