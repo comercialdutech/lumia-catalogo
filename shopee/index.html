@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Shopee preços</title>
+<meta name="theme-color" content="#f4f5f9"><meta name="robots" content="noindex">
+<link rel="apple-touch-icon" href="../app/icone-192.png">
+<style>
+ :root{--bg:#f4f5f9;--card:#fff;--borda:#e7e9f0;--txt:#1d1f2c;--mut:#7b8095;--ama:#FFD100;--verde:#16a34a;--verm:#e0344a;--alerta:#b7791f}
+ *{box-sizing:border-box}
+ body{font:14px/1.45 system-ui,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--txt);margin:0;padding:16px 16px 80px}
+ .max{max-width:1400px;margin:0 auto}
+ a.volta{color:var(--mut);text-decoration:none;font-size:13px}
+ h1{font-size:21px;margin:6px 0 4px}
+ .sub{color:var(--mut);font-size:12.5px;margin-bottom:14px}
+ .nums{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+ .num{background:var(--card);border:1px solid var(--borda);border-radius:12px;padding:12px}
+ .num b{display:block;font-size:22px} .num span{color:var(--mut);font-size:12.5px}
+ .num.verm b{color:var(--verm)} .num.ama b{color:var(--alerta)}
+ .barra{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+ .barra input[type=search],.barra select{border:1px solid var(--borda);border-radius:8px;padding:7px 9px;font:inherit;background:#fff}
+ .barra input[type=search]{flex:1;min-width:180px}
+ .chave{display:inline-flex;gap:6px;align-items:center;background:#fff;border:1px solid var(--borda);border-radius:8px;padding:6px 10px;cursor:pointer}
+ button{font:inherit;border:0;border-radius:8px;padding:8px 14px;cursor:pointer;background:#0A0A0B;color:#fff}
+ button.sec{background:#eceef4;color:var(--txt)} button:disabled{opacity:.45;cursor:default}
+ table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--borda);border-radius:12px;overflow:hidden}
+ th,td{padding:8px;border-bottom:1px solid var(--borda);text-align:right;white-space:nowrap}
+ th{font-size:12px;color:var(--mut);cursor:pointer;user-select:none;background:#fafbfd}
+ td.t,th.t{text-align:left;white-space:normal}
+ td img{width:38px;height:38px;object-fit:cover;border-radius:6px}
+ tr.det td{background:#fafbfd;text-align:left;white-space:normal;color:var(--mut)}
+ .tag{display:inline-block;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:600}
+ .ok{background:#dcfce7;color:#166534}.abaixo{background:#fde2e6;color:#9f1239}.acima{background:#fff3c4;color:#854d0e}
+ .custo_mudou{background:#e0e7ff;color:#3730a3}.sem_custo,.fora_campanha{background:#eceef4;color:#555}
+ .neg{color:var(--verm);font-weight:600}
+ input.man{width:78px;border:1px solid var(--borda);border-radius:6px;padding:4px;text-align:right;font:inherit}
+ .rodape{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--borda);padding:10px 16px;display:flex;gap:10px;align-items:center;justify-content:flex-end}
+ .modal{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;padding:16px}
+ .caixa{background:#fff;border-radius:14px;max-width:760px;width:100%;max-height:85vh;overflow:auto;padding:18px}
+ .aviso{background:#fff3c4;border-radius:8px;padding:8px 10px;margin:8px 0}
+ .erro{background:#fde2e6;border-radius:8px;padding:8px 10px;margin:8px 0;color:#9f1239}
+ .cartoes{display:none}
+ @media (max-width:760px){
+  table.grande{display:none}.cartoes{display:grid;gap:8px}
+  .cartao{background:#fff;border:1px solid var(--borda);border-radius:12px;padding:10px}
+  .cartao .l1{display:flex;justify-content:space-between;gap:8px}.cartao .l2{color:var(--mut);font-size:12.5px;margin-top:4px}
+ }
+</style></head><body><div class="max">
+<a class="volta" href="../hub/">‹ hub</a>
+<h1>🛍️ Shopee preços</h1>
+<div class="sub" id="sub">carregando…</div>
+<div id="tela"></div>
+</div>
+<script type="module">
+import {REGRA_PADRAO, alvoDe, situacao} from "./logica.mjs";
+const PROXY = "https://estoque-olist.dutech.workers.dev/shopee";
+const $ = id => document.getElementById(id);
+const cab = () => ({authorization: `Bearer ${localStorage.usuario || ""}:${localStorage.senha || ""}`, "content-type": "application/json"});
+const brl = v => v == null ? "—" : v.toLocaleString("pt-BR", {minimumFractionDigits: 2, maximumFractionDigits: 2});
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+const NOME_SIT = {ok: "OK", abaixo: "Abaixo", acima: "Acima", custo_mudou: "Custo mudou", sem_custo: "Sem custo", fora_campanha: "Fora de campanha"};
+let D = null, oper = null, busca = "", fSit = "", fMarca = "", fStatus = "NORMAL", ord = ["sit", 1], aberto = null;
+const sel = new Set();
+
+async function api(rota, corpo) {
+  const r = await fetch(PROXY + rota, corpo ? {method: "POST", headers: cab(), body: JSON.stringify(corpo)} : {headers: cab()});
+  if (r.status === 401) { telaLogin(localStorage.usuario ? "Usuário ou senha errados (precisa ser da equipe)." : ""); throw new Error("login"); }
+  const j = await r.json().catch(() => ({erro: `resposta inválida (${r.status})`}));
+  if (!r.ok) throw new Error(j.erro || r.status);
+  return j;
+}
+function telaLogin(msg) {
+  $("sub").textContent = "";
+  $("tela").innerHTML = `<div class="caixa" style="max-width:340px">${msg ? `<div class="erro">${esc(msg)}</div>` : ""}
+    <p><input id="u" placeholder="usuário" style="width:100%;padding:8px"></p><p><input id="s" type="password" placeholder="senha" style="width:100%;padding:8px"></p>
+    <button id="entrar">Entrar</button></div>`;
+  $("entrar").onclick = () => { localStorage.usuario = $("u").value.trim(); localStorage.senha = $("s").value; carregar(); };
+}
+async function carregar() {
+  try { D = await api("/dados"); } catch (e) { if (e.message !== "login") $("sub").innerHTML = `<span class="erro">${esc(e.message)}</span>`; return; }
+  if (oper == null) oper = D.regra.considerar_oper;
+  desenhar();
+}
+const regraAtual = () => ({...REGRA_PADRAO, ...D.regra, considerar_oper: oper});
+const marcaDe = t => /xfull/i.test(t) ? "Xfull" : /masterprint/i.test(t) ? "Masterprint" : "Outras";
+function linhas() {
+  const R = regraAtual();
+  return D.anuncios.map(a => { const alvo = alvoDe(a, R, D.manuais[a.sku]); return {...a, alvo, sit: situacao(a, alvo),
+    hoje: a.custo > 0 && a.campanha != null ? alvoDe(a, R, a.campanha) : null, marca: marcaDe(a.titulo)}; });
+}
+function desenhar() {
+  const R = regraAtual(), rotLucro = oper ? "Lucro" : "Margem de contribuição";
+  const todas = linhas(), L = todas.filter(l => (!fStatus || l.status === fStatus) && (!fSit || l.sit === fSit) && (!fMarca || l.marca === fMarca)
+    && (!busca || (l.sku + " " + l.titulo).toLowerCase().includes(busca.toLowerCase())));
+  const ORD = {sit: l => ["abaixo", "custo_mudou", "acima", "fora_campanha", "sem_custo", "ok"].indexOf(l.sit), sku: l => l.sku,
+    custo: l => l.custo ?? -1, campanha: l => l.campanha ?? -1, lucro: l => l.hoje?.lucro_pct ?? -999, venda: l => l.alvo?.venda ?? -1};
+  L.sort((a, b) => { const x = ORD[ord[0]](a), y = ORD[ord[0]](b); return (x > y ? 1 : x < y ? -1 : 0) * ord[1]; });
+  const ativos = todas.filter(l => l.status === "NORMAL"), comLucro = ativos.filter(l => l.hoje);
+  const media = comLucro.length ? comLucro.reduce((s, l) => s + l.hoje.lucro_pct, 0) / comLucro.length : 0;
+  const lido = D.lido_em ? new Date(D.lido_em).toLocaleString("pt-BR", {day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"}) : "nunca";
+  $("sub").textContent = `Loja Dutech · dados da Shopee de ${lido} · lucro ${R.lucro_modo === "rs" ? "R$ " + brl(R.lucro_rs) : R.lucro_pct + "%"} · campanha −${R.desconto}%`;
+  const td = l => {
+    const h = l.hoje, al = l.alvo;
+    return `<td><input type="checkbox" data-sel="${l.item_id}" ${sel.has(l.item_id) ? "checked" : ""} ${al ? "" : "disabled"}></td>
+      <td>${l.foto ? `<img src="${esc(l.foto)}" alt="" loading="lazy">` : ""}</td>
+      <td class="t" data-abre="${l.item_id}" style="cursor:pointer"><b>${esc(l.sku)}</b><br><span style="color:var(--mut)">${esc(l.titulo.slice(0, 70))}</span></td>
+      <td>${brl(l.custo)}</td><td>${brl(l.cheio)}</td><td>${brl(l.campanha)}</td>
+      <td class="${h && h.lucro < 0 ? "neg" : ""}">${h ? brl(h.lucro) + "<br>" + brl(h.lucro_pct) + "%" : "—"}</td>
+      <td>${al ? brl(al.cheio) : "—"}</td><td><b>${al ? brl(al.venda) : "—"}</b>${al?.travado ? " 🔒" : ""}</td>
+      <td class="${al && al.lucro < 0 ? "neg" : ""}">${al ? brl(al.lucro) + "<br>" + brl(al.lucro_pct) + "%" : "—"}</td>
+      <td>${al?.faixa || "—"}</td><td><span class="tag ${l.sit}">${NOME_SIT[l.sit]}${l.sit === "abaixo" || l.sit === "acima" ? " " + brl((l.campanha / al.venda - 1) * 100) + "%" : ""}</span></td>
+      <td><input class="man" data-man="${esc(l.sku)}" value="${D.manuais[l.sku] ?? ""}" placeholder="manual"></td>`;
+  };
+  const det = l => !l.alvo ? "" : `<tr class="det"><td colspan="13">Venda ${brl(l.alvo.venda)} − comissão ${brl(l.alvo.comissao)} − fixa ${brl(l.alvo.fixa)}
+    − imposto ${brl(l.alvo.imposto)} − operacional ${brl(l.alvo.operacional)} − custo ${brl(l.custo)} = <b>${rotLucro.toLowerCase()} ${brl(l.alvo.lucro)}</b>
+    ${l.alvo.manual ? " · preço manual" : ""}${l.alvo.travado ? " · travado no teto da faixa" : ""}</td></tr>`;
+  const th = (k, t, cls = "") => `<th class="${cls}" ${k ? `data-ord="${k}"` : ""}>${t}${ord[0] === k ? (ord[1] > 0 ? " ▲" : " ▼") : ""}</th>`;
+  const n = s => todas.filter(l => l.status === "NORMAL" && l.sit === s).length;
+  $("tela").innerHTML = `
+    <div class="nums"><div class="num"><b>${ativos.length}</b><span>anúncios ativos</span></div>
+      <div class="num verm"><b>${n("abaixo")}</b><span>abaixo da regra</span></div>
+      <div class="num ama"><b>${n("acima")}</b><span>acima da regra</span></div>
+      <div class="num"><b>${brl(media)}%</b><span>${oper ? "lucro médio" : "margem de contribuição média"} na campanha</span></div></div>
+    <div class="barra"><input type="search" id="busca" placeholder="SKU ou título" value="${esc(busca)}">
+      <select id="fsit"><option value="">todas as situações</option>${Object.entries(NOME_SIT).map(([k, v]) => `<option value="${k}" ${fSit === k ? "selected" : ""}>${v}</option>`).join("")}</select>
+      <select id="fmarca"><option value="">todas as marcas</option>${["Masterprint", "Xfull", "Outras"].map(m => `<option ${fMarca === m ? "selected" : ""}>${m}</option>`).join("")}</select>
+      <select id="fstatus"><option value="NORMAL" ${fStatus === "NORMAL" ? "selected" : ""}>ativos</option><option value="UNLIST" ${fStatus === "UNLIST" ? "selected" : ""}>pausados</option><option value="" ${!fStatus ? "selected" : ""}>todos</option></select>
+      <label class="chave"><input type="checkbox" id="oper" ${oper ? "checked" : ""}> Considerar custo operacional</label>
+      <button class="sec" id="atualizar">Atualizar agora</button><button class="sec" id="engr">⚙️ Regra</button><button class="sec" id="hist">Histórico</button></div>
+    <table class="grande"><thead><tr><th><input type="checkbox" id="todos"></th><th></th>${th("sku", "SKU / título", "t")}${th("custo", "Custo")}<th>Cheio hoje</th>
+      ${th("campanha", "Campanha hoje")}${th("lucro", rotLucro + " hoje")}<th>Cheio regra</th>${th("venda", "Venda regra")}<th>${rotLucro} regra</th><th>Faixa</th>${th("sit", "Situação")}<th>Manual</th></tr></thead>
+      <tbody>${L.map(l => `<tr>${td(l)}</tr>${aberto === l.item_id ? det(l) : ""}`).join("")}</tbody></table>
+    <div class="cartoes">${L.map(l => `<div class="cartao" data-abre="${l.item_id}"><div class="l1"><span><input type="checkbox" data-sel="${l.item_id}" ${sel.has(l.item_id) ? "checked" : ""} ${l.alvo ? "" : "disabled"}> <b>${esc(l.sku)}</b></span>
+      <span class="tag ${l.sit}">${NOME_SIT[l.sit]}</span></div><div class="l2">${esc(l.titulo.slice(0, 60))}</div>
+      <div>campanha ${brl(l.campanha)} → <b>${l.alvo ? brl(l.alvo.venda) : "—"}</b> · ${rotLucro.toLowerCase()} ${l.alvo ? brl(l.alvo.lucro) : "—"}</div>
+      ${aberto === l.item_id && l.alvo ? `<div class="l2">cheio ${brl(l.alvo.cheio)} · comissão ${brl(l.alvo.comissao)} · fixa ${brl(l.alvo.fixa)} · imposto ${brl(l.alvo.imposto)} · operacional ${brl(l.alvo.operacional)}</div>` : ""}</div>`).join("")}</div>
+    <div class="rodape"><span id="nsel">${sel.size} selecionado(s)</span><button class="sec" id="selAbaixo">Selecionar abaixo da regra</button><button id="aplicar" ${sel.size ? "" : "disabled"}>Aplicar</button></div>`;
+  ligar(L);
+}
+function ligar(L) {
+  $("busca").oninput = e => { busca = e.target.value; desenhar(); $("busca").focus(); };
+  $("fsit").onchange = e => { fSit = e.target.value; desenhar(); };
+  $("fmarca").onchange = e => { fMarca = e.target.value; desenhar(); };
+  $("fstatus").onchange = e => { fStatus = e.target.value; desenhar(); };
+  $("oper").onchange = e => { oper = e.target.checked; desenhar(); };
+  $("todos").onchange = e => { L.filter(l => l.alvo).forEach(l => e.target.checked ? sel.add(l.item_id) : sel.delete(l.item_id)); desenhar(); };
+  $("selAbaixo").onclick = () => { linhas().filter(l => l.sit === "abaixo" && l.status === "NORMAL").forEach(l => sel.add(l.item_id)); desenhar(); };
+  $("atualizar").onclick = async () => { $("atualizar").disabled = true; try { await api("/atualizar", {}); } catch (e) { alert(e.message); } carregar(); };
+  $("engr").onclick = engrenagem; $("hist").onclick = historico; $("aplicar").onclick = confirmar;
+  document.querySelectorAll("[data-ord]").forEach(th => th.onclick = () => { const k = th.dataset.ord; ord = [k, ord[0] === k ? -ord[1] : 1]; desenhar(); });
+  document.querySelectorAll("[data-sel]").forEach(c => c.onclick = e => { e.stopPropagation(); const id = Number(c.dataset.sel); c.checked ? sel.add(id) : sel.delete(id); $("nsel").textContent = `${sel.size} selecionado(s)`; $("aplicar").disabled = !sel.size; });
+  document.querySelectorAll("[data-abre]").forEach(t => t.onclick = () => { const id = Number(t.dataset.abre); aberto = aberto === id ? null : id; desenhar(); });
+  document.querySelectorAll("[data-man]").forEach(i => { i.onclick = e => e.stopPropagation(); i.onchange = async () => {
+    const v = Number(String(i.value).replace(",", ".")) || null;
+    try { await api("/manual", {sku: i.dataset.man, venda: v}); D.manuais[i.dataset.man] = v ?? undefined; if (!v) delete D.manuais[i.dataset.man]; desenhar(); } catch (e) { alert(e.message); } }; });
+}
+function modal(html) { const m = document.createElement("div"); m.className = "modal"; m.innerHTML = `<div class="caixa">${html}</div>`;
+  m.onclick = e => { if (e.target === m) m.remove(); }; document.body.appendChild(m); return m; }
+function confirmar() {
+  const L = linhas().filter(l => sel.has(l.item_id) && l.alvo), neg = L.filter(l => l.alvo.lucro < 0);
+  const m = modal(`<h3>Aplicar ${L.length} preço(s) na Shopee</h3>
+    <div class="aviso">Calculado ${oper ? "COM" : "SEM"} custo operacional · lucro ${D.regra.lucro_modo === "rs" ? "R$ " + brl(D.regra.lucro_rs) : D.regra.lucro_pct + "%"}.
+    Quem está em desconto sai e volta para o desconto (fica alguns segundos sem desconto).</div>
+    ${neg.length ? `<div class="erro">${neg.length} anúncio(s) com PREJUÍZO (preço manual): ${neg.map(l => esc(l.sku)).join(", ")}</div>` : ""}
+    <table><tr><th class="t">SKU</th><th>Cheio</th><th>Campanha</th><th>${oper ? "Lucro" : "Margem"}</th></tr>
+    ${L.map(l => `<tr><td class="t">${esc(l.sku)}</td><td>${brl(l.cheio)} → ${brl(l.alvo.cheio)}</td><td>${brl(l.campanha)} → <b>${brl(l.alvo.venda)}</b></td>
+      <td class="${l.alvo.lucro < 0 ? "neg" : ""}">${brl(l.alvo.lucro)}</td></tr>`).join("")}</table>
+    <p><button id="vai">Aplicar agora</button> <button class="sec" id="nao">Cancelar</button></p><div id="res"></div>`);
+  m.querySelector("#nao").onclick = () => m.remove();
+  m.querySelector("#vai").onclick = async () => {
+    if (neg.length && !confirm(`Confirma vender ${neg.length} anúncio(s) com PREJUÍZO?`)) return;
+    m.querySelector("#vai").disabled = true; m.querySelector("#res").textContent = "aplicando… (não feche)";
+    try {
+      const j = await api("/aplicar", {considerar_oper: oper, itens: L.map(l => ({item_id: l.item_id, cheio: l.alvo.cheio, venda: l.alvo.venda, aceito_prejuizo: l.alvo.lucro < 0}))});
+      const RES = {aplicado: "✅ aplicado", igual: "já estava certo", divergente: "⚠️ gravou diferente", falhou: "❌ falhou", fora_do_desconto: "🚨 FORA DO DESCONTO", desatualizado: "↻ desatualizado", recusado: "⛔ recusado"};
+      m.querySelector("#res").innerHTML = j.resultados.map(r => `<div class="${["falhou", "fora_do_desconto"].includes(r.resultado) ? "erro" : ""}">${esc(r.sku || r.item_id)}: ${RES[r.resultado] || r.resultado}${r.erro ? " — " + esc(r.erro) : ""}</div>`).join("");
+      sel.clear(); carregar();
+    } catch (e) { m.querySelector("#res").innerHTML = `<div class="erro">${esc(e.message)} — confira na Central do Vendedor antes de repetir.</div>`; }
+  };
+}
+function engrenagem() {
+  const R = D.regra;
+  const m = modal(`<h3>Regra de preço</h3>
+    <p>Imposto % <input id="g_imp" value="${R.imposto}" size="4"> · Operacional % <input id="g_op" value="${R.operacional}" size="4"> · Desconto da campanha % <input id="g_des" value="${R.desconto}" size="4"></p>
+    <p>Lucro <select id="g_modo"><option value="pct" ${R.lucro_modo === "pct" ? "selected" : ""}>em %</option><option value="rs" ${R.lucro_modo === "rs" ? "selected" : ""}>em R$ por unidade</option></select>
+      % <input id="g_pct" value="${R.lucro_pct}" size="4"> · R$ <input id="g_rs" value="${R.lucro_rs}" size="5"></p>
+    <p><label><input type="checkbox" id="g_trava" ${R.trava ? "checked" : ""}> Travar no teto da faixa quando ainda der lucro</label></p>
+    <p><label><input type="checkbox" id="g_oper" ${R.considerar_oper ? "checked" : ""}> Considerar custo operacional por padrão</label></p>
+    <table><tr><th>Até (R$)</th><th>Comissão %</th><th>Fixa R$</th></tr>${R.faixas.map((f, i) => `<tr><td><input id="f_ate${i}" value="${f.ate ?? ""}" size="7" placeholder="sem teto"></td>
+      <td><input id="f_com${i}" value="${f.com}" size="4"></td><td><input id="f_fix${i}" value="${f.fixa}" size="5"></td></tr>`).join("")}</table>
+    <p><button id="salvar">Salvar</button> <button class="sec" id="nao">Cancelar</button></p>`);
+  const num = id => Number(String(m.querySelector("#" + id).value).replace(",", "."));
+  m.querySelector("#nao").onclick = () => m.remove();
+  m.querySelector("#salvar").onclick = async () => {
+    const regra = {imposto: num("g_imp"), operacional: num("g_op"), desconto: num("g_des"), lucro_modo: m.querySelector("#g_modo").value,
+      lucro_pct: num("g_pct"), lucro_rs: num("g_rs"), trava: m.querySelector("#g_trava").checked, considerar_oper: m.querySelector("#g_oper").checked,
+      faixas: R.faixas.map((_, i) => ({ate: m.querySelector("#f_ate" + i).value.trim() ? num("f_ate" + i) : null, com: num("f_com" + i), fixa: num("f_fix" + i)}))};
+    try { await api("/regra", {regra}); oper = regra.considerar_oper; m.remove(); carregar(); } catch (e) { alert(e.message); }
+  };
+}
+function historico() {
+  const dt = t => new Date(t).toLocaleString("pt-BR", {day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"});
+  modal(`<h3>Histórico (últimas 50)</h3><table><tr><th class="t">Quando</th><th class="t">Quem</th><th class="t">SKU</th><th>Cheio</th><th>Campanha</th><th class="t">Resultado</th></tr>
+    ${D.aplicados.map(a => `<tr><td class="t">${dt(a.quando)}</td><td class="t">${esc(a.usuario)}</td><td class="t">${esc(a.sku)}</td>
+      <td>${brl(a.cheio_antes)} → ${brl(a.cheio_depois)}</td><td>${brl(a.campanha_antes)} → ${brl(a.campanha_depois)}</td>
+      <td class="t">${esc(a.resultado)}${a.janela_s != null ? ` (${brl(a.janela_s)}s sem desconto)` : ""}${a.erro ? " — " + esc(a.erro) : ""} · ${a.operacional ? "c/" : "s/"} operacional</td></tr>`).join("") || "<tr><td>nada ainda</td></tr>"}</table>`);
+}
+carregar();
+document.addEventListener("visibilitychange", () => { if (!document.hidden && !document.querySelector(".modal")) carregar(); });
+</script></body></html>
