@@ -170,7 +170,12 @@ function confirmar() {
     if (neg.length && !confirm(`Confirma vender ${neg.length} anúncio(s) com PREJUÍZO?`)) return;
     m.querySelector("#vai").disabled = true; m.querySelector("#res").textContent = "aplicando… (não feche)";
     try {
-      const j = await api("/aplicar", {considerar_oper: oper, itens: L.map(l => ({item_id: l.item_id, cheio: l.alvo.cheio, venda: l.alvo.venda, aceito_prejuizo: l.alvo.lucro < 0}))});
+      // lotes de 25: cada anúncio custa ~5 chamadas à Shopee e o worker tem limite de subrequests por execução
+      const j = {resultados: []}, itens = L.map(l => ({item_id: l.item_id, cheio: l.alvo.cheio, venda: l.alvo.venda, aceito_prejuizo: l.alvo.lucro < 0}));
+      for (let i = 0; i < itens.length; i += 25) {
+        m.querySelector("#res").textContent = `aplicando ${Math.min(i + 25, itens.length)} de ${itens.length}… (não feche)`;
+        j.resultados.push(...(await api("/aplicar", {considerar_oper: oper, itens: itens.slice(i, i + 25)})).resultados);
+      }
       const RES = {aplicado: "✅ aplicado", igual: "já estava certo", divergente: "⚠️ gravou diferente", falhou: "❌ falhou", fora_do_desconto: "🚨 FORA DO DESCONTO", desatualizado: "↻ desatualizado", recusado: "⛔ recusado"};
       m.querySelector("#res").innerHTML = j.resultados.map(r => `<div class="${["falhou", "fora_do_desconto"].includes(r.resultado) ? "erro" : ""}">${esc(r.sku || r.item_id)}: ${RES[r.resultado] || r.resultado}${r.erro ? " — " + esc(r.erro) : ""}</div>`).join("");
       sel.clear(); carregar();
