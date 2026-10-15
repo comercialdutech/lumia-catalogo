@@ -243,7 +243,7 @@ async function rodar(L, oque) {
 
 // ---------------- PRODUTOS ----------------
 function produtos() {
-  const R = regra();
+  const R = regra(), rolagem = [document.querySelector("#main .twrap")?.scrollTop || 0, window.scrollY];   // redesenho mantém o lugar
   const L = linhas().filter(l => (!fSit || l.sit === fSit) && (!buscaP || (l.sku + " " + l.titulo).toLowerCase().includes(buscaP.toLowerCase())));
   const ORD = {sku: l => l.sku, titulo: l => l.titulo, custo: l => l.custo ?? -1, campanha: l => l.campanha ?? -1, min: l => l.min?.venda ?? -1,
     salvo: l => l.salvo ?? -1, margem: l => l.alvo?.margem ?? -999, sit: l => ["prejuizo", "pendente", "custo_mudou", "fora_campanha", "sem_preco", "sem_custo", "pausado", "ok"].indexOf(l.sit)};
@@ -266,22 +266,27 @@ function produtos() {
       ${th("margem", "Margem contrib.", "n")}${th("sit", "Situação")}</tr></thead><tbody>
       ${L.map(l => { const txt = sujo[l.sku] ?? (l.salvo != null ? brl(l.salvo) : ""), prev = sujo[l.sku] != null ? alvoDe(l, R, num(sujo[l.sku])) : l.alvo;
         const neg = prev?.margem != null && prev.margem < 0;
-        return `<tr class="${neg ? "prej" : ""}">
+        return `<tr class="${neg ? "prej" : ""}" data-row="${esc(l.sku)}">
         <td><input type="checkbox" data-p="${esc(l.sku)}" ${marcadosP.has(l.sku) ? "checked" : ""}></td>
         <td class="sku"><b>${esc(l.sku)}</b></td><td class="tit-full">${esc(l.titulo)}</td>
         <td class="n">${l.custo > 0 ? brl(l.custo) : `<span class="tag t-sem_custo">sem custo</span>`}</td><td class="n">${brl(l.campanha)}</td>
         <td class="n" title="${esc(contaMin(l, R))}"><b>${l.min ? brl(l.min.venda) : "—"}</b></td>
         <td class="n"><input class="price ${neg ? "abaixo" : ""} ${sujo[l.sku] != null ? "dirty" : ""}" data-v="${esc(l.sku)}" value="${esc(txt)}" placeholder="—"></td>
-        <td class="n">${prev ? brl(prev.cheio) : "—"}</td>
-        <td class="n ${neg ? "neg" : ""}" title="${esc(contaMargem(prev))}">${prev?.margem != null ? `${brl(prev.margem)}<br><small>${brl(prev.margem_pct)}%</small>` : "—"}</td>
+        <td class="n c-cheio">${prev ? brl(prev.cheio) : "—"}</td>
+        <td class="n c-margem ${neg ? "neg" : ""}" title="${esc(contaMargem(prev))}">${prev?.margem != null ? `${brl(prev.margem)}<br><small>${brl(prev.margem_pct)}%</small>` : "—"}</td>
         <td>${tagSit(l)}</td></tr>`; }).join("")}
     </tbody></table></div></div>`;
+  if (document.querySelector("#main .twrap")) { document.querySelector("#main .twrap").scrollTop = rolagem[0]; window.scrollTo(0, rolagem[1]); }
   $("buscaP").oninput = e => { buscaP = e.target.value; produtos(); $("buscaP").focus(); $("buscaP").setSelectionRange(buscaP.length, buscaP.length); };
   $("fsit").onchange = e => { fSit = e.target.value; produtos(); };
   document.querySelectorAll("th[data-ord]").forEach(t => t.onclick = () => { const k = t.dataset.ord; ord = [k, ord[0] === k ? -ord[1] : 1]; produtos(); });
   document.querySelectorAll("[data-p]").forEach(c => c.onchange = () => { c.checked ? marcadosP.add(c.dataset.p) : marcadosP.delete(c.dataset.p); $("limpar").textContent = `Limpar preço dos selecionados (${marcadosP.size})`; });
   $("todosP").onchange = e => { L.forEach(l => e.target.checked ? marcadosP.add(l.sku) : marcadosP.delete(l.sku)); produtos(); };
-  document.querySelectorAll("[data-v]").forEach(i => i.onchange = () => { sujo[i.dataset.v] = i.value; produtos(); });
+  // digitar NÃO redesenha a tabela (pulava a página e perdia o lugar): só a própria linha e o botão Salvar se atualizam
+  document.querySelectorAll("[data-v]").forEach(i => {
+    i.oninput = () => { sujo[i.dataset.v] = i.value; atualizaLinha(i.dataset.v); };
+    i.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); const t = [...document.querySelectorAll("[data-v]")]; t[t.indexOf(i) + 1]?.focus(); } };
+  });
   $("salvar").onclick = salvarPrecos;
   $("sinc").onclick = async () => { $("sinc").disabled = true; $("sinc").textContent = "sincronizando…";
     try { const j = await api("/atualizar", {}); await carregar(); estado(`sincronizado: ${j.n} anúncios`, "ok"); } catch (e) { alert(e.message); produtos(); } };
@@ -291,6 +296,20 @@ function produtos() {
     if (!confirm(`Apagar o preço mínimo de ${skus.length} SKU(s)? Eles deixam de ser mexidos pelo Rodar.`)) return;
     try { await api("/manuais", {precos: Object.fromEntries(skus.map(s => [s, null]))}); marcadosP.clear(); await carregar(); } catch (e) { alert(e.message); }
   };
+}
+function atualizaLinha(sku) {
+  const R = regra(), l = linhas().find(x => x.sku === sku), tr = document.querySelector(`tr[data-row="${CSS.escape(sku)}"]`);
+  if (!l || !tr) return;
+  const v = num(sujo[sku]), prev = String(sujo[sku]).trim() === "" ? null : v ? alvoDe(l, R, v) : null;
+  const neg = prev?.margem != null && prev.margem < 0, inp = tr.querySelector("[data-v]");
+  tr.className = neg ? "prej" : "";
+  inp.classList.toggle("abaixo", neg); inp.classList.add("dirty");
+  tr.querySelector(".c-cheio").textContent = prev ? brl(prev.cheio) : "—";
+  const m = tr.querySelector(".c-margem");
+  m.className = "n c-margem" + (neg ? " neg" : ""); m.title = contaMargem(prev);
+  m.innerHTML = prev?.margem != null ? `${brl(prev.margem)}<br><small>${brl(prev.margem_pct)}%</small>` : "—";
+  const n = Object.keys(sujo).length, b = $("salvar");
+  b.disabled = !n; b.textContent = `Salvar preços${n ? ` (${n})` : ""}`;
 }
 async function salvarPrecos() {
   const R = regra(), precos = {};
