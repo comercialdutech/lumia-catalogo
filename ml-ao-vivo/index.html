@@ -101,6 +101,7 @@
  .num.alerta b{color:var(--verm)}
  .tag{font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:5px;margin-left:6px}
  .tag.Dutech{background:#fff5d6;color:#946c00}.tag.Lumia{background:#e2f0ff;color:#1d64b8}.tag.Oneway{background:#f3e8ff;color:#7e22ce}
+ .tag.ML{background:#FFF0B3;color:#5c4a00}.tag.Shopee{background:#EE4D2D;color:#fff}
  .ped li{gap:10px}.ped .h{color:var(--mut);font-variant-numeric:tabular-nums;width:40px;flex:none}
  .ped .val{font-weight:700;font-variant-numeric:tabular-nums}
  .ped li.novo{animation:brilho 3s ease-out}
@@ -145,6 +146,7 @@
 <script>
 const PROXY = "https://ml-vivo.dutech.workers.dev";
 const CONTAS = ["Dutech", "Lumia", "Oneway"];
+const CANAIS = [["", "Todos"], ["ML", "Mercado Livre"], ["Shopee", "Shopee"]];
 const PERIODOS = [["hoje", "Hoje"], ["7d", "7d"], ["15d", "15d"], ["30d", "30d"], ["mes", "Este mês"], ["mesant", "Mês passado"], ["custom", "Personalizado"]];
 const COR = {cmv: "--cmv", tarifa: "--tarifa", imposto: "--imposto", frete: "--frete", cancel: "--cancel", ads: "--ads"};
 const ICONE = {cmv: "📦", tarifa: "🏷️", imposto: "🏛️", frete: "🚚", cancel: "⛔", ads: "📣"};
@@ -162,6 +164,7 @@ function pill(d, inverso = false) {          // inverso: cancelado subir e ruim
 }
 
 let per = localStorage.mlPer || "7d", conta = localStorage.mlConta || "", dados = null, vistos = null, ultimaOk = 0, aba = "top";
+let canal = localStorage.mlCanal || "";
 // "Detalhe financeiro": venda a venda, como o Resumo financeiro das dashboards
 const hojeBR = () => new Intl.DateTimeFormat("en-CA", {timeZone: "America/Sao_Paulo"}).format(new Date());
 const menosDias = (d, n) => new Date(Date.parse(d + "T12:00:00Z") - n * 864e5).toISOString().slice(0, 10);
@@ -189,7 +192,7 @@ function entrar() { localStorage.usuario = $("u").value.trim(); localStorage.sen
 
 async function carregar() {
   let r;
-  const qs = `periodo=${per}&conta=${conta}${per === "custom" ? `&de=${pDe}&ate=${pAte}` : ""}${vista === "detalhe" ? "&detalhe=1" : ""}`;
+  const qs = `periodo=${per}&conta=${conta}&canal=${canal}${per === "custom" ? `&de=${pDe}&ate=${pAte}` : ""}${vista === "detalhe" ? "&detalhe=1" : ""}`;
   try { r = await fetch(`${PROXY}/?${qs}`, {headers: cab()}); }
   catch { $("status").textContent = "sem conexão — tentando de novo"; $("ponto").className = "ponto"; return; }
   if (r.status === 401) return telaLogin(localStorage.usuario ? "Usuário ou senha errados (precisa ser da equipe)." : "");
@@ -204,7 +207,7 @@ function desenharVistas() {
 function trocaVista(v) { vista = v; localStorage.mlVista = v; $("tela").innerHTML = `<div class="vazio">carregando…</div>`; carregar(); }
 
 // linha = [dia, criado, conta, pedido, sku, titulo, qtd, receita, tarifa, frete, imposto, cmv, margem, fretePendente]
-const COLS = [["Data", 0], ["Produto", 5], ["Conta", 2], ["Qtd", 6], ["Receita", 7], ["Tarifa ML", 8], ["Frete", 9],
+const COLS = [["Data", 0], ["Produto", 5], ["Conta", 2], ["Qtd", 6], ["Receita", 7], ["Tarifa", 8], ["Frete", 9],
               ["Imposto", 10], ["Custo", 11], ["Margem", 12], ["%", 99]];
 function linhasAgrupadas() {
   const q = detBusca.trim().toLowerCase();
@@ -224,7 +227,7 @@ function linhasAgrupadas() {
 }
 function desenharDetalhe() {
   if (!det || !det.linhas) return;
-  $("dir").innerHTML = seg([["", "Todas"], ...CONTAS.map(c => [c, c])], conta, "conta");
+  $("dir").innerHTML = seg(CANAIS, canal, "canal") + seg([["", "Todas"], ...CONTAS.map(c => [c, c])], conta, "conta");
   const todas = !conta, L = linhasAgrupadas(), [ci, dir] = detOrd;
   const val = l => ci === 99 ? (l[7] ? l[12] / l[7] : 0) : l[ci];
   L.sort((a, b) => { const x = val(a), y = val(b); return (x == null) - (y == null) || (x < y ? -dir : x > y ? dir : 0); });
@@ -235,7 +238,7 @@ function desenharDetalhe() {
   const cel = l => cols.map(([, i]) => {
     if (i === 0) return `<td>${detAgr === "produto" ? "" : l[0].slice(8) + "/" + l[0].slice(5, 7)}${detAgr === "venda" ? `<br><span class="sc">${horaDe(l[1])}</span>` : ""}</td>`;
     if (i === 5) return `<td class="pr">${detAgr === "dia" ? "todas as vendas do dia" : esc(l[5])}${detAgr === "dia" ? "" : `<span>${esc(l[4] || "sem SKU")}${detAgr === "venda" ? " · pedido " + l[3] : ""}</span>`}</td>`;
-    if (i === 2) return `<td>${l[2] ? `<span class="tag ${l[2]}" style="margin:0">${l[2]}</span>` : ""}</td>`;
+    if (i === 2) return `<td>${l[2] ? `<span class="tag ${l[2]}" style="margin:0">${l[2]}</span>` : ""}${!canal && l[15] ? ` <span class="tag ${l[15]}" style="margin:0">${l[15]}</span>` : ""}</td>`;
     if (i === 6) return `<td>${num(l[6])}</td>`;
     if (i === 9) return `<td>${brl(l[9])}${l[13] ? `<br><span class="sc">buscando…</span>` : ""}</td>`;
     if (i === 11) return `<td>${l[11] == null ? `<span class="sc">sem custo</span>` : brl(l[11])}${l[14] ? `<br><span class="sc">${l[14]} sem custo</span>` : ""}</td>`;
@@ -248,7 +251,7 @@ function desenharDetalhe() {
   $("tela").innerHTML = `<div class="card">
     <div class="cab"><div><h2>🧾 Detalhe financeiro</h2><p>Venda a venda · ${rotuloPer(det.periodo)} · só vendas válidas (canceladas ficam fora) · margem antes dos Ads, que não são por venda</p></div>${segPer()}</div>
     ${semCusto || pend ? `<div class="aviso">${semCusto ? `${num(semCusto)} venda(s) sem custo cadastrado no Tiny/Bling — a margem delas não desconta o produto. ` : ""}${pend ? `${num(pend)} com frete ainda sendo buscado no ML.` : ""}</div>` : ""}
-    <div class="tot">${[["Receita", T[0]], ["Tarifa ML", T[1]], ["Frete", T[2]], ["Imposto", T[3]], ["Custo (CMV)", T[4]], ["Margem", T[5]]]
+    <div class="tot">${[["Receita", T[0]], ["Tarifa", T[1]], ["Frete", T[2]], ["Imposto", T[3]], ["Custo (CMV)", T[4]], ["Margem", T[5]]]
       .map(([t, x]) => `<div><span>${t}</span><b class="${t === "Margem" && x < 0 ? "neg-v" : ""}">${brl(x)}</b></div>`).join("")}
       <div><span>Margem %</span><b>${pct(T[5], T[0])}</b></div></div>
     <div class="ctl"><input id="detBusca" type="search" placeholder="Buscar produto, SKU ou nº do pedido…" value="${esc(detBusca)}"
@@ -263,7 +266,7 @@ function desenharDetalhe() {
 }
 // margem e % comecam do pior; o resto do maior
 function ordDet(i) { detOrd = [i, detOrd[0] === i ? -detOrd[1] : (i === 12 || i === 99 ? 1 : -1)]; desenharDetalhe(); }
-function mudar(k, v) { if (k === "per") { per = v; localStorage.mlPer = v; } else { conta = v; localStorage.mlConta = v; }
+function mudar(k, v) { if (k === "per") { per = v; localStorage.mlPer = v; } else if (k === "canal") { canal = v; localStorage.mlCanal = v; } else { conta = v; localStorage.mlConta = v; }
   vistos = null; carregar(); }
 
 const seg = (itens, atual, k) => `<div class="seg">${itens.map(([v, t]) =>
@@ -273,7 +276,7 @@ function desenhar() {
   const d = dados, p = d.painel, pr = d.periodo;
   const rotPer = rotuloPer(pr), vs = vsPer(pr);
   $("ponto").className = "ponto on";
-  $("dir").innerHTML = seg([["", "Todas"], ...CONTAS.map(c => [c, c])], conta, "conta") +
+  $("dir").innerHTML = seg(CANAIS, canal, "canal") + seg([["", "Todas"], ...CONTAS.map(c => [c, c])], conta, "conta") +
     `<span class="chip"><b>${num(d.ativos.anuncios)}</b>anúncios ativos</span><span class="chip"><b>${num(d.ativos.skus)}</b>SKUs ativos</span>`;
 
   // avisos de qualidade do dado
@@ -284,6 +287,8 @@ function desenhar() {
   if (carreg.length) av.push(`<span data-info>Carregando o histórico de 95 dias (para comparar com o período anterior): ${carreg.map(h => `${h.conta} ${h.pct}%`).join(" · ")}. Os “vs” ficam certos quando terminar.</span>`);
   if (pr.corte) av.push(`O painel guarda só os últimos 95 dias: o período foi ajustado para começar em ${dm(pr.de)}.`);
   if (d.sem_custo.length) av.push(`Sem custo/imposto cadastrado para ${d.sem_custo.join(", ")} — o CMV fica zerado até o envio das 23h.`);
+  if (p.tarifa_pendente) av.push(`<span data-info>${num(p.tarifa_pendente)} pedido(s) da Shopee com tarifa estimada — a real chega quando a Shopee libera o repasse.</span>`);
+  if (canal !== "ML" && d.shopee_lido && Date.now() - d.shopee_lido > 15 * 60e3) av.push(`Shopee: dados de ${horaDe(new Date(d.shopee_lido).toISOString())} — a coleta está atrasada.`);
   if (p.frete_pendente) av.push(`Frete de ${num(p.frete_pendente)} envio(s) ainda sendo buscado no ML — a margem pode cair um pouco.`);
   if (p.receita && p.cmv_cobertura < 95) av.push(`O custo do Tiny/Bling cobre ${num(p.cmv_cobertura, 0)}% da receita — produto sem custo cadastrado entra com CMV zero.`);
 
@@ -304,11 +309,15 @@ function desenhar() {
       <div class="comp"><div class="comp-t"><span>COMPOSIÇÃO</span><span style="font-weight:600">6 deduções + margem</span></div>
         <div class="barra">${comp.map(x => `<i title="${x.nome}: ${brl(x.v)}" style="width:${x.v / somaComp * 100}%;background:${x.cor}"></i>`).join("")}</div>
         <div class="leg">${comp.map(x => `<span style="--c:${x.cor}">${x.nome}</span>`).join("")}</div></div>
+      ${d.canais ? (() => { const ml = d.canais.ML, sh = d.canais.Shopee, tf = (ml.faturamento + sh.faturamento) || 1;
+        return `<div class="comp"><div class="comp-t"><span>ML × SHOPEE</span><span style="font-weight:600">faturamento · margem</span></div>
+          <div class="barra"><i title="ML: ${brl(ml.faturamento)}" style="width:${ml.faturamento / tf * 100}%;background:#FFD100"></i><i title="Shopee: ${brl(sh.faturamento)}" style="width:${sh.faturamento / tf * 100}%;background:#EE4D2D"></i></div>
+          <div class="leg"><span style="--c:#FFD100">ML ${brl(ml.faturamento)} · margem ${brl(ml.margem)}</span><span style="--c:#EE4D2D">Shopee ${brl(sh.faturamento)} · margem ${brl(sh.margem)}</span></div></div>`; })() : ""}
     </div>
     <div class="sec">DEDUÇÕES</div>
     <div class="ded">${p.deducoes.map(x => `<div class="dc" style="--c:var(${COR[x.id]})">
-      <div class="dc-t"><span class="ic">${ICONE[x.id]}</span>${x.id === "cmv" ? "Custos (CMV)" : x.nome}<span class="pill">${num(x.pct, 2)}%</span></div>
-      <div class="dc-v">${reais(x.valor)}</div><div class="prog"><i style="width:${Math.min(100, x.pct * 2)}%"></i></div></div>`).join("")}</div>
+      <div class="dc-t"><span class="ic">${ICONE[x.id]}</span>${x.id === "cmv" ? "Custos (CMV)" : x.id === "ads" && !canal ? "Ads (só ML)" : x.nome}<span class="pill">${num(x.pct, 2)}%</span></div>
+      <div class="dc-v" title="${x.id === "tarifa" && p.tarifa_pendente ? "inclui tarifa estimada da Shopee" : x.id === "ads" && canal === "Shopee" ? "não disponível para a Shopee" : ""}">${x.id === "ads" && canal === "Shopee" ? "—" : (x.id === "tarifa" && p.tarifa_pendente ? "≈ " : "") + reais(x.valor)}</div><div class="prog"><i style="width:${Math.min(100, x.pct * 2)}%"></i></div></div>`).join("")}</div>
     <div class="baixo">
       <div class="tk"><div class="l"><span>TICKET MÉDIO</span>${pill(p.ticket_delta)}</div>
         <div class="v"><span>vendas<b>${brl(p.ticket)}</b></span><span style="text-align:right">margem<b>${brl(p.margem_por_venda)}</b></span></div></div>
@@ -322,8 +331,8 @@ function desenhar() {
     <div class="kpis">
       ${kpi("🛒", "Vendas", num(p.vendas), pill(p.vendas_delta), vs, "#0A0A0B")}
       ${kpi("⛔", "Cancelados", num(p.cancelados), pill(p.cancelados_delta, true), vs, "#ef4458")}
-      ${kpi("🎯", "Taxa de conversão", p.conversao == null ? "—" : num(p.conversao, 1) + "%", pill(p.conversao_delta),
-            p.visitas ? `${num(p.visitas)} visitas` : "sem visitas ainda", "#0A0A0B")}
+      ${kpi("🎯", canal ? "Taxa de conversão" : "Taxa de conversão (só ML)", canal === "Shopee" || p.conversao == null ? "—" : num(p.conversao, 1) + "%", canal === "Shopee" ? pill(null) : pill(p.conversao_delta),
+            canal === "Shopee" ? "não disponível para a Shopee" : p.visitas ? `${num(p.visitas)} visitas` : "sem visitas ainda", "#0A0A0B")}
       ${kpi("💲", "Receita", brl(p.receita), pill(p.receita_delta), vs, "#22c55e")}
     </div>
     <div class="tend"><div class="tend-t">TENDÊNCIA DE VENDAS <span id="mm"></span></div>${grafico(d.tendencia, pr.chave === "hoje")}</div>
@@ -336,7 +345,7 @@ function desenhar() {
     ${d.ultimos.length ? `<ul class="lista ped">${d.ultimos.map(u => `<li class="${vistos && !vistos.has(u.id) ? "novo" : ""}"
       style="${u.status === "cancelled" ? "opacity:.45;text-decoration:line-through" : ""}">
       <span class="h">${horaDe(u.criado)}</span><span class="nm"><b title="${esc(u.titulo)}">${u.unidades > 1 ? u.unidades + "× " : ""}${esc(u.titulo)}</b>
-      <span class="tag ${u.conta}" style="margin:0">${u.conta}</span></span><span class="val">${brl(u.receita)}</span></li>`).join("")}</ul>`
+      <span class="tag ${u.conta}" style="margin:0">${u.conta}</span>${!canal && u.canal ? `<span class="tag ${u.canal}" style="margin:0">${u.canal}</span>` : ""}</span><span class="val">${brl(u.receita)}</span></li>`).join("")}</ul>`
       : `<div class="vazio">Nenhuma venda hoje ainda.</div>`}
    </div>
   </div>`;
@@ -383,7 +392,7 @@ function grafico(pts, porHora) {
 
 function desenharAbas() {
   const d = dados, todas = !conta;
-  const rotConta = x => todas ? `<span class="tag ${x.conta}">${x.conta}</span>` : "";
+  const rotConta = x => (todas ? `<span class="tag ${x.conta}">${x.conta}</span>` : "") + (!canal && x.canal ? `<span class="tag ${x.canal}">${x.canal}</span>` : "");
   const img = x => x.thumb ? `<img class="th" loading="lazy" src="${esc(x.thumb)}" alt="">` : `<div class="th"></div>`;
   const linha = (x, i, dir) => `<li><span class="pos">${i + 1}</span>${img(x)}<div class="nm"><b title="${esc(x.titulo)}">${esc(x.titulo)}</b>
     <span>${esc(x.sku || "sem SKU")}</span>${rotConta(x)}</div>${dir}</li>`;
