@@ -28,6 +28,8 @@
  .emps{display:flex;gap:4px;background:var(--hover);border-radius:10px;padding:3px}
  .emps button{flex:1;border:0;background:none;border-radius:8px;padding:7px 4px;font:inherit;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer}
  .emps button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+ .emps button.roda::after{content:" ●";color:var(--warn)}
+ .console > div[data-emp]:not(.atual){display:none}
  .side-nav{display:flex;flex-direction:column;gap:3px}
  .nav-item{display:flex;align-items:center;gap:11px;width:100%;text-align:left;border:none;background:none;padding:9px 12px;border-radius:10px;font:inherit;font-weight:700;color:var(--muted);cursor:pointer}
  .nav-item:hover{background:var(--hover);color:var(--ink)} .nav-item.active{background:var(--brand-soft);color:var(--ink)}
@@ -156,7 +158,6 @@
         <div class="spacer"></div>
         <span id="modePill" class="pill"><span class="dot"></span><span id="modeText">—</span></span>
         <button id="runBtn" class="btn primary" onclick="runNow()">Rodar agora</button>
-        <button id="runAllBtn" class="btn" onclick="runTodas()" title="Dutech, Lumia e OneWay ao mesmo tempo, cada uma no modo das Configurações dela">Rodar as 3 lojas</button>
         <button id="leaveBtn" class="btn danger" onclick="leaveAll()">Sair de todas</button>
         <button id="stopBtn" class="btn danger hide" onclick="stopRun()">Parar</button>
       </div>
@@ -523,8 +524,8 @@
         <li>Esta é a mesma Central de Promoções que rodava no PC, agora no hub: abre do celular e não depende do computador ligado.</li>
         <li>Escolha a <b>empresa</b> (Dutech, Lumia ou OneWay) no alto do menu. Cada uma tem a sua conta do ML, o seu cadastro de preços e as suas configurações.</li>
         <li>As execuções longas (Rodar agora, varreduras) andam <b>enquanto esta página estiver aberta</b>: ela manda os anúncios aos poucos e mostra o log. Fechou a página, a execução para no lote em que estava (nada fica pela metade dentro de um anúncio).</li>
-        <li>Só roda uma execução por empresa de cada vez (empresas diferentes rodam juntas). Se outra pessoa estiver rodando, aparece o aviso com o nome dela.</li>
-        <li><b>Rodar as 3 lojas</b> (Painel) — roda Dutech, Lumia e OneWay ao mesmo tempo, cada uma no modo (simulação ou valendo) das Configurações dela. O log é um só, com o nome da loja em cada linha; Parar interrompe as três.</li>
+        <li>Cada loja roda independente: inicie a Dutech, troque para a Lumia no alto do menu e inicie a Lumia também — a da Dutech continua. Cada loja tem o seu log, os seus contadores e o seu Parar; a loja que está rodando fica marcada com um ponto no seletor.</li>
+        <li>Só roda uma execução por loja de cada vez. Se outra pessoa estiver rodando aquela loja, aparece o aviso com o nome dela.</li>
         <li>O preço mínimo e os relatórios ficam na nuvem; as dashboards do PC continuam lendo o preço do ML daqui.</li>
       </ul>
     </div>
@@ -610,7 +611,8 @@
 const PROXY = "https://estoque-olist.dutech.workers.dev/meli";
 const $ = id => document.getElementById(id);
 let EMP = localStorage.meliEmp || "DUTECH", EMPRESAS = [];
-let allProducts = [], CFG = null, parar = false, repetir = null;
+let allProducts = [];
+const CFGS = {}, parar = new Set(), repetir = {};   // por empresa: config, pedido de parar, timer do "repetir"
 const rodando = new Set();   // empresas com execução acompanhada por esta página
 const NOME_EMP = {DUTECH: "Dutech", LUMIA: "Lumia", ONEWAY: "OneWay"};
 const cab = () => ({authorization: `Bearer ${localStorage.usuario || ""}:${localStorage.senha || ""}`, "content-type": "application/json"});
@@ -632,14 +634,11 @@ function telaLogin(msg) {
 function entrar() { localStorage.usuario = $("u").value.trim(); localStorage.senha = $("s").value; iniciar(); }
 
 function desenhaEmpresas() {
-  $("emps").innerHTML = EMPRESAS.map(e => `<button class="${e === EMP ? "on" : ""}" onclick="trocaEmp('${e}')">${NOME_EMP[e]}</button>`).join("");
+  $("emps").innerHTML = EMPRESAS.map(e => `<button data-emp="${e}" class="${e === EMP ? "on" : ""}${rodando.has(e) ? " roda" : ""}" onclick="trocaEmp('${e}')">${NOME_EMP[e]}</button>`).join("");
 }
 function trocaEmp(e) {
-  if (rodando.size) { alert("Espere a execução terminar (ou clique em Parar) antes de trocar de empresa."); return; }
-  if (repetir) { clearTimeout(repetir); repetir = null; }
-  EMP = e; localStorage.meliEmp = e; desenhaEmpresas();
-  document.querySelectorAll(".console").forEach(c => c.innerHTML = '<span class="l empty">—</span>');
-  ["sAcc", "sErr", "sScan"].forEach(id => $(id).textContent = "0");
+  // a execução da loja anterior continua; a tela só passa a mostrar a outra
+  EMP = e; localStorage.meliEmp = e; desenhaEmpresas(); mostrarEmp();
   loadState(); tab(localStorage.meliAba || "painel");
 }
 
@@ -660,12 +659,11 @@ async function loadState(){
   const pill=$('connPill'), txt=$('connText');
   if(s.connected){ pill.className='pill ok'; txt.textContent=NOME_EMP[EMP]+' · conta conectada'; $('notConnected').classList.add('hide'); }
   else { pill.className='pill off'; txt.textContent='não conectada'; $('notConnected').classList.remove('hide'); }
-  if(rodando.size) setRunningUI(true);
   const outro=$('outroAparelho');
   if(s.rodando && !rodando.has(EMP)){ outro.classList.remove('hide');
     outro.textContent=`Rodando agora em outro aparelho: ${s.rodando.tipo}, por ${s.rodando.usuario} (desde ${new Date(s.rodando.desde).toLocaleTimeString('pt-BR')}).`; }
   else outro.classList.add('hide');
-  CFG=s.config; applyConfig(s.config);
+  CFGS[EMP]=s.config; applyConfig(s.config); atualizaBotoes();
   $('prodCount').querySelector('span:last-child').textContent = s.product_count+' itens';
 }
 
@@ -716,6 +714,21 @@ function classify(line){
   if(line.includes('NÃO participa')||line.includes('ficaria de FORA')||line.includes('ignorando')||line.includes('pulando')) return 'skip';
   return '';
 }
+// Cada loja roda sozinha: dá para iniciar a Dutech, trocar para a Lumia e iniciar a Lumia também.
+// Cada console guarda uma caixa de log por empresa e mostra só a da empresa escolhida; o mesmo com os contadores.
+function caixa(conId, emp=EMP){
+  const con=$(conId);
+  let c=con.querySelector(`:scope > div[data-emp="${emp}"]`);
+  if(!c){ c=document.createElement('div'); c.dataset.emp=emp; c.innerHTML=con.dataset.vazio||''; con.appendChild(c); }
+  c.classList.toggle('atual', emp===EMP);
+  return c;
+}
+function mostrarEmp(){
+  document.querySelectorAll('.console').forEach(con=>{ caixa(con.id);
+    con.querySelectorAll(':scope > div[data-emp]').forEach(d=>d.classList.toggle('atual', d.dataset.emp===EMP));
+    con.scrollTop=con.scrollHeight; });
+  mostrarPlacar(); atualizaBotoes();
+}
 function appendLogLines(c, lines){
   if(!lines||!lines.length) return;
   const e=c.querySelector('.empty'); if(e) e.remove();
@@ -723,80 +736,73 @@ function appendLogLines(c, lines){
     const span=document.createElement('span');
     span.className='l '+classify(line); span.textContent=line; c.appendChild(span);
   }
-  c.scrollTop=c.scrollHeight;
+  if(c.classList.contains('atual')) c.parentElement.scrollTop=c.parentElement.scrollHeight;
 }
 const espera = ms => new Promise(r=>setTimeout(r,ms));
-/** inicia uma execução, manda os lotes um por um e fecha. op.painel = atualiza os contadores do Painel */
-// op.emp = outra empresa que não a da tela (Rodar as 3 lojas); op.prefixo marca as linhas no log comum
+const placar = {};   // contadores do Painel por empresa: aceitos, erros, campanhas varridas
+function mostrarPlacar(){ const p=placar[EMP]||{acc:0,err:0,scan:0};
+  $('sAcc').textContent=p.acc; $('sErr').textContent=p.err; $('sScan').textContent=p.scan; }
+/** inicia uma execução, manda os lotes um por um e fecha. Fica presa à loja em que começou (op.emp ou a da tela),
+ *  mesmo que a tela troque de loja no meio. op.painel = contadores do Painel */
 async function executar(tipo, conId, op={}){
   const emp=op.emp||EMP;
-  if(rodando.has(emp)){ alert('Já está rodando.'); return false; }
-  const con=$(conId), api_=(r,c,x='')=>api(r,c,x,emp);
-  const marca=ls=>op.prefixo?(ls||[]).map(l=>`[${op.prefixo}] ${l}`):ls;
+  if(rodando.has(emp)){ alert(`Já está rodando na ${NOME_EMP[emp]}.`); return false; }
+  const c=caixa(conId, emp), api_=(r,b,x='')=>api(r,b,x,emp);
   let ini;
   try{ ini=await api_('/job/inicio',{tipo, mlbs: op.mlbs}); }
-  catch(e){ if(e.message!=='login') alert('Erro: '+(op.prefixo?op.prefixo+': ':'')+e.message); return false; }
-  if(!ini.ok){ appendLogLines(con,marca([ini.error||'Já está rodando.'])); if(!op.prefixo) alert(ini.error||'Já está rodando.'); return false; }
-  if(!rodando.size) parar=false;
-  rodando.add(emp);
-  if(!op.manterConsole) con.innerHTML='';
-  if(op.painel){ setRunningUI(true); if(!op.manterConsole){ ['sAcc','sErr','sScan'].forEach(id=>$(id).textContent='0'); Object.keys(varridas).forEach(k=>delete varridas[k]); } }
-  appendLogLines(con, marca(ini.linhas));
+  catch(e){ if(e.message!=='login') alert(`Erro (${NOME_EMP[emp]}): ${e.message}`); return false; }
+  if(!ini.ok){ alert(`${NOME_EMP[emp]}: ${ini.error||'Já está rodando.'}`); return false; }
+  rodando.add(emp); parar.delete(emp);
+  c.innerHTML='';
+  if(op.painel){ placar[emp]={acc:0,err:0,scan:0}; if(emp===EMP) mostrarPlacar(); }
+  atualizaBotoes();
+  appendLogLines(c, ini.linhas);
   // mesma conta do /api/log do app.py: aceitos = linhas " OK  " ou "[DRY]", erros = linhas " ERR "
   const conta=()=>{ if(!op.painel) return;
-    const ls=[...con.querySelectorAll('.l')].map(s=>s.textContent);
-    $('sAcc').textContent=ls.filter(t=>t.includes(' OK  ')||t.includes('[DRY]')).length;
-    $('sErr').textContent=ls.filter(t=>t.includes(' ERR ')).length; };
+    const ls=[...c.querySelectorAll('.l')].map(s=>s.textContent);
+    placar[emp].acc=ls.filter(t=>t.includes(' OK  ')||t.includes('[DRY]')).length;
+    placar[emp].err=ls.filter(t=>t.includes(' ERR ')).length;
+    if(emp===EMP) mostrarPlacar(); };
   if(!ini.fim){
     const total=ini.itens.length;
-    for(let i=0;i<total && !parar;i+=ini.lote){
-      if(op.info) op.info(`${Math.min(i+ini.lote,total)}/${total}…`);
+    for(let i=0;i<total && !parar.has(emp);i+=ini.lote){
+      if(op.info && emp===EMP) op.info(`${Math.min(i+ini.lote,total)}/${total}…`);
       let l=null;
       for(let t=0;t<3 && !l;t++){   // rede do celular cai: tenta o mesmo lote de novo
         try{ l=await api_('/job/lote',{job:ini.job, itens:ini.itens.slice(i,i+ini.lote)}); }
-        catch(e){ if(e.message==='login'){ parar=true; break; }
-          appendLogLines(con,marca([`ERRO  falha no lote (${e.message}); tentando de novo…`])); await espera(3000); }
+        catch(e){ if(e.message==='login'){ parar.add(emp); break; }
+          appendLogLines(c,[`ERRO  falha no lote (${e.message}); tentando de novo…`]); await espera(3000); }
       }
-      if(!l){ parar=true; break; }
-      if(!l.ok){ appendLogLines(con,marca([l.error||'execução encerrada'])); break; }
-      appendLogLines(con,marca(l.linhas)); conta();
-      if(op.painel && l.cont && l.cont.varridas!=null){ varridas[emp]=l.cont.varridas;
-        $('sScan').textContent=Object.values(varridas).reduce((a,b)=>a+b,0); }
+      if(!l){ parar.add(emp); break; }
+      if(!l.ok){ appendLogLines(c,[l.error||'execução encerrada']); break; }
+      appendLogLines(c,l.linhas); conta();
+      if(op.painel && l.cont && l.cont.varridas!=null){ placar[emp].scan=l.cont.varridas; if(emp===EMP) mostrarPlacar(); }
       if(l.parar) break;
     }
-    try{ appendLogLines(con,marca((await api_('/job/fim',{job:ini.job, parado:parar})).linhas)); }catch(e){}
+    try{ appendLogLines(c,(await api_('/job/fim',{job:ini.job, parado:parar.has(emp)})).linhas); }catch(e){}
   }
   conta();
   rodando.delete(emp);
-  if(op.painel && !rodando.size) setRunningUI(false);
+  atualizaBotoes();
+  if(emp===EMP) loadState().catch(()=>{});
   return true;
 }
-const varridas={};   // campanhas varridas por empresa (o contador do Painel soma as que estão rodando)
-// as 3 lojas ao mesmo tempo, no log do Painel. A trava do worker é por empresa: uma não espera a outra.
-async function runTodas(){
-  if(repetir){ clearTimeout(repetir); repetir=null; }
-  let modos;
-  try{ modos=await Promise.all(EMPRESAS.map(async e=>[e,(await api('/estado',null,'',e)).config])); }
-  catch(e){ if(e.message!=='login') alert('Erro: '+e.message); return; }
-  const txt=modos.map(([e,c])=>`${NOME_EMP[e]}: ${c.DRY_RUN==='true'?'simulação':'PRA VALER'}`).join('\n');
-  if(!confirm(`Rodar as ${EMPRESAS.length} lojas ao mesmo tempo?\n\n${txt}\n\n(o modo de cada loja é o das Configurações dela)`)) return;
-  $('console').innerHTML=''; ['sAcc','sErr','sScan'].forEach(id=>$(id).textContent='0');
-  Object.keys(varridas).forEach(k=>delete varridas[k]);
-  await Promise.all(EMPRESAS.map(e=>executar('rodar','console',{painel:true, emp:e, prefixo:NOME_EMP[e], manterConsole:true})));
+/** botões e pílula do Painel seguem a loja que está na tela; a loja rodando ganha um ponto no seletor */
+function atualizaBotoes(){
+  const on=rodando.has(EMP);
+  $('runBtn').classList.toggle('hide',on); $('leaveBtn').classList.toggle('hide',on); $('stopBtn').classList.toggle('hide',!on);
+  if(on){ $('connPill').className='pill run'; $('connText').textContent=NOME_EMP[EMP]+' · rodando…'; }
+  document.querySelectorAll('#emps button').forEach(b=>b.classList.toggle('roda', rodando.has(b.dataset.emp)));
 }
-function setRunningUI(on){
-  $('runBtn').classList.toggle('hide',on); $('runAllBtn').classList.toggle('hide',on||EMPRESAS.length<2); $('leaveBtn').classList.toggle('hide',on); $('stopBtn').classList.toggle('hide',!on);
-  if(on){ $('connPill').className='pill run'; $('connText').textContent='rodando…'; }
-  else loadState().catch(()=>{});
-}
-function stopRun(){ parar=true; if(repetir){ clearTimeout(repetir); repetir=null; } $('stopBtn').textContent='parando…'; setTimeout(()=>$('stopBtn').textContent='Parar',4000); }
+function stopRun(){ parar.add(EMP); if(repetir[EMP]){ clearTimeout(repetir[EMP]); delete repetir[EMP]; }
+  $('stopBtn').textContent='parando…'; setTimeout(()=>$('stopBtn').textContent='Parar',4000); }
 
-async function runNow(mlbs){
-  if(repetir){ clearTimeout(repetir); repetir=null; }
-  await executar('rodar','console',{painel:true, mlbs});
+async function runNow(mlbs, emp=EMP){
+  if(repetir[emp]){ clearTimeout(repetir[emp]); delete repetir[emp]; }
+  await executar('rodar','console',{painel:true, mlbs, emp});
   // "Repetir a cada X minutos": em ciclo enquanto a página estiver aberta (era o POLL_SECONDS do .env)
-  const poll=parseInt((CFG||{}).POLL_SECONDS||'0');
-  if(!mlbs && poll>0 && !parar) repetir=setTimeout(()=>runNow(),poll*1000);
+  const poll=parseInt((CFGS[emp]||{}).POLL_SECONDS||'0');
+  if(!mlbs && poll>0 && !parar.has(emp)) repetir[emp]=setTimeout(()=>runNow(undefined, emp),poll*1000);
 }
 async function leaveAll(){
   if(!confirm("SAIR DE TODAS as campanhas reversíveis?\n\nIsto vai remover seus anúncios de todas as campanhas DEAL, Campanha do vendedor, SMART e cupom em que estão ativos.\n\nCampanhas irreversíveis (Relâmpago/Oferta do dia) NÃO são afetadas.\n\nTem certeza?")) return;
@@ -1176,7 +1182,7 @@ async function catPreco(btn){
   catch(e){ r={ok:false,error:e.message}; }
   btn.disabled=false; btn.textContent=lab;
   if(!r.ok){ alert(r.error||'Erro ao gravar o preço mínimo.'); return; }
-  appendLogLines($('catConsole'),[`OK   ${r.changed} preço(s) mínimo(s) gravado(s) no cadastro.`]);
+  appendLogLines(caixa('catConsole'),[`OK   ${r.changed} preço(s) mínimo(s) gravado(s) no cadastro.`]);
   sel.forEach(o=>{ o.minimo=o.preco_para_ganhar; o.margem=0; });
   renderCatRows();
 }
@@ -1224,7 +1230,7 @@ function checkMlb(mlb){ $('chkMlb').value=mlb; runCheck(); window.scrollTo({top:
 async function runCheck(){
   const mlb=($('chkMlb').value||'').trim().toUpperCase();
   if(!mlb){ alert('Informe o código MLB (ou clique em "Checar" num produto da lista).'); return; }
-  const con=$('chkConsole'); con.innerHTML='<span class="l empty">checando…</span>';
+  const con=caixa('chkConsole'); con.innerHTML='<span class="l empty">checando…</span>';
   let r;
   try{ r=await api('/checar',{mlb}); } catch(e){ r={ok:false,error:e.message}; }
   con.innerHTML='';
@@ -1267,10 +1273,13 @@ async function iniciar(){
     EMPRESAS = r.empresas;
     if(!EMPRESAS.includes(EMP)) EMP = EMPRESAS[0];
     desenhaEmpresas();
+    mostrarEmp();
     await loadState();
     tab(localStorage.meliAba || 'painel');
   }catch(e){ if(e.message!=='login'){ $('connPill').className='pill off'; $('connText').textContent='erro: '+e.message; } }
 }
+// o texto inicial de cada console vira o modelo da caixa de cada loja
+document.querySelectorAll('.console').forEach(con=>{ con.dataset.vazio=con.innerHTML; con.innerHTML=''; });
 wireAutoSave();
 (localStorage.usuario && localStorage.senha) ? iniciar() : telaLogin('');
 </script>
