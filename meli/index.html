@@ -156,6 +156,7 @@
         <div class="spacer"></div>
         <span id="modePill" class="pill"><span class="dot"></span><span id="modeText">—</span></span>
         <button id="runBtn" class="btn primary" onclick="runNow()">Rodar agora</button>
+        <button id="runAllBtn" class="btn" onclick="runTodas()" title="Dutech, Lumia e OneWay ao mesmo tempo, cada uma no modo das Configurações dela">Rodar as 3 lojas</button>
         <button id="leaveBtn" class="btn danger" onclick="leaveAll()">Sair de todas</button>
         <button id="stopBtn" class="btn danger hide" onclick="stopRun()">Parar</button>
       </div>
@@ -522,7 +523,8 @@
         <li>Esta é a mesma Central de Promoções que rodava no PC, agora no hub: abre do celular e não depende do computador ligado.</li>
         <li>Escolha a <b>empresa</b> (Dutech, Lumia ou OneWay) no alto do menu. Cada uma tem a sua conta do ML, o seu cadastro de preços e as suas configurações.</li>
         <li>As execuções longas (Rodar agora, varreduras) andam <b>enquanto esta página estiver aberta</b>: ela manda os anúncios aos poucos e mostra o log. Fechou a página, a execução para no lote em que estava (nada fica pela metade dentro de um anúncio).</li>
-        <li>Só roda uma execução por empresa de cada vez. Se outra pessoa estiver rodando, aparece o aviso com o nome dela.</li>
+        <li>Só roda uma execução por empresa de cada vez (empresas diferentes rodam juntas). Se outra pessoa estiver rodando, aparece o aviso com o nome dela.</li>
+        <li><b>Rodar as 3 lojas</b> (Painel) — roda Dutech, Lumia e OneWay ao mesmo tempo, cada uma no modo (simulação ou valendo) das Configurações dela. O log é um só, com o nome da loja em cada linha; Parar interrompe as três.</li>
         <li>O preço mínimo e os relatórios ficam na nuvem; as dashboards do PC continuam lendo o preço do ML daqui.</li>
       </ul>
     </div>
@@ -608,12 +610,13 @@
 const PROXY = "https://estoque-olist.dutech.workers.dev/meli";
 const $ = id => document.getElementById(id);
 let EMP = localStorage.meliEmp || "DUTECH", EMPRESAS = [];
-let allProducts = [], CFG = null, rodando = false, parar = false, repetir = null;
+let allProducts = [], CFG = null, parar = false, repetir = null;
+const rodando = new Set();   // empresas com execução acompanhada por esta página
 const NOME_EMP = {DUTECH: "Dutech", LUMIA: "Lumia", ONEWAY: "OneWay"};
 const cab = () => ({authorization: `Bearer ${localStorage.usuario || ""}:${localStorage.senha || ""}`, "content-type": "application/json"});
 
-async function api(rota, corpo, extra = "") {
-  const url = `${PROXY}${rota}?emp=${EMP}${extra}`;
+async function api(rota, corpo, extra = "", emp = EMP) {
+  const url = `${PROXY}${rota}?emp=${emp}${extra}`;
   const r = await fetch(url, corpo ? {method: "POST", headers: cab(), body: JSON.stringify(corpo)} : {headers: cab()});
   if (r.status === 401) { telaLogin(localStorage.usuario ? "Usuário ou senha errados." : ""); throw new Error("login"); }
   const j = await r.json().catch(() => ({error: `resposta inválida (${r.status})`}));
@@ -632,7 +635,7 @@ function desenhaEmpresas() {
   $("emps").innerHTML = EMPRESAS.map(e => `<button class="${e === EMP ? "on" : ""}" onclick="trocaEmp('${e}')">${NOME_EMP[e]}</button>`).join("");
 }
 function trocaEmp(e) {
-  if (rodando) { alert("Espere a execução terminar (ou clique em Parar) antes de trocar de empresa."); return; }
+  if (rodando.size) { alert("Espere a execução terminar (ou clique em Parar) antes de trocar de empresa."); return; }
   if (repetir) { clearTimeout(repetir); repetir = null; }
   EMP = e; localStorage.meliEmp = e; desenhaEmpresas();
   document.querySelectorAll(".console").forEach(c => c.innerHTML = '<span class="l empty">—</span>');
@@ -657,9 +660,9 @@ async function loadState(){
   const pill=$('connPill'), txt=$('connText');
   if(s.connected){ pill.className='pill ok'; txt.textContent=NOME_EMP[EMP]+' · conta conectada'; $('notConnected').classList.add('hide'); }
   else { pill.className='pill off'; txt.textContent='não conectada'; $('notConnected').classList.remove('hide'); }
-  if(rodando) setRunningUI(true);
+  if(rodando.size) setRunningUI(true);
   const outro=$('outroAparelho');
-  if(s.rodando && !rodando){ outro.classList.remove('hide');
+  if(s.rodando && !rodando.has(EMP)){ outro.classList.remove('hide');
     outro.textContent=`Rodando agora em outro aparelho: ${s.rodando.tipo}, por ${s.rodando.usuario} (desde ${new Date(s.rodando.desde).toLocaleTimeString('pt-BR')}).`; }
   else outro.classList.add('hide');
   CFG=s.config; applyConfig(s.config);
@@ -724,16 +727,21 @@ function appendLogLines(c, lines){
 }
 const espera = ms => new Promise(r=>setTimeout(r,ms));
 /** inicia uma execução, manda os lotes um por um e fecha. op.painel = atualiza os contadores do Painel */
+// op.emp = outra empresa que não a da tela (Rodar as 3 lojas); op.prefixo marca as linhas no log comum
 async function executar(tipo, conId, op={}){
-  if(rodando){ alert('Já está rodando.'); return false; }
-  const con=$(conId);
+  const emp=op.emp||EMP;
+  if(rodando.has(emp)){ alert('Já está rodando.'); return false; }
+  const con=$(conId), api_=(r,c,x='')=>api(r,c,x,emp);
+  const marca=ls=>op.prefixo?(ls||[]).map(l=>`[${op.prefixo}] ${l}`):ls;
   let ini;
-  try{ ini=await api('/job/inicio',{tipo, mlbs: op.mlbs}); }
-  catch(e){ if(e.message!=='login') alert('Erro: '+e.message); return false; }
-  if(!ini.ok){ alert(ini.error||'Já está rodando.'); return false; }
-  rodando=true; parar=false; con.innerHTML='';
-  if(op.painel){ setRunningUI(true); ['sAcc','sErr','sScan'].forEach(id=>$(id).textContent='0'); }
-  appendLogLines(con, ini.linhas);
+  try{ ini=await api_('/job/inicio',{tipo, mlbs: op.mlbs}); }
+  catch(e){ if(e.message!=='login') alert('Erro: '+(op.prefixo?op.prefixo+': ':'')+e.message); return false; }
+  if(!ini.ok){ appendLogLines(con,marca([ini.error||'Já está rodando.'])); if(!op.prefixo) alert(ini.error||'Já está rodando.'); return false; }
+  if(!rodando.size) parar=false;
+  rodando.add(emp);
+  if(!op.manterConsole) con.innerHTML='';
+  if(op.painel){ setRunningUI(true); if(!op.manterConsole){ ['sAcc','sErr','sScan'].forEach(id=>$(id).textContent='0'); Object.keys(varridas).forEach(k=>delete varridas[k]); } }
+  appendLogLines(con, marca(ini.linhas));
   // mesma conta do /api/log do app.py: aceitos = linhas " OK  " ou "[DRY]", erros = linhas " ERR "
   const conta=()=>{ if(!op.painel) return;
     const ls=[...con.querySelectorAll('.l')].map(s=>s.textContent);
@@ -745,25 +753,39 @@ async function executar(tipo, conId, op={}){
       if(op.info) op.info(`${Math.min(i+ini.lote,total)}/${total}…`);
       let l=null;
       for(let t=0;t<3 && !l;t++){   // rede do celular cai: tenta o mesmo lote de novo
-        try{ l=await api('/job/lote',{job:ini.job, itens:ini.itens.slice(i,i+ini.lote)}); }
+        try{ l=await api_('/job/lote',{job:ini.job, itens:ini.itens.slice(i,i+ini.lote)}); }
         catch(e){ if(e.message==='login'){ parar=true; break; }
-          appendLogLines(con,[`ERRO  falha no lote (${e.message}); tentando de novo…`]); await espera(3000); }
+          appendLogLines(con,marca([`ERRO  falha no lote (${e.message}); tentando de novo…`])); await espera(3000); }
       }
       if(!l){ parar=true; break; }
-      if(!l.ok){ appendLogLines(con,[l.error||'execução encerrada']); break; }
-      appendLogLines(con,l.linhas); conta();
-      if(op.painel && l.cont && l.cont.varridas!=null) $('sScan').textContent=l.cont.varridas;
+      if(!l.ok){ appendLogLines(con,marca([l.error||'execução encerrada'])); break; }
+      appendLogLines(con,marca(l.linhas)); conta();
+      if(op.painel && l.cont && l.cont.varridas!=null){ varridas[emp]=l.cont.varridas;
+        $('sScan').textContent=Object.values(varridas).reduce((a,b)=>a+b,0); }
       if(l.parar) break;
     }
-    try{ appendLogLines(con,(await api('/job/fim',{job:ini.job, parado:parar})).linhas); }catch(e){}
+    try{ appendLogLines(con,marca((await api_('/job/fim',{job:ini.job, parado:parar})).linhas)); }catch(e){}
   }
   conta();
-  rodando=false;
-  if(op.painel) setRunningUI(false);
+  rodando.delete(emp);
+  if(op.painel && !rodando.size) setRunningUI(false);
   return true;
 }
+const varridas={};   // campanhas varridas por empresa (o contador do Painel soma as que estão rodando)
+// as 3 lojas ao mesmo tempo, no log do Painel. A trava do worker é por empresa: uma não espera a outra.
+async function runTodas(){
+  if(repetir){ clearTimeout(repetir); repetir=null; }
+  let modos;
+  try{ modos=await Promise.all(EMPRESAS.map(async e=>[e,(await api('/estado',null,'',e)).config])); }
+  catch(e){ if(e.message!=='login') alert('Erro: '+e.message); return; }
+  const txt=modos.map(([e,c])=>`${NOME_EMP[e]}: ${c.DRY_RUN==='true'?'simulação':'PRA VALER'}`).join('\n');
+  if(!confirm(`Rodar as ${EMPRESAS.length} lojas ao mesmo tempo?\n\n${txt}\n\n(o modo de cada loja é o das Configurações dela)`)) return;
+  $('console').innerHTML=''; ['sAcc','sErr','sScan'].forEach(id=>$(id).textContent='0');
+  Object.keys(varridas).forEach(k=>delete varridas[k]);
+  await Promise.all(EMPRESAS.map(e=>executar('rodar','console',{painel:true, emp:e, prefixo:NOME_EMP[e], manterConsole:true})));
+}
 function setRunningUI(on){
-  $('runBtn').classList.toggle('hide',on); $('leaveBtn').classList.toggle('hide',on); $('stopBtn').classList.toggle('hide',!on);
+  $('runBtn').classList.toggle('hide',on); $('runAllBtn').classList.toggle('hide',on||EMPRESAS.length<2); $('leaveBtn').classList.toggle('hide',on); $('stopBtn').classList.toggle('hide',!on);
   if(on){ $('connPill').className='pill run'; $('connText').textContent='rodando…'; }
   else loadState().catch(()=>{});
 }
@@ -1237,7 +1259,7 @@ async function leaveSelected(){
 }
 
 // sair no meio de uma execução: o navegador avisa (a execução só anda com a página aberta)
-addEventListener('beforeunload', e => { if(rodando){ e.preventDefault(); e.returnValue=''; } });
+addEventListener('beforeunload', e => { if(rodando.size){ e.preventDefault(); e.returnValue=''; } });
 
 async function iniciar(){
   try{
