@@ -1,0 +1,18 @@
+/* Cores das telas simples do hub, nos dois temas. O tema vem do tema.js (html[data-theme]).
+   --am e o amarelo da marca como FUNDO; --am-txt e o "amarelo" para usar como TEXTO —
+   amarelo em fundo claro nao passa no contraste, entao no claro ele vira dourado escuro. */
+:root{color-scheme:light;
+  --am:#FFD100;--sobre-am:#0A0A0B;--am-txt:#8a6a00;--ic-bg:#FFF6CC;
+  --fundo:#F4F4F5;--cx:#fff;--borda:#E4E4E7;--campo:#fff;--linha:#EDEDEF;
+  --texto:#0A0A0B;--suave:#6B6B70;--rotulo:#52525B;--seta:#a1a1aa;
+  --sec:#E4E4E7;--sec-txt:#27272A;
+  --ok:#15803d;--erro:#c62828;--erro-bg:#fdecec;--erro-borda:#f3c4c4}
+:root[data-theme=escuro]{color-scheme:dark;
+  --am-txt:#FFD100;--ic-bg:#2a2410;
+  --fundo:#111;--cx:#1a1a1a;--borda:#2a2a2a;--campo:#1b1b1b;--linha:#262626;
+  --texto:#eee;--suave:#8d8d8d;--rotulo:#b4b4b4;--seta:#555;
+  --sec:#262626;--sec-txt:#ddd;
+  --ok:#7ddf7d;--erro:#ff8d8d;--erro-bg:#3a1c1c;--erro-borda:#5a2a2a}
+:root:not([data-theme=escuro]) .so-escuro,:root[data-theme=escuro] .so-claro{display:none!important}
+.tema-bt{font-family:inherit;font-weight:600;font-size:13px;line-height:1;color:var(--texto);background:var(--cx);border:1px solid var(--borda);
+  border-radius:999px;padding:7px 12px;cursor:pointer;width:auto;margin:0}

@@ -1,5 +1,7 @@
 <!doctype html>
-<html lang="pt-br"><head><meta charset="utf-8">
+<html lang="pt-br" data-tema-padrao="claro"><head><meta charset="utf-8">
+<!-- tema: cliente ve sempre claro; quem escolheu escuro no hub (mesmo dominio) ve escuro -->
+<script src="tema.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Catalogo Lumia Suprimentos 3D</title>
 <meta name="description" content="209 produtos para impressao 3D: filamentos, bicos, hotends e acessorios. Preco, disponibilidade e pedido direto no WhatsApp.">
@@ -13,6 +15,13 @@
 @font-face{font-family:Buvera;src:url(marca/Buvera-Regular.ttf) format('truetype');font-weight:400;font-display:swap}
 @font-face{font-family:Buvera;src:url(marca/Buvera-ExtraBold.ttf) format('truetype');font-weight:800;font-display:swap}
 :root{--bg:#f4f4f5;--card:#fff;--ink:#0a0a0b;--mut:#6b6b70;--ac:#ffd100;--bd:#e4e4e7;--barra:56px}
+:root[data-theme=escuro]{color-scheme:dark;--bg:#111;--card:#1a1a1a;--ink:#eee;--mut:#9a9aa5;--bd:#2a2a2a}
+/* --ink tambem pinta fundo escuro (cabecalho, botoes): no tema escuro esses ficam pretos/amarelos */
+:root[data-theme=escuro] header,:root[data-theme=escuro] #n-cart{background:#0a0a0b}
+:root[data-theme=escuro] .bt:not(.bt-ghost){color:#0a0a0b}
+:root[data-theme=escuro] .add{background:var(--ac);color:#0a0a0b}:root[data-theme=escuro] .add:hover{background:var(--ac);filter:brightness(.92)}
+:root[data-theme=escuro] .add.ok{background:#0b6b2f;color:#fff}
+:root[data-theme=escuro] .est.tem{color:#7ddf7d;background:#12301c;border-color:#1f5a33}
 *{box-sizing:border-box}
 body{margin:0;font:16px/1.45 Buvera,Poppins,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink)}
 header{position:sticky;top:0;background:var(--ink);border-bottom:3px solid var(--ac);padding:12px 18px;z-index:20}

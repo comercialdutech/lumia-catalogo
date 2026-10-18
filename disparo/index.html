@@ -3,43 +3,46 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Disparo</title>
 <meta name="theme-color" content="#111111">
+<link rel="stylesheet" href="../tema.css">
+<script src="../tema.js"></script>
 <link rel="apple-touch-icon" href="../app/icone-192.png">
 <meta name="robots" content="noindex">
 <style>
- :root{--am:#F8CF39}
+
+
  *{box-sizing:border-box}
- body{font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#111;color:#eee;
+ body{font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--fundo);color:var(--texto);
       margin:0;padding:22px 16px 70px;max-width:620px;margin-inline:auto}
  h1{font-size:20px;margin:0 0 2px}
- .sub{color:#8d8d8d;font-size:13px;margin:0 0 18px}
- label{display:block;margin:12px 0 4px;color:#b4b4b4;font-size:13px}
- input{width:100%;padding:11px;border-radius:9px;border:1px solid #333;background:#1b1b1b;color:#eee;font:16px system-ui}
- button{background:var(--am);color:#000;font-weight:700;border:0;border-radius:10px;
+ .sub{color:var(--suave);font-size:13px;margin:0 0 18px}
+ label{display:block;margin:12px 0 4px;color:var(--rotulo);font-size:13px}
+ input{width:100%;padding:11px;border-radius:9px;border:1px solid var(--borda);background:var(--campo);color:var(--texto);font:16px system-ui}
+ button{background:var(--am);color:var(--sobre-am);font-weight:700;border:0;border-radius:10px;
         padding:13px 20px;font-size:16px;cursor:pointer;margin-top:12px;width:100%}
- button.sec{background:#262626;color:#ddd;font-weight:600}
+ button.sec{background:var(--sec);color:var(--sec-txt);font-weight:600}
  button:disabled{opacity:.5;cursor:default}
- .cx{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:13px;padding:15px;margin-top:16px}
- .erro{color:#ff8d8d}.mini{color:#8d8d8d;font-size:12px}
+ .cx{background:var(--cx);border:1px solid var(--borda);border-radius:13px;padding:15px;margin-top:16px}
+ .erro{color:var(--erro)}.mini{color:var(--suave);font-size:12px}
  .estado{display:flex;align-items:center;gap:9px;font-size:17px;font-weight:700}
  .bolha{width:11px;height:11px;border-radius:50%;flex:none}
- .on{background:#7ddf7d}.off{background:#777}
+ .on{background:var(--ok)}.off{background:var(--suave)}
  .grade{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-top:14px}
- .num{font-size:24px;font-weight:700;color:var(--am);line-height:1.15}
- .rot{color:#9a9a9a;font-size:12px}
+ .num{font-size:24px;font-weight:700;color:var(--am-txt);line-height:1.15}
+ .rot{color:var(--suave);font-size:12px}
  table{width:100%;border-collapse:collapse;margin-top:6px;font-size:14px}
- td{padding:6px 0;border-bottom:1px solid #262626}
- td:last-child{text-align:right;color:#9a9a9a;white-space:nowrap}
- .volta{color:#777;text-decoration:none;font-size:13px}
+ td{padding:6px 0;border-bottom:1px solid var(--linha)}
+ td:last-child{text-align:right;color:var(--suave);white-space:nowrap}
+ .volta{color:var(--suave);text-decoration:none;font-size:13px}
  .dupla{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:0 12px}
  .numero .topo{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
  .numero .topo b{font-size:16px}
  .numero p.mini{margin:4px 0 0}
- .barra{height:6px;background:#262626;border-radius:3px;margin-top:12px;overflow:hidden}
+ .barra{height:6px;background:var(--sec);border-radius:3px;margin-top:12px;overflow:hidden}
  .barra i{display:block;height:100%;background:var(--am)}
- .tag{font-size:11px;color:#bbb;background:#262626;border-radius:5px;padding:2px 6px;margin-right:6px}
+ .tag{font-size:11px;color:var(--sec-txt);background:var(--sec);border-radius:5px;padding:2px 6px;margin-right:6px}
 </style></head><body>
 
-<a class="volta" href="../hub/">‹ Ferramentas</a>
+<a class="volta" href="../balcao/">‹ Balcão</a>
 <h1>Disparo de campanha</h1>
 <p class="sub">Roda na nuvem: continua com o computador desligado</p>
 
