@@ -1,0 +1,1255 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Meli Promos</title>
+<meta name="theme-color" content="#F4F4F5">
+<link rel="stylesheet" href="../tema.css">
+<script src="../tema.js"></script>
+<meta name="robots" content="noindex">
+<link rel="apple-touch-icon" href="../app/icone-192.png">
+<style>
+ @font-face{font-family:"Buvera";font-weight:400;font-display:swap;src:url(../marca/Buvera-Regular.ttf)}
+ @font-face{font-family:"Buvera";font-weight:700 800;font-display:swap;src:url(../marca/Buvera-ExtraBold.ttf)}
+ :root{--bg:#F4F4F5;--surface:#fff;--ink:#0A0A0B;--muted:#6B6B70;--line:#E4E4E7;--brand:#0A0A0B;--brand-soft:#FFF0B3;
+   --accent:#10b981;--accent-ink:#0a8f66;--ok:#0a8f66;--danger:#e5484d;--warn:#d9930d;--console:#0f172a;
+   --hover:#f5f6fa;--soft:#f8fafc;--topo:rgba(255,255,255,.85);--sobre-brand:#fff;
+   --shadow:0 1px 2px rgba(16,24,40,.04),0 6px 20px rgba(16,24,40,.05);--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+ :root[data-theme=escuro]{color-scheme:dark;--bg:#111;--surface:#1a1a1a;--ink:#eee;--muted:#9a9aa5;--line:#2a2a2a;
+   --brand:#FFD100;--brand-soft:#3a3210;--hover:#222;--soft:#202020;--topo:rgba(17,17,17,.85);--sobre-brand:#0A0A0B;
+   --accent-ink:#4ade80;--ok:#4ade80}
+ *{box-sizing:border-box}
+ body{margin:0;background:var(--bg);color:var(--ink);font-family:"Buvera",system-ui,"Segoe UI",Roboto,sans-serif;font-size:14px;line-height:1.55}
+ input[type=checkbox]{accent-color:var(--brand)}
+ .shell{display:flex;min-height:100vh}
+ .sidebar{width:225px;flex:none;background:var(--surface);border-right:1px solid var(--line);padding:18px 14px;display:flex;flex-direction:column;gap:18px;position:sticky;top:0;height:100vh;overflow-y:auto}
+ .brand{display:flex;align-items:center;gap:10px;padding:4px 8px}
+ .brand img{height:30px;width:auto}
+ .brand-sub{color:var(--muted);font-weight:700;font-size:12px;line-height:1.3}
+ .emps{display:flex;gap:4px;background:var(--hover);border-radius:10px;padding:3px}
+ .emps button{flex:1;border:0;background:none;border-radius:8px;padding:7px 4px;font:inherit;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer}
+ .emps button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+ .side-nav{display:flex;flex-direction:column;gap:3px}
+ .nav-item{display:flex;align-items:center;gap:11px;width:100%;text-align:left;border:none;background:none;padding:9px 12px;border-radius:10px;font:inherit;font-weight:700;color:var(--muted);cursor:pointer}
+ .nav-item:hover{background:var(--hover);color:var(--ink)} .nav-item.active{background:var(--brand-soft);color:var(--ink)}
+ .nav-item svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+ .volta{color:var(--muted);text-decoration:none;font-size:13px;padding:0 12px;margin-top:auto}
+ .maincol{flex:1;min-width:0;display:flex;flex-direction:column}
+ .topbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 28px;background:var(--topo);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+ .topbar h1{margin:0;font-size:17px;font-weight:800}
+ .spacer{flex:1}
+ main{padding:26px 28px 70px;max-width:1240px;width:100%}
+ .pill{display:inline-flex;align-items:center;gap:7px;padding:6px 13px;border-radius:999px;font-size:12.5px;font-weight:700;border:1px solid var(--line);background:var(--surface);color:var(--muted);white-space:nowrap}
+ .dot{width:8px;height:8px;border-radius:50%;background:#c3c9d6}
+ .pill.ok{color:var(--accent-ink)} .pill.ok .dot{background:var(--accent)}
+ .pill.off{color:var(--danger)} .pill.off .dot{background:var(--danger)}
+ .pill.run{color:var(--warn)} .pill.run .dot{background:var(--warn);animation:pulse 1s infinite}
+ @keyframes pulse{50%{opacity:.25}}
+ .btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:9px 16px;border-radius:10px;font:inherit;font-weight:700;font-size:13.5px;cursor:pointer;box-shadow:0 1px 2px rgba(16,24,40,.04);text-decoration:none;display:inline-block}
+ .btn:hover{border-color:var(--muted)} .btn:disabled{opacity:.5;cursor:not-allowed}
+ .btn.primary{background:var(--brand);border-color:var(--brand);color:var(--sobre-brand)}
+ .btn.danger{color:var(--danger);border-color:#f3d2d3}
+ :root[data-theme=escuro] .btn.danger{border-color:#5a2a2a}
+ .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px;margin-bottom:20px;box-shadow:var(--shadow)}
+ .card h2{margin:0 0 4px;font-size:15px;font-weight:800}
+ .card .sub{color:var(--muted);font-size:13px;margin-bottom:16px}
+ .hide{display:none!important}
+ .runbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+ .stat{display:flex;flex-direction:column;gap:2px;padding:12px 18px 12px 15px;border-radius:12px;background:var(--soft);border:1px solid var(--line);border-left:3px solid #c3c9d6;min-width:132px}
+ .stat b{font-size:24px;font-variant-numeric:tabular-nums} .stat span{font-size:12px;color:var(--muted);font-weight:700}
+ .stat.green{border-left-color:var(--accent)} .stat.green b{color:var(--accent-ink)}
+ .stat.red{border-left-color:var(--danger)} .stat.red b{color:var(--danger)}
+ .console{margin-top:16px;background:var(--console);border-radius:12px;padding:15px 17px;font-family:var(--mono);font-size:12.5px;line-height:1.65;color:#cbd5e1;height:420px;overflow-y:auto;white-space:pre-wrap;word-break:break-word}
+ .console .l{display:block}
+ .console .ok{color:#4ade80}.console .err{color:#f87171}.console .skip{color:#64748b}.console .head{color:#fbbf77;font-weight:700}.console .sys{color:#7dd3fc}.console .empty{color:#475569}
+ .toolbar{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+ .search{flex:1;min-width:200px;padding:10px 13px;border:1px solid var(--line);border-radius:10px;font:inherit;background:var(--surface);color:var(--ink)}
+ select.search{flex:0 0 auto;min-width:0}
+ table{width:100%;border-collapse:collapse;font-size:13px}
+ th{text-align:left;color:var(--muted);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.6px;padding:9px 10px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface);z-index:1}
+ th.sort{cursor:pointer;user-select:none} th.sort:hover{color:var(--ink)}
+ td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+ tbody tr:hover td{background:var(--soft)}
+ .mono,td.mono{font-family:var(--mono);font-size:12px;color:var(--muted)}
+ .twrap{max-height:520px;overflow:auto;border:1px solid var(--line);border-radius:12px}
+ input.price{width:92px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;font-family:var(--mono);font-size:13px;text-align:right;background:var(--surface);color:var(--ink)}
+ input.price.dirty{border-color:var(--ink);background:var(--brand-soft)}
+ .titlecell{max-width:420px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+ .field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px} .field label{font-weight:700;font-size:13px}
+ .hint{color:var(--muted);font-size:12px}
+ .field input[type=number],.field select{padding:10px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;background:var(--surface);color:var(--ink);max-width:260px}
+ .toggle{display:flex;align-items:center;gap:10px}
+ .switch{position:relative;width:44px;height:25px;flex:none}
+ .switch input{opacity:0;width:0;height:0}
+ .slider{position:absolute;inset:0;background:#cdd3e0;border-radius:999px;transition:.2s;cursor:pointer}
+ .slider::before{content:"";position:absolute;width:19px;height:19px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+ .switch input:checked+.slider{background:var(--brand)}
+ .switch input:checked+.slider::before{transform:translateX(19px)}
+ :root[data-theme=escuro] .switch input:checked+.slider::before{background:#0A0A0B}
+ .checks{display:flex;flex-direction:column;gap:9px}
+ .chk{display:flex;align-items:center;gap:9px;font-size:14px} .chk small{color:var(--muted)}
+ .warnbox{background:#fff8ec;border:1px solid #f2dcae;color:#8a6212;border-radius:10px;padding:10px 13px;font-size:12.5px;margin-top:8px}
+ :root[data-theme=escuro] .warnbox{background:#2e2610;border-color:#5a4a14;color:#f5d77a}
+ .saverow{display:flex;align-items:center;gap:12px;margin-top:6px}
+ .saved{color:var(--accent-ink);font-size:13px;font-weight:700;opacity:0;transition:.2s} .saved.show{opacity:1}
+ .banner{background:#fdecec;border:1px solid #f4c7c7;color:#a12b2b;border-radius:12px;padding:12px 15px;font-size:13px;margin-bottom:16px}
+ :root[data-theme=escuro] .banner{background:#3a1c1c;border-color:#5a2a2a;color:#ffb4b4}
+ #ajuda li{margin:7px 0}
+ #ajuda code{background:var(--soft);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-family:var(--mono);font-size:12px}
+ .login{max-width:360px;margin:60px auto}
+ .login input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;margin-bottom:10px;background:var(--surface);color:var(--ink)}
+ @media (max-width:920px){
+  .shell{flex-direction:column}
+  .sidebar{width:auto;height:auto;position:static;flex-direction:row;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 12px;border-right:0;border-bottom:1px solid var(--line)}
+  .brand-sub,.volta{display:none} .side-nav{flex-direction:row;overflow-x:auto;scrollbar-width:none;width:100%} .nav-item{width:auto;padding:8px 10px;white-space:nowrap} .nav-item svg{display:none}
+  .topbar{padding:10px 16px;position:static} main{padding:16px 12px 60px}
+  .stat{min-width:0;flex:1 1 40%} .card{padding:16px} .grid{grid-template-columns:1fr}
+ }
+</style></head><body>
+<div class="shell">
+<aside class="sidebar">
+  <div class="brand"><img class="so-claro" src="../marca/logo-escuro.png" alt="Lumia"><img class="so-escuro" src="../marca/logo.png" alt="Lumia"><div class="brand-sub">Meli<br>Promos</div></div>
+  <div class="emps" id="emps"></div>
+  <nav class="side-nav">
+    <button class="nav-item active" data-tab="painel" onclick="tab('painel')"><svg viewBox="0 0 24 24"><path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z"/></svg>Painel</button>
+    <button class="nav-item" data-tab="produtos" onclick="tab('produtos')"><svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>Produtos</button>
+    <button class="nav-item" data-tab="oportunidades" onclick="tab('oportunidades')"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>Oportunidades</button>
+    <button class="nav-item" data-tab="catalogo" onclick="tab('catalogo')"><svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1.5"/></svg>Catálogo</button>
+    <button class="nav-item" data-tab="fretes" onclick="tab('fretes')"><svg viewBox="0 0 24 24"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Fretes</button>
+    <button class="nav-item" data-tab="estoque" onclick="tab('estoque')"><svg viewBox="0 0 24 24"><path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M3.3 7L12 12l8.7-5M12 22V12"/></svg>Estoque</button>
+    <button class="nav-item" data-tab="mercado" onclick="tab('mercado')"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>Mercado</button>
+    <button class="nav-item" data-tab="qualidade" onclick="tab('qualidade')"><svg viewBox="0 0 24 24"><path d="M12 2l2.9 6.3 6.6.8-4.9 4.6 1.3 6.6L12 17l-5.9 3.3 1.3-6.6L2.5 9.1l6.6-.8z"/></svg>Qualidade</button>
+    <button class="nav-item" data-tab="checagem" onclick="tab('checagem')"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>Checagem</button>
+    <button class="nav-item" data-tab="ajuda" onclick="tab('ajuda')"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Instruções</button>
+    <button class="nav-item" data-tab="config" onclick="tab('config')"><svg viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>Configurações</button>
+  </nav>
+  <a class="volta" href="../hub/">‹ voltar ao hub</a>
+</aside>
+<div class="maincol">
+<header class="topbar">
+  <h1 id="pageTitle">Painel</h1>
+  <div class="spacer"></div>
+  <button class="tema-bt" data-tema-botao></button>
+  <span id="connPill" class="pill"><span class="dot"></span><span id="connText">verificando…</span></span>
+</header>
+<main>
+  <!-- LOGIN -->
+  <section id="login" class="hide">
+    <div class="card login"><h2>Entrar</h2><div class="sub">Mesmo usuário e senha do hub.</div>
+      <div id="loginErro" class="banner hide"></div>
+      <input id="u" placeholder="usuário" autocomplete="username"><input id="s" type="password" placeholder="senha" autocomplete="current-password">
+      <button class="btn primary" onclick="entrar()">Entrar</button></div>
+  </section>
+
+  <!-- PAINEL -->
+  <section id="painel">
+    <div id="notConnected" class="banner hide">
+      Conta do Mercado Livre desta empresa não conectada na nuvem. Conecte no PC (<code>python oauth_bootstrap.py SEU_CODIGO</code>
+      na pasta do Meli Promos) e suba com <code>python semear.py --tokens EMPRESA</code>.
+    </div>
+    <div id="outroAparelho" class="banner hide"></div>
+    <div class="card">
+      <div class="runbar">
+        <div class="stat green"><b id="sAcc">0</b><span>aceitos / simulados</span></div>
+        <div class="stat red"><b id="sErr">0</b><span>erros</span></div>
+        <div class="stat"><b id="sScan">0</b><span>campanhas varridas</span></div>
+        <div class="spacer"></div>
+        <span id="modePill" class="pill"><span class="dot"></span><span id="modeText">—</span></span>
+        <button id="runBtn" class="btn primary" onclick="runNow()">Rodar agora</button>
+        <button id="leaveBtn" class="btn danger" onclick="leaveAll()">Sair de todas</button>
+        <button id="stopBtn" class="btn danger hide" onclick="stopRun()">Parar</button>
+      </div>
+      <div id="console" class="console"><span class="l empty">O log ao vivo aparece aqui quando você clicar em "Rodar agora".</span></div>
+    </div>
+    <div class="card">
+      <h2>Incluir ou remover produtos das campanhas</h2>
+      <div class="sub">Selecione os produtos e inclua só eles nas campanhas elegíveis (seguindo suas regras
+        de preço mínimo e o modo simulação/valendo), ou remova-os das campanhas reversíveis
+        (Relâmpago e Oferta do dia não são afetadas). O andamento aparece no log acima.</div>
+      <div class="toolbar">
+        <input id="panSearch" class="search" placeholder="Buscar por título, SKU ou código…" oninput="renderPanRows()">
+        <button class="btn primary" onclick="includeSelected()">Incluir selecionados nas campanhas</button>
+        <button class="btn danger" onclick="leaveSelected()">Remover selecionados das campanhas</button>
+      </div>
+      <div class="twrap" style="max-height:340px">
+        <table>
+          <thead><tr>
+            <th style="width:28px"><input type="checkbox" id="panAll" title="Selecionar todos"
+              onchange="document.querySelectorAll('.pansel').forEach(c=>c.checked=this.checked)"></th>
+            <th>Código</th><th>Título</th><th>SKU</th>
+          </tr></thead>
+          <tbody id="panBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRODUTOS -->
+  <section id="produtos" class="hide">
+    <div class="card">
+      <h2>Produtos e preços mínimos</h2>
+      <div class="sub">O preço é o mínimo de venda de cada anúncio. Edite e clique em salvar.</div>
+      <div class="toolbar">
+        <input id="search" class="search" placeholder="Buscar por título, SKU ou código…" oninput="filterRows()">
+        <span id="prodCount" class="pill"><span class="dot"></span><span>0 itens</span></span>
+        <button class="btn primary" onclick="saveProducts()">Salvar preços</button>
+        <button id="syncBtn" class="btn" onclick="syncItems()">Sincronizar do ML</button>
+        <button class="btn danger" onclick="delSelected()">Excluir selecionados</button>
+        <span id="prodSaved" class="saved">Salvo ✓</span>
+      </div>
+      <div class="toolbar">
+        <input id="newMlb" class="search" style="flex:0 0 150px;min-width:150px" placeholder="MLB…">
+        <input id="newSku" class="search" style="flex:0 0 120px;min-width:120px" placeholder="SKU (opcional)">
+        <input id="newTitulo" class="search" placeholder="Nome do produto (opcional)">
+        <input id="newCost" class="search" style="flex:0 0 110px;min-width:110px" placeholder="Preço mín. R$">
+        <button class="btn primary" onclick="addProduct()">Adicionar</button>
+      </div>
+      <div class="twrap">
+        <table>
+          <thead><tr>
+            <th style="width:28px"><input type="checkbox" id="prodAll" title="Selecionar todos"
+              onchange="document.querySelectorAll('.prodsel').forEach(c=>c.checked=this.checked)"></th>
+            <th class="sort" onclick="sortBy('mlb')">Código <span id="ar-mlb"></span></th>
+            <th class="sort" onclick="sortBy('titulo')">Título <span id="ar-titulo"></span></th>
+            <th class="sort" onclick="sortBy('sku')">SKU <span id="ar-sku"></span></th>
+            <th class="sort" style="text-align:right" onclick="sortBy('cost')">Preço mín. (R$) <span id="ar-cost"></span></th>
+            <th class="sort" style="text-align:right" onclick="sortBy('mv')" title="Menor preço que paga CMV + frete + comissão do ML + imposto (lucro zero). Passe o mouse no valor para ver a conta.">Mín. p/ venda (R$) <span id="ar-mv"></span></th>
+            <th></th>
+          </tr></thead>
+          <tbody id="prodBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- OPORTUNIDADES -->
+  <section id="oportunidades" class="hide">
+    <div class="card">
+      <h2>Oportunidades com rebate (o ML banca parte do desconto)</h2>
+      <div class="sub">Nestas campanhas o Mercado Livre cobre uma parte do desconto. Mesmo com o preço ao cliente
+        abaixo do seu mínimo, o seu <b>valor equivalente de venda</b> pode ficar acima. Avalie e aceite caso a caso.</div>
+      <div class="toolbar">
+        <button class="btn primary" onclick="scanRebates()">Buscar oportunidades</button>
+        <span id="rebInfo" class="pill"><span class="dot"></span><span>—</span></span>
+        <div class="spacer"></div>
+        <select id="rebGanho" class="search" onchange="renderRebRows()" title="Filtrar pelo ganho">
+          <option value="">ganhos e perdas</option>
+          <option value="ganho">só ganhos (≥ 0)</option>
+          <option value="perda">só perdas (&lt; 0)</option>
+        </select>
+        <button id="rebSubmit" class="btn primary" onclick="acceptSelected()">Aceitar selecionadas</button>
+      </div>
+      <div id="rebResult" class="hide" style="border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:13px"></div>
+      <div id="rebConsole" class="console" style="height:200px;margin-bottom:14px"><span class="l empty">O log da varredura aparece aqui quando você clicar em "Buscar oportunidades".</span></div>
+      <div class="twrap">
+        <table>
+          <thead><tr>
+            <th style="width:28px"><input type="checkbox" id="rebAll" title="Selecionar todas"
+              onchange="document.querySelectorAll('.rebsel').forEach(c=>c.checked=this.checked)"></th>
+            <th class="sort" onclick="rebSortBy('titulo')">Anúncio <span id="rar-titulo"></span></th>
+            <th class="sort" onclick="rebSortBy('campanha')">Campanha <span id="rar-campanha"></span></th>
+            <th class="sort" style="text-align:right" onclick="rebSortBy('preco_final')">Preço final <span id="rar-preco_final"></span></th>
+            <th class="sort" style="text-align:right" onclick="rebSortBy('ml_cobre_pct')">ML cobre <span id="rar-ml_cobre_pct"></span></th>
+            <th class="sort" style="text-align:right" onclick="rebSortBy('recebimento_efetivo')">Valor equiv. de venda* <span id="rar-recebimento_efetivo"></span></th>
+            <th class="sort" style="text-align:right" onclick="rebSortBy('minimo')">Seu mínimo <span id="rar-minimo"></span></th>
+            <th class="sort" style="text-align:right" onclick="rebSortBy('ganho_vs_minimo')">Ganho <span id="rar-ganho_vs_minimo"></span></th>
+            <th></th></tr></thead>
+          <tbody id="rebBody"></tbody>
+        </table>
+      </div>
+      <div class="hint" style="margin-top:10px">*Valor equivalente de venda = preço cheio menos só a SUA parte do desconto (a parte do ML volta pra você via rebate). Não desconta a comissão de venda.</div>
+    </div>
+  </section>
+
+  <!-- CONFIG -->
+  <section id="config" class="hide">
+    <div class="card">
+      <h2>Configurações</h2>
+      <div class="sub">Ajuste o comportamento da automação desta empresa. As credenciais do ML ficam guardadas na nuvem e não aparecem aqui.</div>
+      <div class="grid">
+        <div>
+          <div class="field">
+            <div class="toggle">
+              <label class="switch"><input type="checkbox" id="cfgDry"><span class="slider"></span></label>
+              <div><label for="cfgDry">Modo simulação</label><div class="hint">Ligado: mostra o que faria, sem inscrever nada.</div></div>
+            </div>
+          </div>
+          <div class="field">
+            <div class="toggle">
+              <label class="switch"><input type="checkbox" id="cfgFees"><span class="slider"></span></label>
+              <div><label for="cfgFees">Descontar comissão do ML</label><div class="hint">Desligado: compara o preço da campanha direto com seu mínimo.</div></div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Tipos de campanha</label>
+            <div class="checks">
+              <label class="chk"><input type="checkbox" class="ptype" value="DEAL"> DEAL <small>tradicional · reversível</small></label>
+              <label class="chk"><input type="checkbox" class="ptype" value="SELLER_CAMPAIGN"> Campanha do vendedor <small>reversível</small></label>
+              <label class="chk"><input type="checkbox" class="ptype" value="SMART"> SMART <small>co-financiada · reversível</small></label>
+              <label class="chk"><input type="checkbox" class="ptype" value="PRICE_MATCHING"> Igualar preço (Price Matching) <small>co-financiada · reduz tarifa · reversível</small></label>
+              <label class="chk"><input type="checkbox" class="ptype" value="SELLER_COUPON_CAMPAIGN"> Cupom do vendedor <small>preço cheio · reversível</small></label>
+              <label class="chk"><input type="checkbox" class="ptype" value="LIGHTNING"> Relâmpago <small>irreversível</small></label>
+              <label class="chk"><input type="checkbox" class="ptype" value="DOD"> Oferta do dia <small>irreversível</small></label>
+            </div>
+            <div id="irrevWarn" class="warnbox hide">Atenção: Relâmpago e Oferta do dia <b>não podem ser desfeitas</b> depois de ativadas.</div>
+          </div>
+        </div>
+        <div>
+          <div class="field">
+            <label for="cfgStrategy">Estratégia de preço</label>
+            <select id="cfgStrategy">
+              <option value="use_minimum">Usar meu preço mínimo</option>
+              <option value="margin_safe">Margem segura (menor desconto)</option>
+              <option value="suggested">Sugestão do ML</option>
+              <option value="aggressive">Agressiva (maior desconto)</option>
+            </select>
+            <div class="hint">"Usar meu mínimo" preenche a campanha com seu preço mínimo. Só afeta DEAL e Campanha do vendedor.</div>
+          </div>
+          <div class="field">
+            <label for="cfgMax">Limite de aceites por execução</label>
+            <input type="number" id="cfgMax" min="0" step="1">
+            <div class="hint">0 = sem limite (aceita todas as campanhas elegíveis).</div>
+          </div>
+          <div class="field">
+            <label for="cfgMinDisc">Desconto mínimo crível (%)</label>
+            <input type="number" id="cfgMinDisc" min="0" max="90" step="1">
+            <div class="hint">Evita o erro de "preço pouco crível" nas campanhas onde você define o preço.</div>
+          </div>
+          <div class="field">
+            <label for="cfgPoll">Repetir a cada (minutos)</label>
+            <input type="number" id="cfgPoll" min="0" step="1">
+            <div class="hint">0 = roda uma vez e para. Ex.: 30 = repete a cada 30 min enquanto esta página estiver aberta.</div>
+          </div>
+        </div>
+      </div>
+      <div class="saverow">
+        <button class="btn primary" onclick="saveConfig()">Salvar agora</button><span class="hint" style="margin-left:10px">As alterações já são salvas automaticamente.</span>
+        <span id="cfgSaved" class="saved">Salvo ✓</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATÁLOGO -->
+  <section id="catalogo" class="hide">
+    <div class="card">
+      <h2>Anúncios de catálogo</h2>
+      <div class="sub">No catálogo, vários vendedores disputam a mesma página de produto e o ML mostra um vencedor.
+        Aqui você vê quem participa, a situação na disputa e o preço necessário para ganhar.
+        Os três botões numerados são os passos para assumir esse preço: <b>1</b> grava o preço como seu mínimo,
+        <b>2</b> tira o anúncio das campanhas e <b>3</b> recoloca por ele — o ML não troca o preço de quem já
+        está dentro da campanha, só saindo e voltando.
+        "Sair" pausa o anúncio de catálogo (reversível); "Participar" cria ou reativa.</div>
+      <div class="toolbar">
+        <button class="btn primary" onclick="scanCatalog()">Varrer catálogo</button>
+        <span id="catInfo" class="pill"><span class="dot"></span><span>—</span></span>
+        <label class="chk" title="Só os que dá para ganhar sem furar o preço mínimo já cadastrado.">
+          <input type="checkbox" id="catOnlyOk" onchange="renderCatRows()"> só interessantes</label>
+        <button id="catB1" class="btn primary" onclick="catPreco(this)" title="Grava o preço p/ ganhar como preço mínimo dos selecionados">1 · Salvar preço novo</button>
+        <button id="catB2" class="btn danger" onclick="catRemover(this)" title="Tira os selecionados de todas as campanhas reversíveis">2 · Remover das campanhas</button>
+        <button id="catB3" class="btn primary" onclick="catEnquadrar(this)" title="Recoloca os selecionados nas campanhas, pelo preço mínimo atual">3 · Enquadrar nas campanhas</button>
+        <div class="spacer"></div>
+        <input id="catSearch" class="search" style="flex:0 1 260px" placeholder="Buscar…" oninput="renderCatRows()">
+      </div>
+      <div id="catConsole" class="console" style="height:180px;margin-bottom:14px"><span class="l empty">O log da varredura aparece aqui quando você clicar em "Varrer catálogo".</span></div>
+      <div class="twrap" style="max-height:430px">
+        <table>
+          <thead><tr>
+            <th style="width:28px"><input type="checkbox" id="catAll" title="Selecionar elegíveis"
+              onchange="document.querySelectorAll('.catsel').forEach(c=>{c.checked=this.checked;catPick(c)})"></th>
+            <th class="sort" onclick="catSortBy('titulo')">Anúncio <span id="car-titulo"></span></th>
+            <th class="sort" style="text-align:right" onclick="catSortBy('preco')">Preço atual <span id="car-preco"></span></th>
+            <th class="sort" style="text-align:right" onclick="catSortBy('estoque')">Estoque <span id="car-estoque"></span></th>
+            <th class="sort" onclick="catSortBy('situacao')">Situação <span id="car-situacao"></span></th>
+            <th class="sort" style="text-align:right" onclick="catSortBy('preco_para_ganhar')">Preço p/ ganhar <span id="car-preco_para_ganhar"></span></th>
+            <th class="sort" style="text-align:right" onclick="catSortBy('minimo')">Seu mínimo <span id="car-minimo"></span></th>
+            <th class="sort" style="text-align:right" onclick="catSortBy('margem')">Margem <span id="car-margem"></span></th>
+            <th class="sort" onclick="catSortBy('participa')">Participa <span id="car-participa"></span></th><th></th>
+          </tr></thead>
+          <tbody id="catBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- FRETES -->
+  <section id="fretes" class="hide">
+    <div class="card">
+      <h2>Frete x faixa de preço</h2>
+      <div class="sub">O frete que o ML cobra sobe por faixa de preço (R$79, 100, 120, 150 e 200; abaixo de R$79 é
+        menor, mas não é zero). Aqui aparece, no preço que o comprador paga <b>hoje</b> (com campanha), quanto sobraria
+        baixando até 1 centavo abaixo de uma faixa. Em <b>verde</b>: ganha baixando. <b>Abaixo do piso</b>: o
+        alvo fica abaixo do preço mínimo cadastrado. Só consulta, não muda preço.</div>
+      <div class="toolbar">
+        <button class="btn primary" onclick="scanFretes()">Varrer fretes</button>
+        <span id="frInfo" class="pill"><span class="dot"></span><span>—</span></span>
+        <div class="spacer"></div>
+        <label class="hint" style="display:flex;align-items:center;gap:6px">
+          <input type="checkbox" id="frOnlyGain" checked onchange="renderFrRows()"> só quem ganha</label>
+        <input id="frSearch" class="search" style="flex:0 1 240px" placeholder="Buscar…" oninput="renderFrRows()">
+      </div>
+      <div id="frConsole" class="console" style="height:170px;margin-bottom:14px"><span class="l empty">O log da varredura aparece aqui.</span></div>
+      <div class="twrap" style="max-height:440px">
+        <table>
+          <thead><tr>
+            <th>Anúncio</th><th>Campanha</th><th style="text-align:right">Preço hoje</th><th style="text-align:right">Baixar p/</th>
+            <th style="text-align:right">Frete</th><th style="text-align:right">Ganho/un</th><th style="text-align:right">Piso</th><th></th>
+          </tr></thead>
+          <tbody id="frBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- MERCADO -->
+  <section id="mercado" class="hide">
+    <div class="card">
+      <h2>Análise de mercado / oportunidades</h2>
+      <div class="sub">Produtos <b>mais vendidos</b> nas categorias em que você já atua, cruzados com o seu
+        catálogo. Em <b>vermelho</b>: campeões que você <b>não vende</b> (lacuna para entrar). Em <b>laranja</b>:
+        você vende, mas acima do menor preço do mercado.
+        <br><span style="color:var(--muted)">A busca por termo do ML é bloqueada na API — esta análise usa o ranking
+        oficial de mais-vendidos por categoria, não uma varredura de concorrentes arbitrária.</span></div>
+      <div class="toolbar">
+        <button class="btn primary" onclick="scanMarket()">Analisar mercado</button>
+        <span id="mkInfo" class="pill"><span class="dot"></span><span>—</span></span>
+        <div class="spacer"></div>
+        <label class="hint" style="display:flex;align-items:center;gap:6px">
+          <input type="checkbox" id="mkOnlyGap" onchange="renderMkRows()"> só lacunas</label>
+        <input id="mkSearch" class="search" style="flex:0 1 240px" placeholder="Buscar…" oninput="renderMkRows()">
+      </div>
+      <div id="mkConsole" class="console" style="height:170px;margin-bottom:14px"><span class="l empty">O log da análise aparece aqui.</span></div>
+      <div class="twrap" style="max-height:440px">
+        <table>
+          <thead><tr>
+            <th>Produto campeão</th><th>Categoria</th><th style="text-align:right">Menor preço</th>
+            <th style="text-align:right">Você</th><th style="text-align:center">Vend.</th><th>Oportunidade</th><th></th>
+          </tr></thead>
+          <tbody id="mkBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUALIDADE -->
+  <section id="qualidade" class="hide">
+    <div class="card">
+      <h2>Qualidade dos anúncios</h2>
+      <div class="sub">Nota de saúde do anúncio e o que está faltando na ficha: atributos obrigatórios em
+        branco, poucas fotos, sem garantia. Ficha incompleta perde posição na busca e barra a entrada no catálogo.
+        Nota com <b>*</b> é estimada (o ML não devolveu a dele para esse anúncio).</div>
+      <div class="toolbar">
+        <button class="btn primary" onclick="scanHealth()">Verificar qualidade</button>
+        <span id="hlInfo" class="pill"><span class="dot"></span><span>—</span></span>
+        <div class="spacer"></div>
+        <label class="hint" style="display:flex;align-items:center;gap:6px">
+          <input type="checkbox" id="hlOnlyBad" onchange="renderHlRows()"> só com problema</label>
+        <input id="hlSearch" class="search" style="flex:0 1 240px" placeholder="Buscar…" oninput="renderHlRows()">
+      </div>
+      <div id="hlConsole" class="console" style="height:170px;margin-bottom:14px"><span class="l empty">O log da verificação aparece aqui.</span></div>
+      <div class="twrap" style="max-height:420px">
+        <table>
+          <thead><tr>
+            <th>Anúncio</th><th style="text-align:right">Nota</th>
+            <th style="text-align:right">Fotos</th><th>O que corrigir</th><th></th>
+          </tr></thead>
+          <tbody id="hlBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ESTOQUE -->
+  <section id="estoque" class="hide">
+    <div class="card">
+      <h2>Estoque baixo em promoção</h2>
+      <div class="sub">Anúncios que estão <b>em campanha ativa</b> e com pouco estoque — o cenário que causa
+        venda sem estoque, cancelamento e queda de reputação (que por sua vez trava campanhas melhores).</div>
+      <div class="toolbar">
+        <button class="btn primary" onclick="scanStock()">Verificar estoque</button>
+        <span id="stkInfo" class="pill"><span class="dot"></span><span>—</span></span>
+        <button class="btn danger" onclick="stkLeaveSelected()">Remover selecionados das campanhas</button>
+        <div class="spacer"></div>
+        <input id="stkSearch" class="search" style="flex:0 1 240px" placeholder="Buscar…" oninput="renderStkRows()">
+      </div>
+      <div id="stkConsole" class="console" style="height:170px;margin-bottom:14px"><span class="l empty">O log da verificação aparece aqui.</span></div>
+      <div class="twrap" style="max-height:420px">
+        <table>
+          <thead><tr>
+            <th style="width:28px"><input type="checkbox" id="stkAll" title="Selecionar todos"
+              onchange="document.querySelectorAll('.stksel').forEach(c=>c.checked=this.checked)"></th>
+            <th>Anúncio</th><th style="text-align:right">Estoque</th>
+            <th style="text-align:right">Preço em promoção</th><th style="text-align:right">Preço cheio</th>
+            <th style="text-align:right">Vendidos</th>
+          </tr></thead>
+          <tbody id="stkBody"></tbody>
+        </table>
+      </div>
+      <div class="hint" style="margin-top:10px">O limite de alerta é 5 unidades. Ao remover, a lista é atualizada automaticamente no fim.</div>
+    </div>
+  </section>
+
+  <!-- CHECAGEM -->
+  <section id="checagem" class="hide">
+    <div class="card">
+      <h2>Checagem de anúncio</h2>
+      <div class="sub">Veja todas as campanhas de um anúncio e por que ele entraria ou ficaria de fora,
+        segundo suas regras atuais (preço mínimo e tipos habilitados).</div>
+      <div class="toolbar">
+        <input id="chkMlb" class="search" style="flex:0 0 220px;min-width:200px" placeholder="MLB…">
+        <button class="btn primary" onclick="runCheck()">Checar</button>
+      </div>
+      <div id="chkConsole" class="console" style="height:300px"><span class="l empty">O resultado da checagem aparece aqui.</span></div>
+    </div>
+    <div class="card">
+      <h2>Ou escolha um produto da lista</h2>
+      <div class="toolbar">
+        <input id="chkSearch" class="search" placeholder="Buscar por título, SKU ou código…" oninput="renderChkRows()">
+      </div>
+      <div class="twrap" style="max-height:340px">
+        <table>
+          <thead><tr><th>Código</th><th>Título</th><th>SKU</th><th></th></tr></thead>
+          <tbody id="chkBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- INSTRUÇÕES -->
+  <section id="ajuda" class="hide">
+    <div class="card">
+      <h2>Como funciona na nuvem</h2>
+      <ul>
+        <li>Esta é a mesma Central de Promoções que rodava no PC, agora no hub: abre do celular e não depende do computador ligado.</li>
+        <li>Escolha a <b>empresa</b> (Dutech, Lumia ou OneWay) no alto do menu. Cada uma tem a sua conta do ML, o seu cadastro de preços e as suas configurações.</li>
+        <li>As execuções longas (Rodar agora, varreduras) andam <b>enquanto esta página estiver aberta</b>: ela manda os anúncios aos poucos e mostra o log. Fechou a página, a execução para no lote em que estava (nada fica pela metade dentro de um anúncio).</li>
+        <li>Só roda uma execução por empresa de cada vez. Se outra pessoa estiver rodando, aparece o aviso com o nome dela.</li>
+        <li>O preço mínimo e os relatórios ficam na nuvem; as dashboards do PC continuam lendo o preço do ML daqui.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Aba Painel</h2>
+      <ul>
+        <li><b>Rodar agora</b> — varre todos os produtos cadastrados e aceita os convites de campanha que respeitam seu preço mínimo e os tipos habilitados. Contadores de aceitos e erros no topo, log ao vivo abaixo.</li>
+        <li><b>Sair de todas</b> — remove todos os produtos das campanhas <b>reversíveis</b> (DEAL, Campanha do vendedor, SMART, cupom).</li>
+        <li><b>Parar</b> — interrompe a execução em andamento (termina o lote atual).</li>
+        <li><b>Incluir/Remover selecionados</b> — na tabela de produtos do Painel, marque itens (a busca ajuda a filtrar) e inclua só eles nas campanhas elegíveis, ou remova só eles das reversíveis.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Aba Produtos</h2>
+      <ul>
+        <li>O <b>preço mínimo</b> é o piso de venda de cada anúncio: nenhuma campanha é aceita abaixo dele. Aceita vírgula ("49,90").</li>
+        <li><b>Mín. p/ venda</b> — o menor preço que ainda paga o que incide no produto, com lucro zero: <b>(CMV + frete + embalagem) ÷ (1 − comissão − imposto)</b>. O CMV vem do ERP, a comissão e o frete do que o ML cobrou de verdade nas vendas daquele SKU, e o imposto e a embalagem da DRE — tudo do dashboard da própria empresa. Na Lumia, produto que não vendeu lá usa o histórico de vendas da Dutech (mesma empresa, mesmo produto). <b>≈</b> = sem histórico nenhum do produto: comissão e frete são a média da conta. Em <b>vermelho</b>: seu preço mínimo está abaixo disso, ou seja, campanha aceita no mínimo vende com prejuízo. Passe o mouse no valor para ver a conta.</li>
+        <li><b>Sincronizar do ML</b> — importa anúncios novos da sua conta (entram <b>sem preço mínimo</b> — defina em seguida!) e atualiza título/SKU dos existentes. Nunca altera seus preços.</li>
+        <li><b>Adicionar</b> — cadastro manual por código MLB, SKU e nome.</li>
+        <li><b>✕ / Excluir selecionados</b> — tira o produto do cadastro (ele deixa de ser verificado; NÃO o remove de campanhas já ativas).</li>
+        <li>Clique nos títulos das colunas para <b>ordenar</b>; clique de novo para inverter.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Aba Oportunidades</h2>
+      <ul>
+        <li>Lista campanhas com <b>rebate</b>: o ML banca parte do desconto. Mesmo com preço ao cliente abaixo do seu mínimo, pode valer a pena.</li>
+        <li><b>Valor equiv. de venda</b> = preço cheio menos só a SUA parte do desconto (a parte do ML volta pra você). <b>Ganho</b> = esse valor menos o seu mínimo.</li>
+        <li>Use o filtro <b>só ganhos / só perdas</b> e a ordenação pelas colunas para decidir.</li>
+        <li><b>Aceitar</b> entra na campanha individualmente; marque várias e use <b>Aceitar selecionadas</b> para o lote — no final aparece o resumo do que entrou e do que falhou.</li>
+        <li>Algumas ofertas relâmpago exigem agendamento que a API não aceita — nesses casos, aceite pelo painel do Mercado Livre.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Aba Configurações</h2>
+      <ul>
+        <li><b>Modo simulação</b> — mostra o que faria sem inscrever nada. Comece sempre ligado.</li>
+        <li><b>Descontar comissão do ML</b> — compara seu mínimo com o valor líquido (preço − comissão) em vez do preço cheio da campanha.</li>
+        <li><b>Tipos de campanha</b> — DEAL, Campanha do vendedor, SMART e cupom são reversíveis. <b>Relâmpago e Oferta do dia NÃO podem ser desfeitas</b> depois de ativadas — habilite com muito cuidado.</li>
+        <li><b>Estratégia de preço</b> — "Usar meu mínimo" preenche com seu piso; "Margem segura" usa o menor desconto aceito; "Sugestão do ML" e "Agressiva" descontam mais.</li>
+        <li><b>Limite de aceites por execução</b> — trava de segurança; recomendado um valor baixo (ex.: 5) nas primeiras rodadas valendo. 0 = sem limite.</li>
+        <li><b>Repetir a cada X minutos</b> — roda sozinho em ciclo enquanto esta página estiver aberta. 0 = roda uma vez.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Aba Catálogo</h2>
+      <ul>
+        <li><b>Varrer catálogo</b> — identifica seus anúncios vinculados ao catálogo do ML e mostra: preço atual (o promocional, se houver campanha ativa, com o cheio riscado), situação na disputa (Ganhando ✓ / Perdendo / Dividindo o 1º / Sem disputa ativa) e o <b>preço p/ ganhar</b> calculado pelo próprio ML.</li>
+        <li><b>1 · Salvar preço novo</b> — grava o preço p/ ganhar dos <b>selecionados</b> como <b>preço mínimo</b> (substitui o anterior). Não mexe em campanha nenhuma.</li>
+        <li><b>2 · Remover das campanhas</b> — tira os selecionados de todas as campanhas reversíveis.</li>
+        <li><b>3 · Enquadrar nas campanhas</b> — recoloca os selecionados em cada campanha que couber no preço mínimo atual de cada anúncio.</li>
+        <li>A ordem 1 → 2 → 3 importa quando o preço mudou: o ML <b>não troca o preço</b> de um anúncio que já está dentro da campanha (o aceite volta "OK" e ignora o preço novo). <b>Sem o passo 2, o passo 3 não muda nada.</b></li>
+        <li><b>Participar / Sair</b> — cria (ou reativa) sua publicação de catálogo, ou a pausa. "Catálogo inativo" significa que o ML desativou aquela página de produto — não há como participar até o ML reativá-la.</li>
+        <li><b>Estoque</b> — unidades disponíveis no ML na hora da varredura. Amarelo com 5 ou menos, vermelho zerado: descontar o preço de um anúncio sem estoque só gera venda cancelada.</li>
+        <li><b>Seu mínimo / Margem</b> — o mínimo vem da aba Produtos; a margem é o preço p/ ganhar menos ele. Verde = dá para ganhar sem furar o mínimo. <b>só interessantes</b> deixa na tela só esses.</li>
+        <li>A seleção acompanha o anúncio, não a linha: sobrevive à busca, à ordenação e a uma nova varredura.</li>
+        <li>O preço p/ ganhar muda com a concorrência — <b>re-varra antes de decidir</b>.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Aba Checagem</h2>
+      <ul>
+        <li>Digite um código MLB (ou clique em "Checar" num produto da lista) para ver <b>todas as campanhas daquele anúncio</b>: preço cheio, faixa permitida, seu mínimo e o veredito — <b>ENTRARIA ✓</b> ou <b>ficaria de FORA</b> com o motivo.</li>
+        <li>Útil para entender por que um anúncio específico não entrou em determinada campanha na última execução.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Problemas comuns</h2>
+      <ul>
+        <li><b>"Conta não conectada"</b> — a conta do ML desta empresa precisa ser reconectada no PC (<code>oauth_bootstrap.py</code>) e subida para a nuvem (<code>semear.py --tokens EMPRESA</code>).</li>
+        <li><b>"Já está rodando"</b> — outra execução desta empresa está em andamento (talvez em outro aparelho). Espere terminar; se a página que rodava foi fechada, a trava some sozinha em 3 minutos.</li>
+        <li><b>Preço não salvou</b> — o campo fica destacado e um aviso aparece quando o valor é inválido; corrija e salve de novo.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+</div>
+</div>
+
+<script>
+// Central de Promoções do ML na nuvem (worker meli-promos, pelo hub). A tela é a mesma do app.py local;
+// o que mudou: escolha da empresa, login do hub e execução em lotes (a tela manda e mostra o log).
+const PROXY = "https://estoque-olist.dutech.workers.dev/meli";
+const $ = id => document.getElementById(id);
+let EMP = localStorage.meliEmp || "DUTECH", EMPRESAS = [];
+let allProducts = [], CFG = null, rodando = false, parar = false, repetir = null;
+const NOME_EMP = {DUTECH: "Dutech", LUMIA: "Lumia", ONEWAY: "OneWay"};
+const cab = () => ({authorization: `Bearer ${localStorage.usuario || ""}:${localStorage.senha || ""}`, "content-type": "application/json"});
+
+async function api(rota, corpo, extra = "") {
+  const url = `${PROXY}${rota}?emp=${EMP}${extra}`;
+  const r = await fetch(url, corpo ? {method: "POST", headers: cab(), body: JSON.stringify(corpo)} : {headers: cab()});
+  if (r.status === 401) { telaLogin(localStorage.usuario ? "Usuário ou senha errados." : ""); throw new Error("login"); }
+  const j = await r.json().catch(() => ({error: `resposta inválida (${r.status})`}));
+  if (!r.ok && !Array.isArray(j)) throw new Error(j.error || j.erro || r.status);
+  return j;
+}
+function telaLogin(msg) {
+  document.querySelectorAll("main > section").forEach(s => s.classList.add("hide"));
+  $("login").classList.remove("hide");
+  $("loginErro").classList.toggle("hide", !msg); $("loginErro").textContent = msg || "";
+  $("connPill").className = "pill off"; $("connText").textContent = "sem login";
+}
+function entrar() { localStorage.usuario = $("u").value.trim(); localStorage.senha = $("s").value; iniciar(); }
+
+function desenhaEmpresas() {
+  $("emps").innerHTML = EMPRESAS.map(e => `<button class="${e === EMP ? "on" : ""}" onclick="trocaEmp('${e}')">${NOME_EMP[e]}</button>`).join("");
+}
+function trocaEmp(e) {
+  if (rodando) { alert("Espere a execução terminar (ou clique em Parar) antes de trocar de empresa."); return; }
+  if (repetir) { clearTimeout(repetir); repetir = null; }
+  EMP = e; localStorage.meliEmp = e; desenhaEmpresas();
+  document.querySelectorAll(".console").forEach(c => c.innerHTML = '<span class="l empty">—</span>');
+  ["sAcc", "sErr", "sScan"].forEach(id => $(id).textContent = "0");
+  loadState(); tab(localStorage.meliAba || "painel");
+}
+
+function tab(name){
+  localStorage.meliAba = name;
+  document.querySelectorAll('.nav-item').forEach(t=>t.classList.toggle('active',t.dataset.tab===name));
+  const titles={painel:'Painel',produtos:'Produtos',oportunidades:'Oportunidades',config:'Configurações',catalogo:'Catálogo',fretes:'Frete x faixa de preço',estoque:'Estoque x promoções',mercado:'Análise de mercado',qualidade:'Qualidade dos anúncios',checagem:'Checagem de anúncio',ajuda:'Instruções de uso'};
+  $('pageTitle').textContent=(titles[name]||name)+' · '+NOME_EMP[EMP];
+  $('login').classList.add('hide');
+  ['painel','produtos','oportunidades','config','catalogo','fretes','estoque','mercado','qualidade','checagem','ajuda'].forEach(s=>$(s).classList.toggle('hide',s!==name));
+  const carga={painel:loadPanel,catalogo:loadCatalog,fretes:loadFretes,estoque:loadStock,mercado:loadMarket,
+    qualidade:loadHealth,checagem:loadCheck,produtos:loadProducts,oportunidades:loadRebates}[name];
+  if(carga) carga().catch(e=>{ if(e.message!=='login') alert('Erro: '+e.message); });
+}
+
+async function loadState(){
+  const s = await api('/estado');
+  const pill=$('connPill'), txt=$('connText');
+  if(s.connected){ pill.className='pill ok'; txt.textContent=NOME_EMP[EMP]+' · conta conectada'; $('notConnected').classList.add('hide'); }
+  else { pill.className='pill off'; txt.textContent='não conectada'; $('notConnected').classList.remove('hide'); }
+  if(rodando) setRunningUI(true);
+  const outro=$('outroAparelho');
+  if(s.rodando && !rodando){ outro.classList.remove('hide');
+    outro.textContent=`Rodando agora em outro aparelho: ${s.rodando.tipo}, por ${s.rodando.usuario} (desde ${new Date(s.rodando.desde).toLocaleTimeString('pt-BR')}).`; }
+  else outro.classList.add('hide');
+  CFG=s.config; applyConfig(s.config);
+  $('prodCount').querySelector('span:last-child').textContent = s.product_count+' itens';
+}
+
+function applyConfig(c){
+  $('cfgDry').checked = c.DRY_RUN==='true';
+  $('cfgFees').checked = c.ACCOUNT_FOR_FEES==='true';
+  $('cfgStrategy').value = c.PRICE_STRATEGY||'margin_safe';
+  $('cfgMax').value = c.MAX_ACCEPTS_PER_RUN||'0';
+  $('cfgMinDisc').value = Math.round(parseFloat(c.MIN_CREDIBLE_DISCOUNT_PCT||'0.05')*100);
+  $('cfgPoll').value = Math.round(parseInt(c.POLL_SECONDS||'0')/60);
+  const types = (c.PROMOTION_TYPES||'').split(',').map(x=>x.trim());
+  document.querySelectorAll('.ptype').forEach(cb=>cb.checked=types.includes(cb.value));
+  irrevCheck();
+  const mp=$('modePill'), mt=$('modeText'), poll=Math.round(parseInt(c.POLL_SECONDS||'0')/60);
+  if(c.DRY_RUN==='true'){ mp.className='pill'; mt.textContent='modo simulação'; }
+  else { mp.className='pill ok'; mt.textContent='rodando pra valer'; }
+  if(poll) mt.textContent+=` · repete a cada ${poll} min`;
+}
+function irrevCheck(){
+  const on=[...document.querySelectorAll('.ptype')].some(c=>c.checked&&(c.value==='LIGHTNING'||c.value==='DOD'));
+  $('irrevWarn').classList.toggle('hide',!on);
+}
+function wireAutoSave(){
+  ['cfgDry','cfgFees','cfgStrategy','cfgMax','cfgMinDisc','cfgPoll'].forEach(id=>$(id).addEventListener('change',()=>{ irrevCheck(); saveConfig(); }));
+  document.querySelectorAll('.ptype').forEach(c=>c.addEventListener('change',()=>{ irrevCheck(); saveConfig(); }));
+}
+async function saveConfig(){
+  const body={
+    DRY_RUN:$('cfgDry').checked?'true':'false',
+    ACCOUNT_FOR_FEES:$('cfgFees').checked?'true':'false',
+    PRICE_STRATEGY:$('cfgStrategy').value,
+    MAX_ACCEPTS_PER_RUN:$('cfgMax').value||'0',
+    MIN_CREDIBLE_DISCOUNT_PCT:(parseFloat($('cfgMinDisc').value||'5')/100).toFixed(2),
+    POLL_SECONDS:String(parseInt($('cfgPoll').value||'0')*60),
+    PROMOTION_TYPES:[...document.querySelectorAll('.ptype:checked')].map(c=>c.value).join(',')
+  };
+  await api('/config', body);
+  flash('cfgSaved'); loadState();
+}
+
+// ---- execução em lotes: o que era o subprocesso + /api/log do app.py ----
+function classify(line){
+  if(line.includes('>>> ')||line.includes('Renovando')||line.includes('Convites')) return 'sys';
+  if(line.includes(' OK  ')||line.includes('[DRY]')) return 'ok';
+  if(line.includes(' ERR ')||line.includes('ERROR')) return 'err';
+  if(line.includes('==')) return 'head';
+  if(line.includes('ENTRARIA')) return 'ok';
+  if(line.includes('NÃO participa')||line.includes('ficaria de FORA')||line.includes('ignorando')||line.includes('pulando')) return 'skip';
+  return '';
+}
+function appendLogLines(c, lines){
+  if(!lines||!lines.length) return;
+  const e=c.querySelector('.empty'); if(e) e.remove();
+  for(const line of lines){
+    const span=document.createElement('span');
+    span.className='l '+classify(line); span.textContent=line; c.appendChild(span);
+  }
+  c.scrollTop=c.scrollHeight;
+}
+const espera = ms => new Promise(r=>setTimeout(r,ms));
+/** inicia uma execução, manda os lotes um por um e fecha. op.painel = atualiza os contadores do Painel */
+async function executar(tipo, conId, op={}){
+  if(rodando){ alert('Já está rodando.'); return false; }
+  const con=$(conId);
+  let ini;
+  try{ ini=await api('/job/inicio',{tipo, mlbs: op.mlbs}); }
+  catch(e){ if(e.message!=='login') alert('Erro: '+e.message); return false; }
+  if(!ini.ok){ alert(ini.error||'Já está rodando.'); return false; }
+  rodando=true; parar=false; con.innerHTML='';
+  if(op.painel){ setRunningUI(true); ['sAcc','sErr','sScan'].forEach(id=>$(id).textContent='0'); }
+  appendLogLines(con, ini.linhas);
+  // mesma conta do /api/log do app.py: aceitos = linhas " OK  " ou "[DRY]", erros = linhas " ERR "
+  const conta=()=>{ if(!op.painel) return;
+    const ls=[...con.querySelectorAll('.l')].map(s=>s.textContent);
+    $('sAcc').textContent=ls.filter(t=>t.includes(' OK  ')||t.includes('[DRY]')).length;
+    $('sErr').textContent=ls.filter(t=>t.includes(' ERR ')).length; };
+  if(!ini.fim){
+    const total=ini.itens.length;
+    for(let i=0;i<total && !parar;i+=ini.lote){
+      if(op.info) op.info(`${Math.min(i+ini.lote,total)}/${total}…`);
+      let l=null;
+      for(let t=0;t<3 && !l;t++){   // rede do celular cai: tenta o mesmo lote de novo
+        try{ l=await api('/job/lote',{job:ini.job, itens:ini.itens.slice(i,i+ini.lote)}); }
+        catch(e){ if(e.message==='login'){ parar=true; break; }
+          appendLogLines(con,[`ERRO  falha no lote (${e.message}); tentando de novo…`]); await espera(3000); }
+      }
+      if(!l){ parar=true; break; }
+      if(!l.ok){ appendLogLines(con,[l.error||'execução encerrada']); break; }
+      appendLogLines(con,l.linhas); conta();
+      if(op.painel && l.cont && l.cont.varridas!=null) $('sScan').textContent=l.cont.varridas;
+      if(l.parar) break;
+    }
+    try{ appendLogLines(con,(await api('/job/fim',{job:ini.job, parado:parar})).linhas); }catch(e){}
+  }
+  conta();
+  rodando=false;
+  if(op.painel) setRunningUI(false);
+  return true;
+}
+function setRunningUI(on){
+  $('runBtn').classList.toggle('hide',on); $('leaveBtn').classList.toggle('hide',on); $('stopBtn').classList.toggle('hide',!on);
+  if(on){ $('connPill').className='pill run'; $('connText').textContent='rodando…'; }
+  else loadState().catch(()=>{});
+}
+function stopRun(){ parar=true; if(repetir){ clearTimeout(repetir); repetir=null; } $('stopBtn').textContent='parando…'; setTimeout(()=>$('stopBtn').textContent='Parar',4000); }
+
+async function runNow(mlbs){
+  if(repetir){ clearTimeout(repetir); repetir=null; }
+  await executar('rodar','console',{painel:true, mlbs});
+  // "Repetir a cada X minutos": em ciclo enquanto a página estiver aberta (era o POLL_SECONDS do .env)
+  const poll=parseInt((CFG||{}).POLL_SECONDS||'0');
+  if(!mlbs && poll>0 && !parar) repetir=setTimeout(()=>runNow(),poll*1000);
+}
+async function leaveAll(){
+  if(!confirm("SAIR DE TODAS as campanhas reversíveis?\n\nIsto vai remover seus anúncios de todas as campanhas DEAL, Campanha do vendedor, SMART e cupom em que estão ativos.\n\nCampanhas irreversíveis (Relâmpago/Oferta do dia) NÃO são afetadas.\n\nTem certeza?")) return;
+  await executar('sair','console',{painel:true});
+}
+
+// ---- oportunidades (rebate) ----
+let lastOps=[];
+const info = id => t => $(id).querySelector('span:last-child').textContent=t;
+async function scanRebates(){ if(await executar('rebates','rebConsole',{info:info('rebInfo')})) loadRebates(); }
+async function loadRebates(){
+  const d=await api('/relatorio',null,'&tipo=rebates');
+  lastOps=d.oportunidades||[];
+  $('rebAll').checked=false;
+  info('rebInfo')(d.gerado_em ? (lastOps.length+' oportunidades ('+d.gerado_em+')') : 'clique em Buscar');
+  renderRebRows();
+}
+let rebSortKey='ganho_vs_minimo', rebSortDir=-1;
+function rebSortBy(k){ if(rebSortKey===k) rebSortDir=-rebSortDir; else { rebSortKey=k; rebSortDir=1; } renderRebRows(); }
+function renderRebRows(){
+  const ops=lastOps, isStr={titulo:1,campanha:1};
+  ops.sort((a,b)=>{
+    if(isStr[rebSortKey]){
+      const av=rebSortKey==='titulo'?(a.titulo||a.item_id):(a[rebSortKey]||'');
+      const bv=rebSortKey==='titulo'?(b.titulo||b.item_id):(b[rebSortKey]||'');
+      return av.localeCompare(bv,'pt-BR')*rebSortDir;
+    }
+    return ((a[rebSortKey]??0)-(b[rebSortKey]??0))*rebSortDir;
+  });
+  ['titulo','campanha','preco_final','ml_cobre_pct','recebimento_efetivo','minimo','ganho_vs_minimo'].forEach(k=>{
+    $('rar-'+k).textContent = k===rebSortKey ? (rebSortDir>0?'▲':'▼') : ''; });
+  const fg=$('rebGanho').value, b=$('rebBody'); b.innerHTML='';
+  let shown=0;
+  ops.forEach((o,i)=>{
+    const ganhoPos=o.ganho_vs_minimo>=0;
+    if(fg==='ganho' && !ganhoPos) return;
+    if(fg==='perda' && ganhoPos) return;
+    shown++;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><input type="checkbox" class="rebsel" data-i="${i}"></td>
+      <td class="titlecell" title="${esc(o.titulo||o.item_id)}"><span class="mono">${o.item_id}</span><br>${esc((o.titulo||'').slice(0,40))}</td>
+      <td>${esc(o.campanha)}<br><small style="color:var(--muted)">${o.promotion_type}</small></td>
+      <td style="text-align:right">R$ ${o.preco_final.toFixed(2)}${o.abaixo_do_minimo?'<br><small style="color:var(--warn)">abaixo do mín.</small>':''}</td>
+      <td style="text-align:right">${o.ml_cobre_pct.toFixed(0)}%</td>
+      <td style="text-align:right"><b>R$ ${o.recebimento_efetivo.toFixed(2)}</b></td>
+      <td style="text-align:right">R$ ${o.minimo.toFixed(2)}</td>
+      <td style="text-align:right;color:${ganhoPos?'var(--accent-ink)':'var(--danger)'};font-weight:700">${ganhoPos?'+':''}R$ ${o.ganho_vs_minimo.toFixed(2)}</td>
+      <td><button class="btn" onclick="acceptOffer(this,${i})">Aceitar</button></td>`;
+    b.appendChild(tr);
+  });
+  if(!shown) b.innerHTML='<tr><td colspan="9" style="color:var(--muted);padding:18px">'+
+    (ops.length?'Nenhuma oportunidade com esse filtro.':'Nenhuma oportunidade encontrada. Clique em "Buscar oportunidades".')+'</td></tr>';
+}
+async function postAccept(o){
+  try{ return await api('/aceitar-oferta',{item_id:o.item_id,promotion_id:o.promotion_id,promotion_type:o.promotion_type,offer_id:o.offer_id}); }
+  catch(e){ return {ok:false,error:String(e.message)}; }
+}
+async function acceptOffer(btn,i){
+  const o=lastOps[i];
+  if(o.abaixo_do_minimo && !confirm(`Atenção: o preço ao cliente (R$ ${o.preco_final.toFixed(2)}) fica ABAIXO do seu mínimo (R$ ${o.minimo.toFixed(2)}).\n\nO valor equivalente de venda estimado é R$ ${o.recebimento_efetivo.toFixed(2)} (o ML cobre ${o.ml_cobre_pct.toFixed(0)}% do desconto).\n\nAceitar mesmo assim?`)) return;
+  btn.disabled=true; btn.textContent='...';
+  const r=await postAccept(o);
+  if(r.ok){ btn.textContent='Aceito ✓'; btn.style.color='var(--accent-ink)'; }
+  else { btn.disabled=false; btn.textContent='Aceitar'; alert('Erro: '+(r.error||'desconhecido')); }
+}
+async function acceptSelected(){
+  const sel=[...document.querySelectorAll('.rebsel:checked')];
+  if(!sel.length){ alert('Nenhuma campanha selecionada.'); return; }
+  const abaixo=sel.filter(c=>lastOps[+c.dataset.i].abaixo_do_minimo).length;
+  let msg=`Aceitar ${sel.length} campanha(s) de uma vez?`;
+  if(abaixo) msg+=`\n\nAtenção: em ${abaixo} delas o preço ao cliente fica ABAIXO do seu mínimo (confira a coluna "Valor equiv. de venda" — o rebate do ML compensa).`;
+  if(!confirm(msg)) return;
+  const btn=$('rebSubmit'); btn.disabled=true;
+  const oks=[],fails=[];
+  for(const c of sel){
+    const o=lastOps[+c.dataset.i];
+    btn.textContent=`Enviando ${oks.length+fails.length+1}/${sel.length}…`;
+    const rowBtn=c.closest('tr').querySelector('td:last-child button');
+    const r=await postAccept(o);
+    if(r.ok){ oks.push(o); rowBtn.disabled=true; rowBtn.textContent='Aceito ✓'; rowBtn.style.color='var(--accent-ink)'; }
+    else { fails.push({o,err:r.error||'erro desconhecido'}); rowBtn.textContent='Falhou ✗'; rowBtn.style.color='var(--danger)'; }
+  }
+  btn.disabled=false; btn.textContent='Aceitar selecionadas';
+  const box=$('rebResult'); box.classList.remove('hide');
+  box.innerHTML=`<b>Resultado: ${oks.length} aceita(s), ${fails.length} falha(s)</b>`
+    + oks.map(o=>`<div style="color:var(--accent-ink);margin-top:6px">✓ ${o.item_id} — ${esc(o.campanha)}</div>`).join('')
+    + fails.map(f=>`<div style="color:var(--danger);margin-top:6px">✗ ${f.o.item_id} — ${esc(f.o.campanha)}: ${esc(f.err)}</div>`).join('');
+  box.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+// ---- produtos ----
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+async function loadProducts(){ allProducts = await api('/produtos'); filterRows(); }
+function renderRows(list){
+  const b=$('prodBody'); b.innerHTML=''; $('prodAll').checked=false;
+  for(const p of list){
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><input type="checkbox" class="prodsel" data-mlb="${p.mlb}"></td>
+      <td class="mono">${p.mlb}</td>
+      <td class="titlecell" title="${esc(p.titulo)}">${esc(p.titulo)}</td>
+      <td class="mono">${esc(p.sku)}</td>
+      <td style="text-align:right"><input class="price" data-mlb="${p.mlb}" data-orig="${p.cost??''}" value="${p.cost??''}"
+        oninput="this.classList.toggle('dirty', this.value!=this.dataset.orig)"></td>
+      <td style="text-align:right">${mvCell(p)}</td>
+      <td style="text-align:center"><button class="btn danger" style="padding:4px 10px" title="Excluir do cadastro" onclick="delProduct('${p.mlb}')">✕</button></td>`;
+    b.appendChild(tr);
+  }
+}
+// mínimo p/ venda = (CMV + frete + embalagem) / (1 - comissão - imposto), calculado no worker
+function mvCell(p){
+  const v=p.venda;
+  if(!v) return '<span style="color:var(--muted)" title="SKU não encontrado no dashboard desta empresa">—</span>';
+  const rs=x=>x==null?'?':'R$ '+Number(x).toFixed(2), pc=x=>x==null?'?':(x*100).toFixed(1)+'%';
+  const tip=`(CMV ${rs(v.cmv)} + frete ${rs(v.frete_un)} + embalagem ${rs(v.embalagem)}) ÷ (1 − comissão ${pc(v.comissao_pct)} − imposto ${pc(v.imposto_pct)})\nbase: ${v.base}`;
+  if(v.minimo==null) return `<span style="color:var(--muted)" title="${esc(tip)}">— <small>${esc(v.base)}</small></span>`;
+  const prejuizo = p.cost!=null && p.cost < v.minimo;
+  return `<span title="${esc(tip)}" style="${prejuizo?'color:var(--danger);font-weight:700':''}">${v.base==='média da conta'?'≈ ':''}${rs(v.minimo)}</span>`
+    + (prejuizo?'<br><small style="color:var(--danger)">seu mínimo dá prejuízo</small>':'');
+}
+let sortKey='titulo', sortDir=1;
+function sortBy(k){ if(sortKey===k) sortDir=-sortDir; else { sortKey=k; sortDir=1; } filterRows(); }
+function filterRows(){
+  const q=$('search').value.toLowerCase();
+  const list=allProducts.filter(p=>(p.titulo||'').toLowerCase().includes(q)||(p.sku||'').toLowerCase().includes(q)||p.mlb.toLowerCase().includes(q));
+  list.sort((a,b)=>{
+    const num={cost:p=>p.cost, mv:p=>p.venda?p.venda.minimo:null}[sortKey];
+    if(num){ const av=num(a), bv=num(b);
+      if(av==null && bv==null) return 0; if(av==null) return 1; if(bv==null) return -1;
+      return (av-bv)*sortDir; }
+    return String(a[sortKey]||'').localeCompare(String(b[sortKey]||''),'pt-BR')*sortDir;
+  });
+  ['mlb','titulo','sku','cost','mv'].forEach(k=>{ $('ar-'+k).textContent = k===sortKey ? (sortDir>0?'▲':'▼') : ''; });
+  $('prodCount').querySelector('span:last-child').textContent = allProducts.length+' itens';
+  renderRows(list);
+}
+async function syncItems(){
+  const btn=$('syncBtn'); btn.disabled=true; btn.textContent='Sincronizando…';
+  let r;
+  try{ r=await api('/job/inicio',{tipo:'sincronizar'}); }
+  catch(e){ btn.disabled=false; btn.textContent='Sincronizar do ML'; if(e.message!=='login') alert('Erro: '+e.message); return; }
+  btn.disabled=false; btn.textContent='Sincronizar do ML';
+  if(!r.ok){ alert(r.error||'Já está rodando.'); return; }
+  await loadProducts(); await loadState();
+  const fim=(r.linhas||[]).filter(l=>l.includes('Fim.')).pop(), aviso=(r.linhas||[]).filter(l=>l.includes('ATENÇÃO:')).pop();
+  let msg=fim?fim.substring(fim.indexOf('Fim.')):'Sincronização concluída.';
+  if(aviso) msg+='\n\n'+aviso.substring(aviso.indexOf('ATENÇÃO:'));
+  alert(msg);
+}
+async function addProduct(){
+  const body={mlb:$('newMlb').value, sku:$('newSku').value, titulo:$('newTitulo').value, cost:$('newCost').value};
+  const r=await api('/produtos/add',body);
+  if(!r.ok){ alert(r.error||'Erro ao adicionar.'); return; }
+  ['newMlb','newSku','newTitulo','newCost'].forEach(id=>$(id).value='');
+  loadProducts(); loadState();
+}
+async function delSelected(){
+  const sel=[...document.querySelectorAll('.prodsel:checked')].map(c=>c.dataset.mlb);
+  if(!sel.length){ alert('Nenhum anúncio selecionado.'); return; }
+  if(!confirm(`Excluir ${sel.length} anúncio(s) do cadastro?\n\nEles deixam de ser verificados pela automação. Isso NÃO os remove de promoções já ativas.`)) return;
+  const r=await api('/produtos/delete',{mlbs:sel});
+  if(!r.ok) alert(r.error||'Erro ao excluir.');
+  loadProducts(); loadState();
+}
+async function delProduct(mlb){
+  if(!confirm(`Excluir ${mlb} do cadastro?\n\nEle deixa de ser verificado pela automação. Isso NÃO remove o anúncio de promoções já ativas.`)) return;
+  const r=await api('/produtos/delete',{mlbs:[mlb]});
+  if(!r.ok){ alert(r.error||'Erro ao excluir.'); return; }
+  loadProducts(); loadState();
+}
+async function saveProducts(){
+  const edits=[...document.querySelectorAll('input.price')].map(i=>({mlb:i.dataset.mlb,cost:i.value}));
+  const r=await api('/produtos',{products:edits});
+  if((r.invalidos||[]).length) alert('Preço inválido (NÃO salvo) em:\n'+r.invalidos.join('\n'));
+  document.querySelectorAll('input.price').forEach(i=>{
+    if((r.invalidos||[]).includes(i.dataset.mlb)) return;   // mantém marcado como pendente
+    i.dataset.orig=i.value; i.classList.remove('dirty');
+  });
+  allProducts.forEach(p=>{const el=document.querySelector(`input.price[data-mlb="${p.mlb}"]`);
+    if(el&&el.value!==''&&!(r.invalidos||[]).includes(p.mlb)) p.cost=parseFloat(el.value.replace(',','.'))});
+  filterRows(); flash('prodSaved');
+}
+function flash(id){const e=$(id);e.classList.add('show');setTimeout(()=>e.classList.remove('show'),1600);}
+
+// ---- mercado ----
+let mkItens=[];
+async function scanMarket(){ if(await executar('mercado','mkConsole',{info:info('mkInfo')})) loadMarket(); }
+async function loadMarket(){
+  const d=await api('/relatorio',null,'&tipo=mercado');
+  mkItens=d.itens||[];
+  const gaps=mkItens.filter(o=>!o.eu_vendo).length;
+  info('mkInfo')(d.gerado_em ? (gaps+' lacunas de '+mkItens.length+' campeões ('+d.gerado_em+')') : 'clique em Analisar');
+  renderMkRows();
+}
+function renderMkRows(){
+  const q=($('mkSearch').value||'').toLowerCase(), soGap=$('mkOnlyGap').checked, b=$('mkBody'); b.innerHTML='';
+  for(const o of mkItens){
+    if(soGap && o.eu_vendo) continue;
+    if(q && !((o.produto||'').toLowerCase().includes(q)||(o.categoria||'').toLowerCase().includes(q))) continue;
+    const cor = !o.eu_vendo ? 'var(--danger)' : (o._ordem===1||o._ordem===2 ? 'var(--warn)' : 'var(--ok)');
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td class="titlecell" title="${esc(o.produto)}"><span class="mono">#${o.posicao}</span> ${esc((o.produto||'').slice(0,48))}</td>
+      <td style="color:var(--muted);font-size:12px">${esc((o.categoria||'').slice(0,22))}</td>
+      <td style="text-align:right"><b>${o.menor_preco!=null?'R$ '+Number(o.menor_preco).toFixed(2):'—'}</b></td>
+      <td style="text-align:right;color:var(--muted)">${o.meu_preco!=null?'R$ '+Number(o.meu_preco).toFixed(2):'—'}</td>
+      <td style="text-align:center;color:var(--muted)">${o.vendedores??'—'}</td>
+      <td style="color:${cor};font-size:12px;font-weight:700">${esc(o.oportunidade)}</td>
+      <td><a class="btn" target="_blank" href="https://www.mercadolivre.com.br/p/${o.catalog_product_id}">Ver no ML</a></td>`;
+    b.appendChild(tr);
+  }
+  if(!b.children.length) b.innerHTML='<tr><td colspan="7" style="color:var(--muted);padding:18px">'+(mkItens.length?'Nada com esse filtro.':'Clique em "Analisar mercado".')+'</td></tr>';
+}
+
+// ---- fretes ----
+let frItens=[];
+async function scanFretes(){ if(await executar('fretes','frConsole',{info:info('frInfo')})) loadFretes(); }
+async function loadFretes(){
+  const d=await api('/relatorio',null,'&tipo=fretes');
+  frItens=d.itens||[];
+  const bons=frItens.filter(o=>o.ganho>0).length;
+  info('frInfo')(d.gerado_em ? (bons+' ganham baixando, de '+frItens.length+' ('+d.gerado_em+')') : 'clique em Varrer');
+  renderFrRows();
+}
+function renderFrRows(){
+  const q=($('frSearch').value||'').toLowerCase(), so=$('frOnlyGain').checked;
+  const R=v=>v!=null?'R$ '+Number(v).toFixed(2):'—', b=$('frBody'); b.innerHTML='';
+  for(const o of frItens){
+    if(so && !(o.ganho>0)) continue;
+    if(q && !((o.titulo||'').toLowerCase().includes(q)||(o.sku||'').toLowerCase().includes(q)||(o.item_id||'').toLowerCase().includes(q))) continue;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td class="titlecell" title="${esc(o.titulo)}"><span class="mono">${esc(o.sku||o.item_id)}</span> ${esc((o.titulo||'').slice(0,36))}${o.status==='paused'?' <span style="color:var(--muted)">(pausado)</span>':''}</td>
+      <td style="color:var(--muted);font-size:12px">${esc(o.campanha||'—')}</td>
+      <td style="text-align:right;white-space:nowrap">${R(o.preco)}${o.preco!==o.preco_cheio?'<br><span style="color:var(--muted);font-size:11px">cheio '+R(o.preco_cheio)+'</span>':''}</td>
+      <td style="text-align:right;white-space:nowrap"><b>${R(o.alvo)}</b></td>
+      <td style="text-align:right;color:var(--muted);white-space:nowrap">${R(o.frete_preco)} → ${R(o.frete_alvo)}</td>
+      <td style="text-align:right;white-space:nowrap;font-weight:700;color:${o.ganho>0?'var(--ok)':'var(--muted)'}">${o.ganho>0?'+':''}${Number(o.ganho).toFixed(2)}</td>
+      <td style="text-align:right;white-space:nowrap;${o.abaixo_piso?'color:var(--danger)':'color:var(--muted)'}">${R(o.piso)}${o.abaixo_piso?'<br><span style="font-size:11px">abaixo do piso</span>':''}</td>
+      <td style="white-space:nowrap"><a class="btn" target="_blank" href="https://produto.mercadolivre.com.br/MLB-${(o.item_id||'').replace('MLB','')}">Ver</a></td>`;
+    b.appendChild(tr);
+  }
+  if(!b.children.length) b.innerHTML='<tr><td colspan="8" style="color:var(--muted);padding:18px">'+(frItens.length?'Nada com esse filtro.':'Clique em "Varrer fretes".')+'</td></tr>';
+}
+
+// ---- qualidade ----
+let hlItens=[];
+async function scanHealth(){ if(await executar('qualidade','hlConsole',{info:info('hlInfo')})) loadHealth(); }
+async function loadHealth(){
+  const d=await api('/relatorio',null,'&tipo=qualidade');
+  hlItens=d.itens||[];
+  const ruins=hlItens.filter(o=>(o.problemas||[]).length).length;
+  info('hlInfo')(d.gerado_em ? (ruins+' a corrigir de '+hlItens.length+' ('+d.gerado_em+')') : 'clique em Verificar');
+  renderHlRows();
+}
+function renderHlRows(){
+  const q=($('hlSearch').value||'').toLowerCase(), soRuins=$('hlOnlyBad').checked, b=$('hlBody'); b.innerHTML='';
+  for(const o of hlItens){
+    const pr=o.problemas||[];
+    if(soRuins && !pr.length) continue;
+    if(q && !((o.titulo||'').toLowerCase().includes(q)||(o.sku||'').toLowerCase().includes(q)||o.item_id.toLowerCase().includes(q))) continue;
+    const cor = o.nota<0.6 ? 'var(--danger)' : (o.nota<0.85 ? 'var(--warn)' : 'var(--ok)');
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td class="titlecell" title="${esc(o.titulo||o.item_id)}"><span class="mono">${o.item_id}</span><br>${esc((o.titulo||'').slice(0,45))}</td>
+      <td style="text-align:right;color:${cor};font-weight:700;font-size:15px">${(o.nota*100).toFixed(0)}%${o.nota_estimada?'*':''}</td>
+      <td style="text-align:right;color:${o.fotos<6?'var(--warn)':'var(--muted)'}">${o.fotos}</td>
+      <td style="color:var(--muted);font-size:12px">${pr.length?esc(pr.join(' · ')):'—'}</td>
+      <td><a class="btn" target="_blank" href="https://www.mercadolivre.com.br/anuncios/${o.item_id}/modificar">Editar no ML</a></td>`;
+    b.appendChild(tr);
+  }
+  if(!b.children.length) b.innerHTML='<tr><td colspan="5" style="color:var(--muted);padding:18px">'+(hlItens.length?'Nada com esse filtro.':'Clique em "Verificar qualidade".')+'</td></tr>';
+}
+
+// ---- estoque ----
+let stkItens=[];
+async function scanStock(){ if(await executar('estoque','stkConsole',{info:info('stkInfo')})) loadStock(); }
+async function loadStock(){
+  const d=await api('/relatorio',null,'&tipo=estoque');
+  stkItens=d.itens||[];
+  info('stkInfo')(d.gerado_em ? (stkItens.length+' em alerta ('+d.gerado_em+')') : 'clique em Verificar');
+  renderStkRows();
+}
+function renderStkRows(){
+  const q=($('stkSearch').value||'').toLowerCase(), b=$('stkBody'); b.innerHTML='';
+  for(const o of stkItens){
+    if(q && !((o.titulo||'').toLowerCase().includes(q)||(o.sku||'').toLowerCase().includes(q)||o.item_id.toLowerCase().includes(q))) continue;
+    const cor = o.estoque<=1 ? 'var(--danger)' : (o.estoque<=3 ? 'var(--warn)' : 'var(--ink)');
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><input type="checkbox" class="stksel" data-mlb="${o.item_id}"></td>
+      <td class="titlecell" title="${esc(o.titulo||o.item_id)}"><span class="mono">${o.item_id}</span><br>${esc((o.titulo||'').slice(0,45))}</td>
+      <td style="text-align:right;color:${cor};font-weight:700;font-size:15px">${o.estoque}</td>
+      <td style="text-align:right"><b>${o.preco_promo!=null?'R$ '+Number(o.preco_promo).toFixed(2):'—'}</b></td>
+      <td style="text-align:right;color:var(--muted)">${o.preco!=null?'R$ '+Number(o.preco).toFixed(2):'—'}</td>
+      <td style="text-align:right;color:var(--muted)">${o.vendidos??'—'}</td>`;
+    b.appendChild(tr);
+  }
+  $('stkAll').checked=false;
+  if(!b.children.length) b.innerHTML='<tr><td colspan="6" style="color:var(--muted);padding:18px">'+(stkItens.length?'Nada com essa busca.':'Nenhum alerta. Clique em "Verificar estoque".')+'</td></tr>';
+}
+async function stkLeaveSelected(){
+  const sel=[...document.querySelectorAll('.stksel:checked')].map(c=>c.dataset.mlb);
+  if(!sel.length){ alert('Nenhum produto selecionado.'); return; }
+  if(!confirm(`Remover ${sel.length} produto(s) das campanhas reversíveis?\n\nEles saem de DEAL, Campanha do vendedor, SMART e cupom em que estiverem ativos — o preço volta ao cheio e você para de vender barato sem estoque.\n\nCampanhas irreversíveis (Relâmpago/Oferta do dia) NÃO são afetadas.`)) return;
+  if(await executar('sair','stkConsole',{mlbs:sel})) scanStock();
+}
+
+// ---- catálogo ----
+let catItens=[], catSel=new Set();
+function catPick(c){ c.checked?catSel.add(c.dataset.id):catSel.delete(c.dataset.id); }
+function catSelected(){ return catItens.filter(o=>catSel.has(o.item_id)); }
+const CAT_SIT={winning:['Ganhando ✓','var(--accent-ink)'],sharing_first_place:['Dividindo o 1º','var(--warn)'],
+  losing:['Perdendo','var(--danger)'],competing:['Perdendo','var(--danger)'],not_listed:['Sem disputa ativa','var(--muted)']};
+async function scanCatalog(){ if(await executar('catalogo','catConsole',{info:info('catInfo')})) loadCatalog(); }
+async function loadCatalog(){
+  const [d,prods]=await Promise.all([api('/relatorio',null,'&tipo=catalogo'),api('/produtos')]);
+  const min={}; (prods||[]).forEach(p=>min[p.mlb]=p.cost);
+  catItens=d.itens||[];
+  catItens.forEach(o=>{ o.minimo=(min[o.item_id]==null?null:min[o.item_id]);
+    o.margem=(o.preco_para_ganhar!=null&&o.minimo!=null)?+(o.preco_para_ganhar-o.minimo).toFixed(2):null; });
+  info('catInfo')(d.gerado_em ? (catItens.length+' vinculados ('+d.gerado_em+')') : 'clique em Varrer');
+  renderCatRows();
+}
+let catSortKey='titulo', catSortDir=1;
+function catSortBy(k){ if(catSortKey===k) catSortDir=-catSortDir; else { catSortKey=k; catSortDir=1; } renderCatRows(); }
+function renderCatRows(){
+  const isStr={titulo:1,situacao:1};
+  catItens.sort((a,b)=>{
+    if(catSortKey==='participa') return ((a.participa?1:0)-(b.participa?1:0))*catSortDir;
+    if(isStr[catSortKey]){
+      const av=catSortKey==='titulo'?(a.titulo||a.item_id):(a[catSortKey]||'');
+      const bv=catSortKey==='titulo'?(b.titulo||b.item_id):(b[catSortKey]||'');
+      return String(av).localeCompare(String(bv),'pt-BR')*catSortDir;
+    }
+    const av=a[catSortKey], bv=b[catSortKey];
+    if(av==null && bv==null) return 0; if(av==null) return 1; if(bv==null) return -1;
+    return (av-bv)*catSortDir;
+  });
+  ['titulo','preco','estoque','situacao','preco_para_ganhar','minimo','margem','participa'].forEach(k=>{
+    $('car-'+k).textContent = k===catSortKey ? (catSortDir>0?'▲':'▼') : ''; });
+  const q=($('catSearch').value||'').toLowerCase(), soOk=$('catOnlyOk').checked, b=$('catBody'); b.innerHTML='';
+  catItens.forEach((o,i)=>{
+    if(q && !((o.titulo||'').toLowerCase().includes(q)||(o.sku||'').toLowerCase().includes(q)||o.item_id.toLowerCase().includes(q))) return;
+    if(soOk && !(o.margem!=null && o.margem>=0)) return;
+    const sit=CAT_SIT[o.situacao]||[o.situacao||'—','var(--muted)'];
+    const podeGanhar = o.participa && o.preco_para_ganhar!=null && o.situacao && o.situacao!=='winning' && o.situacao!=='not_listed';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${podeGanhar?`<input type="checkbox" class="catsel" data-id="${o.item_id}" ${catSel.has(o.item_id)?'checked':''} onchange="catPick(this)">`:''}</td>
+      <td class="titlecell" title="${esc(o.titulo||o.item_id)}"><span class="mono">${o.item_id}</span><br>${esc((o.titulo||'').slice(0,45))}</td>
+      <td style="text-align:right">${o.preco!=null?'R$ '+Number(o.preco).toFixed(2):'—'}${o.preco_cheio!=null?
+        '<br><small style="color:var(--muted)"><s>R$ '+Number(o.preco_cheio).toFixed(2)+'</s> em promoção</small>':''}</td>
+      <td style="text-align:right;color:${o.estoque==null?'var(--muted)':(o.estoque<=0?'var(--danger)':(o.estoque<=5?'var(--warn)':'inherit'))}"
+        title="Unidades disponíveis no ML na hora da varredura">${o.estoque!=null?o.estoque:'—'}</td>
+      <td style="color:${sit[1]};font-weight:700">${sit[0]}</td>
+      <td style="text-align:right">${o.preco_para_ganhar!=null?'<b>R$ '+Number(o.preco_para_ganhar).toFixed(2)+'</b>':'—'}</td>
+      <td style="text-align:right">${o.minimo!=null?'R$ '+Number(o.minimo).toFixed(2):'<span style="color:var(--warn)">sem mínimo</span>'}</td>
+      <td style="text-align:right;color:${o.margem==null?'var(--muted)':(o.margem>=0?'var(--accent-ink)':'var(--danger)')}">${o.margem!=null?(o.margem>=0?'+':'-')+'R$ '+Math.abs(o.margem).toFixed(2):'—'}</td>
+      <td>${o.participa?'sim':'não'}</td>
+      <td style="white-space:nowrap">${o.participa
+        ? `<button class="btn danger" onclick="catAction(this,${i},'sair')">Sair</button>`
+        : (o.produto_ativo===false
+          ? `<span style="color:var(--muted);font-size:12px" title="O ML desativou esta página de catálogo; não é possível participar.">catálogo inativo</span>`
+          : `<button class="btn primary" onclick="catAction(this,${i},'participar')">Participar</button>`)}</td>`;
+    b.appendChild(tr);
+  });
+  $('catAll').checked=false;
+  if(!b.children.length) b.innerHTML='<tr><td colspan="10" style="color:var(--muted);padding:18px">'+(catItens.length?'Nada com essa busca.':'Nenhum resultado ainda. Clique em "Varrer catálogo".')+'</td></tr>';
+}
+// Aba Catálogo: 3 passos em 3 botões. O ML não troca o preço de um anúncio que já está na campanha
+// (o POST volta 201 e ignora o preço novo): sem o 2 (sair), o 3 (enquadrar) não muda nada.
+async function catPreco(btn){
+  const sel=catSelected();
+  if(!sel.length){ alert('Nenhum produto selecionado.'); return; }
+  if(sel.some(o=>o.preco_para_ganhar==null)){ alert('Tem selecionado sem preço p/ ganhar. Rode a varredura de novo.'); return; }
+  const desce=sel.filter(o=>o.minimo!=null&&o.preco_para_ganhar<o.minimo).length;
+  const sobe =sel.filter(o=>o.minimo!=null&&o.preco_para_ganhar>o.minimo).length;
+  if(!confirm(`Gravar o preço p/ ganhar como PREÇO MÍNIMO de ${sel.length} produto(s)?\n\n${desce} abaixam o mínimo atual e ${sobe} sobem.\n\nO mínimo anterior é substituído e não dá para desfazer daqui.`)) return;
+  const lab=btn.textContent; btn.disabled=true; btn.textContent='salvando…';
+  let r;
+  try{ r=await api('/produtos',{products:sel.map(o=>({mlb:o.item_id,cost:o.preco_para_ganhar}))}); }
+  catch(e){ r={ok:false,error:e.message}; }
+  btn.disabled=false; btn.textContent=lab;
+  if(!r.ok){ alert(r.error||'Erro ao gravar o preço mínimo.'); return; }
+  appendLogLines($('catConsole'),[`OK   ${r.changed} preço(s) mínimo(s) gravado(s) no cadastro.`]);
+  sel.forEach(o=>{ o.minimo=o.preco_para_ganhar; o.margem=0; });
+  renderCatRows();
+}
+async function catMotor(btn,rotulo,tipo,texto){
+  const sel=catSelected();
+  if(!sel.length){ alert('Nenhum produto selecionado.'); return; }
+  if(!confirm(texto(sel))) return;
+  const lab=btn.textContent; btn.disabled=true; btn.textContent=rotulo;
+  await executar(tipo,'catConsole',{mlbs:sel.map(o=>o.item_id)});
+  btn.disabled=false; btn.textContent=lab;
+  loadCatalog();
+}
+const catRemover = btn => catMotor(btn,'removendo…','sair', sel =>
+  `Remover ${sel.length} anúncio(s) de TODAS as campanhas reversíveis?\n\nÉ o passo necessário antes de enquadrar com um preço novo: o ML não troca o preço de quem já está dentro da campanha.`);
+const catEnquadrar = btn => catMotor(btn,'enquadrando…','rodar', sel =>
+  `Enquadrar ${sel.length} anúncio(s) nas campanhas?\n\nEntra em cada campanha que couber no preço mínimo atual do anúncio. Se o preço mudou e você não removeu antes (passo 2), o ML ignora o preço novo.`);
+async function catAction(btn,i,acao){
+  const o=catItens[i], alvo=o.catalogo?o.item_id:(o.gemeo||'');
+  const msg = acao==='sair'
+    ? `Sair do catálogo?\n\n${o.item_id} — ${o.titulo}\n\nO anúncio de catálogo (${alvo}) será PAUSADO. Você pode voltar a participar depois.`
+    : `Participar do catálogo?\n\n${o.item_id} — ${o.titulo}\n\nSeu anúncio passa a disputar a página do produto no catálogo.`;
+  if(!confirm(msg)) return;
+  btn.disabled=true; btn.textContent='...';
+  let r;
+  try{ r=await api('/catalogo-acao',{mlb:o.item_id,acao,alvo,cpid:o.catalog_product_id||''}); }
+  catch(e){ r={ok:false,error:e.message}; }
+  if(r.ok){ btn.textContent=acao==='sair'?'Saiu ✓':'Participando ✓'; }
+  else { btn.disabled=false; btn.textContent=acao==='sair'?'Sair':'Participar'; alert('Erro: '+(r.error||'desconhecido')); }
+}
+
+// ---- checagem ----
+let chkProducts=[];
+async function loadCheck(){ chkProducts = await api('/produtos'); renderChkRows(); }
+function renderChkRows(){
+  const q=($('chkSearch').value||'').toLowerCase(), b=$('chkBody'); b.innerHTML='';
+  for(const p of chkProducts){
+    if(q && !((p.titulo||'').toLowerCase().includes(q)||(p.sku||'').toLowerCase().includes(q)||p.mlb.toLowerCase().includes(q))) continue;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td class="mono">${p.mlb}</td><td class="titlecell" title="${esc(p.titulo)}">${esc(p.titulo)}</td>
+      <td class="mono">${esc(p.sku)}</td><td><button class="btn" onclick="checkMlb('${p.mlb}')">Checar</button></td>`;
+    b.appendChild(tr);
+  }
+}
+function checkMlb(mlb){ $('chkMlb').value=mlb; runCheck(); window.scrollTo({top:0,behavior:'smooth'}); }
+async function runCheck(){
+  const mlb=($('chkMlb').value||'').trim().toUpperCase();
+  if(!mlb){ alert('Informe o código MLB (ou clique em "Checar" num produto da lista).'); return; }
+  const con=$('chkConsole'); con.innerHTML='<span class="l empty">checando…</span>';
+  let r;
+  try{ r=await api('/checar',{mlb}); } catch(e){ r={ok:false,error:e.message}; }
+  con.innerHTML='';
+  if(!r.ok){ appendLogLines(con,[r.error||'erro']); return; }
+  appendLogLines(con,r.linhas);
+}
+
+// ---- painel: produtos para incluir/remover ----
+let panProducts=[];
+async function loadPanel(){ panProducts = await api('/produtos'); renderPanRows(); }
+function renderPanRows(){
+  const q=($('panSearch').value||'').toLowerCase(), b=$('panBody'); b.innerHTML=''; $('panAll').checked=false;
+  for(const p of panProducts){
+    if(q && !((p.titulo||'').toLowerCase().includes(q)||(p.sku||'').toLowerCase().includes(q)||p.mlb.toLowerCase().includes(q))) continue;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><input type="checkbox" class="pansel" data-mlb="${p.mlb}"></td><td class="mono">${p.mlb}</td>
+      <td class="titlecell" title="${esc(p.titulo)}">${esc(p.titulo)}</td><td class="mono">${esc(p.sku)}</td>`;
+    b.appendChild(tr);
+  }
+}
+async function includeSelected(){
+  const sel=[...document.querySelectorAll('.pansel:checked')].map(c=>c.dataset.mlb);
+  if(!sel.length){ alert('Nenhum produto selecionado.'); return; }
+  if(!confirm(`Incluir ${sel.length} produto(s) nas campanhas elegíveis?\n\nA inclusão segue suas regras (preço mínimo, tipos habilitados) e o modo atual (simulação ou valendo).`)) return;
+  runNow(sel);
+}
+async function leaveSelected(){
+  const sel=[...document.querySelectorAll('.pansel:checked')].map(c=>c.dataset.mlb);
+  if(!sel.length){ alert('Nenhum produto selecionado.'); return; }
+  if(!confirm(`Remover ${sel.length} produto(s) das campanhas reversíveis?\n\nEles saem de DEAL, Campanha do vendedor, SMART e cupom em que estiverem ativos.\nCampanhas irreversíveis (Relâmpago/Oferta do dia) NÃO são afetadas.\n\nTem certeza?`)) return;
+  await executar('sair','console',{painel:true, mlbs:sel});
+}
+
+// sair no meio de uma execução: o navegador avisa (a execução só anda com a página aberta)
+addEventListener('beforeunload', e => { if(rodando){ e.preventDefault(); e.returnValue=''; } });
+
+async function iniciar(){
+  try{
+    const r = await api('/empresas');
+    EMPRESAS = r.empresas;
+    if(!EMPRESAS.includes(EMP)) EMP = EMPRESAS[0];
+    desenhaEmpresas();
+    await loadState();
+    tab(localStorage.meliAba || 'painel');
+  }catch(e){ if(e.message!=='login'){ $('connPill').className='pill off'; $('connText').textContent='erro: '+e.message; } }
+}
+wireAutoSave();
+(localStorage.usuario && localStorage.senha) ? iniciar() : telaLogin('');
+</script>
+</body></html>
