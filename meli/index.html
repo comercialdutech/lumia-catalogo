@@ -214,6 +214,7 @@
             <th class="sort" onclick="sortBy('mlb')">Código <span id="ar-mlb"></span></th>
             <th class="sort" onclick="sortBy('titulo')">Título <span id="ar-titulo"></span></th>
             <th class="sort" onclick="sortBy('sku')">SKU <span id="ar-sku"></span></th>
+            <th class="sort" style="text-align:right" onclick="sortBy('est')" title="Disponível no depósito Geral (saldo menos o reservado). O que está no Full do ML aparece embaixo, à parte.">Estoque <span id="ar-est"></span></th>
             <th class="sort" style="text-align:right" onclick="sortBy('cost')">Preço mín. (R$) <span id="ar-cost"></span></th>
             <th class="sort" style="text-align:right" onclick="sortBy('mv')" title="Menor preço que paga CMV + frete + comissão do ML + imposto (lucro zero). Passe o mouse no valor para ver a conta.">Mín. p/ venda (R$) <span id="ar-mv"></span></th>
             <th></th>
@@ -543,6 +544,7 @@
       <ul>
         <li>O <b>preço mínimo</b> é o piso de venda de cada anúncio: nenhuma campanha é aceita abaixo dele. Aceita vírgula ("49,90").</li>
         <li><b>Mín. p/ venda</b> — o menor preço que ainda paga o que incide no produto, com lucro zero: <b>(CMV + frete + embalagem) ÷ (1 − comissão − imposto)</b>. O CMV vem do ERP, a comissão e o frete do que o ML cobrou de verdade nas vendas daquele SKU, e o imposto e a embalagem da DRE — tudo do dashboard da própria empresa. Na Lumia, produto que não vendeu lá usa o histórico de vendas da Dutech (mesma empresa, mesmo produto). <b>≈</b> = sem histórico nenhum do produto: comissão e frete são a média da conta. Em <b>vermelho</b>: seu preço mínimo está abaixo disso, ou seja, campanha aceita no mínimo vende com prejuízo. Passe o mouse no valor para ver a conta.</li>
+        <li><b>Estoque</b> — o <b>disponível</b> do ERP: saldo do depósito "Geral" menos o que está reservado em pedido, que é o que dá para prometer. O que está no Full do ML aparece embaixo, à parte, porque não está na sua prateleira. Amarelo com 5 ou menos, vermelho sem nada em lugar nenhum. O número vem do retrato da dashboard, e na <b>Lumia ele vem do Tiny da Dutech</b> — as duas dividem a mesma prateleira e o Tiny da Lumia soma um depósito negativo.</li>
         <li><b>Sincronizar do ML</b> — importa anúncios novos da sua conta (entram <b>sem preço mínimo</b> — defina em seguida!) e atualiza título/SKU dos existentes. Nunca altera seus preços.</li>
         <li><b>Adicionar</b> — cadastro manual por código MLB, SKU e nome.</li>
         <li><b>✕ / Excluir selecionados</b> — tira o produto do cadastro (ele deixa de ser verificado; NÃO o remove de campanhas já ativas).</li>
@@ -904,12 +906,25 @@ function renderRows(list){
       <td class="mono">${p.mlb}</td>
       <td class="titlecell" title="${esc(p.titulo)}">${esc(p.titulo)}</td>
       <td class="mono">${esc(p.sku)}</td>
+      <td style="text-align:right">${estCell(p)}</td>
       <td style="text-align:right"><input class="price" data-mlb="${p.mlb}" data-orig="${p.cost??''}" value="${p.cost??''}"
         oninput="this.classList.toggle('dirty', this.value!=this.dataset.orig)"></td>
       <td style="text-align:right">${mvCell(p)}</td>
       <td style="text-align:center"><button class="btn danger" style="padding:4px 10px" title="Excluir do cadastro" onclick="delProduct('${p.mlb}')">✕</button></td>`;
     b.appendChild(tr);
   }
+}
+// estoque = disponível do ERP (saldo do Geral − reservado); o Full do ML vai à parte
+function estCell(p){
+  const e=p.estoque;
+  if(!e) return '<span style="color:var(--muted)" title="SKU não encontrado no dashboard">—</span>';
+  const tip=`disponível ${e.disponivel} = saldo do Geral − ${e.reservado} reservado(s)`
+    +`\nFull no ML: ${e.full}`
+    +`\nfonte: Tiny da ${e.fonte} — retrato de ${e.em||'?'}`;
+  const cor = e.disponivel>5 ? 'inherit'
+    : (e.disponivel>0 ? 'var(--warn)' : (e.full>0 ? 'var(--warn)' : 'var(--danger)'));
+  return `<span title="${esc(tip)}" style="color:${cor};font-weight:700">${e.disponivel}</span>`
+    + (e.full>0?`<br><small style="color:var(--muted)">+${e.full} Full</small>`:'');
 }
 // mínimo p/ venda = (CMV + frete + embalagem) / (1 - comissão - imposto), calculado no worker
 function mvCell(p){
@@ -928,13 +943,14 @@ function filterRows(){
   const q=$('search').value.toLowerCase();
   const list=allProducts.filter(p=>(p.titulo||'').toLowerCase().includes(q)||(p.sku||'').toLowerCase().includes(q)||p.mlb.toLowerCase().includes(q));
   list.sort((a,b)=>{
-    const num={cost:p=>p.cost, mv:p=>p.venda?p.venda.minimo:null}[sortKey];
+    const num={cost:p=>p.cost, mv:p=>p.venda?p.venda.minimo:null,
+               est:p=>p.estoque?p.estoque.disponivel:null}[sortKey];
     if(num){ const av=num(a), bv=num(b);
       if(av==null && bv==null) return 0; if(av==null) return 1; if(bv==null) return -1;
       return (av-bv)*sortDir; }
     return String(a[sortKey]||'').localeCompare(String(b[sortKey]||''),'pt-BR')*sortDir;
   });
-  ['mlb','titulo','sku','cost','mv'].forEach(k=>{ $('ar-'+k).textContent = k===sortKey ? (sortDir>0?'▲':'▼') : ''; });
+  ['mlb','titulo','sku','est','cost','mv'].forEach(k=>{ $('ar-'+k).textContent = k===sortKey ? (sortDir>0?'▲':'▼') : ''; });
   $('prodCount').querySelector('span:last-child').textContent = allProducts.length+' itens';
   renderRows(list);
 }
