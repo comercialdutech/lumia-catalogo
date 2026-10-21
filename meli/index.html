@@ -918,12 +918,16 @@ function renderRows(list){
 function estCell(p){
   const e=p.estoque;
   if(!e) return '<span style="color:var(--muted)" title="SKU não encontrado no dashboard">—</span>';
-  const tip=`disponível ${e.disponivel} = saldo do Geral − ${e.reservado} reservado(s)`
+  const tip=(e.fisico
+      ? `${e.disponivel} é o saldo FÍSICO do Geral — este retrato não traz o reservado,`
+        +` então pode haver peça já vendida aí dentro`
+      : `disponível ${e.disponivel} = saldo do Geral − ${e.reservado} reservado(s)`)
     +`\nFull no ML: ${e.full}`
     +`\nfonte: Tiny da ${e.fonte} — retrato de ${e.em||'?'}`;
   const cor = e.disponivel>5 ? 'inherit'
     : (e.disponivel>0 ? 'var(--warn)' : (e.full>0 ? 'var(--warn)' : 'var(--danger)'));
   return `<span title="${esc(tip)}" style="color:${cor};font-weight:700">${e.disponivel}</span>`
+    + (e.fisico?'<small style="color:var(--warn)" title="saldo físico: este retrato não traz o reservado"> físico</small>':'')
     + (e.full>0?`<br><small style="color:var(--muted)">+${e.full} Full</small>`:'');
 }
 // mínimo p/ venda = (CMV + frete + embalagem) / (1 - comissão - imposto), calculado no worker
