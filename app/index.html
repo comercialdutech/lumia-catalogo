@@ -40,8 +40,6 @@
   .conta .e { font-size:11px; color:var(--fraco); text-transform:uppercase; letter-spacing:.04em; }
   .conta .t { font-size:26px; font-weight:700; line-height:1.1; font-variant-numeric:tabular-nums; }
   .conta.sem .t { color:var(--erro); } .conta.tem .t { color:var(--ok); }
-  .dep { font-size:12px; color:var(--fraco); display:flex; justify-content:space-between; gap:8px; }
-  .dep b { color:var(--txt); font-weight:600; }
   .aviso { margin:10px 12px; padding:10px; border-radius:8px; background:var(--erro-bg); color:var(--erro); font-size:13px; }
   .msg { padding:36px 16px; text-align:center; color:var(--fraco); }
   #trava { padding:60px 24px; text-align:center; }
@@ -152,11 +150,10 @@ function cartao(it) {
   // Saldo de cada empresa fica lado a lado e NUNCA somado: sao CNPJs diferentes, e ha
   // deposito com o mesmo nome nos dois. Somar inventaria estoque que nao existe.
   // Sem "contas" a busca trouxe muitos resultados e o saldo so vem no toque.
+  // O numero e o DISPONIVEL (Geral - reservado, regra do dono 21/10): sem fisico nem deposito.
   const contas = it.contas ? `<div class="contas">${Object.entries(it.contas).map(([empresa, c]) => `
     <div class="conta ${c.total > 0 ? "tem" : "sem"}">
-      <div class="e">${esc(empresa)}</div><div class="t">${c.total}</div>
-      ${Object.entries(c.depositos).map(([d, s]) =>
-        `<div class="dep"><span>${esc(d)}</span><b>${s}</b></div>`).join("")}
+      <div class="e">${esc(empresa)} · disponível</div><div class="t">${c.total}</div>
     </div>`).join("")}</div>`
     : it.disponivel !== undefined
       ? `<div class="marca ${it.disponivel ? "tem" : "sem"}">${it.disponivel ? "✓ Disponível" : "Sem estoque"}</div>`
