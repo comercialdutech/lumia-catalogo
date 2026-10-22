@@ -2758,6 +2758,9 @@ lb.addEventListener('click', e => { if (e.target === lb) lb.close(); });   // cl
 // ao refresh. Por isso toda leitura/escrita e protegida e a pagina funciona sem ela. ---
 let cart = {};
 try { cart = JSON.parse(localStorage.pedido || '{}'); } catch (e) { cart = {}; }
+// o estoque ao vivo (mesmo endereco) guardou uma LISTA neste nome ate 21/10: com ela o que se
+// adicionava sumia ao salvar. Carrinho daqui e sempre objeto por SKU; o resto vira vazio.
+if (!cart || typeof cart !== 'object' || Array.isArray(cart)) cart = {};
 const salvar = () => { try { localStorage.pedido = JSON.stringify(cart); } catch (e) {} };
 const totalItens = () => Object.values(cart).reduce((s, i) => s + i.qtd, 0);
 const totalValor = () => Object.values(cart).reduce((s, i) => s + i.preco * i.qtd, 0);

@@ -268,11 +268,18 @@ function daUrl() {
 
 // --- tela do pedido. Fica no localStorage porque um atendimento e interrompido o tempo
 // todo: fechar o app no meio da venda nao pode perder a lista que o cliente ja pediu.
+// Carrinho do estoque tem nome PROPRIO: "pedido" e do catalogo (mesmo endereco, outro formato: objeto
+// por SKU). Ate 21/10 os dois dividiam o nome e o "+ Adicionar" daqui morria em "lista.find is not a
+// function" depois de usar o catalogo. A lista antiga deste app, se houver, e aproveitada uma vez.
+function carregarPedido(armazem) {
+  const lista = t => { try { const v = JSON.parse(t || "null"); return Array.isArray(v) ? v : null; } catch { return null; } };
+  return lista(armazem.pedidoEstoque) || lista(armazem.pedido) || [];
+}
 let pedido = [], ultimos = new Map();
-try { pedido = JSON.parse(localStorage.pedido || "[]"); } catch { pedido = []; }
+try { pedido = carregarPedido(localStorage); } catch { pedido = []; }
 
 function salvarPedido() {
-  localStorage.pedido = JSON.stringify(pedido);
+  try { localStorage.pedidoEstoque = JSON.stringify(pedido); } catch {}
   const t = totalPedido(pedido);
   $("#conta").textContent = t.itens;
   if (!$("#pedido").hidden) pintarPedido();
