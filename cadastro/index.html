@@ -169,8 +169,12 @@ async function gravar(){
     <div class="cod">${j.codigo}</div>
     <div class="mini">${j.endereco || ""}</div>
     <p class="mini">No CRM o contato virou <b>${j.nomeCrm || "-"}</b></p>
-    <button onclick="telaBusca()">Cadastrar outro</button></div>`;
+    ${voltaPedido ? `<button onclick="location.href='../pedido/#cliente=${encodeURIComponent(j.codigo)}&novo=${j.acao === "criado" ? 1 : 0}'">Usar no pedido</button>` : ""}
+    <button ${voltaPedido ? 'class="sec"' : ""} onclick="telaBusca()">Cadastrar outro</button></div>`;
 }
+
+// aberto pela tela de pedido (../cadastro/?volta=pedido): no fim, o cliente volta pro pedido
+const voltaPedido = new URLSearchParams(location.search).get("volta") === "pedido";
 
 (localStorage.usuario && localStorage.senha) ? telaBusca() : telaLogin();
 </script></body></html>
