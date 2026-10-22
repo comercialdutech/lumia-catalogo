@@ -3,6 +3,23 @@
 // a pagina fixa um padrao (<html data-tema-padrao="claro">: a vitrine publica, que o cliente ve).
 // Carregar no <head>, sem defer: tem que marcar o tema antes de pintar, senao a tela pisca.
 // Botao: qualquer elemento com data-tema-botao vira o seletor.
+
+// --- derrubar: o login do hub fica no localStorage (usuario/senha), que e UM SO para todas as
+// paginas (mesmo dominio), e toda pagina com login carrega este arquivo no <head>, antes de ler o
+// login. Trocar SESSAO e publicar desloga TODOS os aparelhos na proxima pagina do hub que abrirem
+// (pedido do dono, 22/10/2026). As senhas continuam as mesmas; tema, carrinhos e rascunhos ficam.
+(function () {
+  var SESSAO = "2026-10-22";
+  try {
+    if (localStorage.sessaoHub !== SESSAO) {
+      localStorage.removeItem("usuario");
+      localStorage.removeItem("senha");
+      localStorage.sessaoHub = SESSAO;
+    }
+  } catch (e) {}
+})();
+// --- fim derrubar
+
 (function () {
   var h = document.documentElement, t;
   try { t = localStorage.tema; } catch (e) {}
