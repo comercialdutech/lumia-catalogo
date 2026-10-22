@@ -119,6 +119,8 @@ const lerRascunho = () => { try { return carregarRascunho(localStorage[chaveRasc
                             catch { return carregarRascunho(undefined); } };
 let rasc = lerRascunho();
 let vendedores = [], padrao = null, achados = null, avisoBusca = "", ultimaBusca = "", cotacao = null, avisos = {};
+let colados = null, textoColado = "";                    // resultado do "Ler pedido colado"
+const valorBR = n => (Number(n) || 0).toFixed(2).replace(".", ",");
 const salvar = () => { try { localStorage[chaveRascunho(localStorage.usuario)] = JSON.stringify(rasc); } catch {} };
 const rolosDe = itens => itens.filter(i => /^FILAMENTO/i.test(i.nome)).reduce((s, i) => s + i.qtd, 0);
 const totalItens = itens => itens.reduce((s, i) => s + i.qtd * i.valor, 0);
@@ -190,11 +192,20 @@ function pintar() {
   <div class="cx"><h2>2. Produtos</h2>
     ${rasc.itens.length ? rasc.itens.map(i => `
       <div class="item"><div class="d"><div>${esc(i.nome)}</div>
-        <div class="mini">${esc(i.codigo)} · ${i.qtd} × ${brl(i.valor)} = <b>${brl(i.qtd * i.valor)}</b></div></div>
+        <div class="mini">${esc(i.codigo)}${i.disponivel != null ? ` · ${i.disponivel} disponível` : ""}</div>
+        <div class="linha">
+          <div><label>Quantidade</label><input data-iqtd="${esc(i.codigo)}" inputmode="numeric" value="${i.qtd}"></div>
+          <div><label>Valor negociado (un)</label><input data-ivalor="${esc(i.codigo)}" inputmode="decimal" value="${valorBR(i.valor)}"></div></div>
+        <div class="mini">= <b>${brl(i.qtd * i.valor)}</b></div></div>
         <button class="lixo" data-tira="${esc(i.codigo)}" aria-label="tirar ${esc(i.nome)}">🗑</button></div>`).join("")
       + `<p class="mini">Produtos: <b>${brl(totalItens(rasc.itens))}</b></p>`
       : `<p class="mini">Nenhum produto ainda.</p>`}
-    <label for="q">Buscar por SKU ou pelo que o cliente pediu</label>
+    <label for="colar">Colar o pedido do catálogo (WhatsApp)</label>
+    <textarea id="colar" placeholder="3x 1098-104 - FILAMENTO MASTERPRINT PETG BRANCO 1KG (1.75MM) - R$ 179,97">${esc(textoColado)}</textarea>
+    <button class="sec mini-bt" id="lerColado">Ler pedido colado</button>
+    ${avisos.colar ? `<p class="erro">${esc(avisos.colar)}</p>` : ""}
+    ${colados ? pintarColados() : ""}
+    <label for="q">Ou buscar por SKU ou pelo que o cliente pediu</label>
     <div class="linha"><div><input id="q" placeholder="petg branco" value="${esc(ultimaBusca)}"></div>
     <div class="bt"><button class="mini-bt" id="buscar">Buscar</button></div></div>
     ${avisoBusca ? `<p class="erro">${esc(avisoBusca)}</p>` : ""}
@@ -234,23 +245,51 @@ function pintar() {
   ligar();
 }
 
-function pintarAchados() {
-  const lista = achados.exatos.length ? achados.exatos : achados.sugestoes;
-  if (!lista.length) return `<p class="mini">Nada com estoque para essa busca.</p>`;
-  return (achados.exatos.length ? "" : `<p class="mini">Não temos exatamente isso. Parecidos, na ordem de preferência:</p>`) +
-    lista.map(p => `<div class="prod">
+// Um produto com disponivel, campos de quantidade/valor e "Adicionar". pre = valores ja preenchidos
+// (vindos do texto colado); aviso = por que ele nao entrou sozinho.
+function pintarProduto(p, pre = {}, aviso = "") {
+  return `<div class="prod">
       <div class="n">${esc(p.nome)}</div>
       <div class="mini">${esc(p.codigo)} · tabela ${brl(p.preco)}</div>
       ${p.motivo ? `<span class="selo">${esc(p.motivo)}</span>` : ""}
+      ${aviso ? `<div class="disp erro">${esc(aviso)}</div>` : ""}
       <div class="disp">${p.disponivel === null
         ? (p.erro ? `<span class="erro">${esc(p.erro)}</span>` : `<button class="sec mini-bt" data-ver="${esc(p.codigo)}">Ver disponível</button>`)
         : `<span class="${p.disponivel > 0 ? "ok" : "erro"}">${p.disponivel} disponível</span>`}</div>
       ${p.disponivel > 0 ? `<div class="linha">
-        <div><label>Quantidade</label><input data-qtd="${esc(p.codigo)}" inputmode="numeric" placeholder="1"></div>
-        <div><label>Valor negociado (un)</label><input data-valor="${esc(p.codigo)}" inputmode="decimal" placeholder="59,99"></div></div>
+        <div><label>Quantidade</label><input data-qtd="${esc(p.codigo)}" inputmode="numeric" placeholder="1" value="${pre.qtd || ""}"></div>
+        <div><label>Valor negociado (un)</label><input data-valor="${esc(p.codigo)}" inputmode="decimal" placeholder="59,99"
+             value="${pre.valor > 0 ? valorBR(pre.valor) : ""}"></div></div>
         <button class="mini-bt" data-add="${esc(p.codigo)}">Adicionar</button>` : ""}
-    </div>`).join("");
+    </div>`;
 }
+
+function pintarAchados() {
+  const lista = achados.exatos.length ? achados.exatos : achados.sugestoes;
+  if (!lista.length) return `<p class="mini">Nada com estoque para essa busca.</p>`;
+  return (achados.exatos.length ? "" : `<p class="mini">Não temos exatamente isso. Parecidos, na ordem de preferência:</p>`) +
+    lista.map(p => pintarProduto(p)).join("");
+}
+
+// O que veio do texto colado e nao entrou sozinho: falta de estoque (com as sugestoes daquele produto),
+// disponivel ilegivel ou linha sem preco; e o SKU que nao existe na Dutech.
+function pintarColados() {
+  const {entraram, pendentes, naoAchados} = colados;
+  return `<div class="cx" style="margin-top:10px">
+    ${entraram ? `<p class="ok">${entraram} produto${entraram === 1 ? "" : "s"} do texto entr${entraram === 1 ? "ou" : "aram"} no pedido.</p>` : ""}
+    ${pendentes.length ? `<p><b>Precisa de atenção:</b></p>` + pendentes.map(p => {
+      const aviso = p.disponivel === null ? "" : p.disponivel < p.qtd ? `pedido ${p.qtd}, disponível ${p.disponivel}`
+                  : !(p.valor > 0) ? "sem preço no texto: digite o valor" : "";
+      const pre = {qtd: p.disponivel === null ? p.qtd : Math.min(p.qtd, p.disponivel), valor: p.valor};
+      return pintarProduto(p, pre, aviso) + ((p.sugestoes || []).length
+        ? `<p class="mini">No lugar dele, na ordem de preferência:</p>` + p.sugestoes.map(s => pintarProduto(s, {valor: p.valor})).join("") : "");
+    }).join("") : ""}
+    ${naoAchados.length ? `<p class="erro">Não achei no Tiny da Dutech:</p>` +
+      naoAchados.map(l => `<p class="mini">${esc(l.linha)}</p>`).join("") : ""}
+  </div>`;
+}
+const mostrados = () => [...(achados ? [...achados.exatos, ...achados.sugestoes] : []),
+  ...(colados ? colados.pendentes.flatMap(p => [p, ...(p.sugestoes || [])]) : [])];
 
 function ligar() {
   const on = (id, ev, fn) => { const el = $(id); if (el) el[ev] = fn; };
@@ -283,6 +322,43 @@ function ligar() {
   });
   document.querySelectorAll("[data-ver]").forEach(b => b.onclick = () => verDisponivel(b.dataset.ver, b));
   document.querySelectorAll("[data-add]").forEach(b => b.onclick = () => adicionar(b.dataset.add));
+  on("lerColado", "onclick", lerColado);
+  on("colar", "oninput", e => { textoColado = e.target.value; });
+  // item ja no pedido: quantidade e valor negociado editaveis (o valor do texto e o de tabela)
+  document.querySelectorAll("[data-iqtd]").forEach(e => e.onchange = () => {
+    const i = rasc.itens.find(x => x.codigo === e.dataset.iqtd), qtd = Number(e.value);
+    if (!Number.isInteger(qtd) || qtd < 1) { alert("quantidade inválida"); return pintar(); }
+    if (i.disponivel != null && qtd > i.disponivel) { alert(`só há ${i.disponivel} disponível`); return pintar(); }
+    i.qtd = qtd; esquecerCotacao(); salvar(); pintar();
+  });
+  document.querySelectorAll("[data-ivalor]").forEach(e => e.onchange = () => {
+    const i = rasc.itens.find(x => x.codigo === e.dataset.ivalor), valor = numBR(e.value);
+    if (!(valor > 0)) { alert("informe o valor negociado"); return pintar(); }
+    i.valor = valor; salvar(); pintar();
+  });
+}
+
+// Texto do WhatsApp do catalogo -> itens. O que tem estoque e preco entra direto; o resto fica em
+// "Precisa de atencao" com a quantidade possivel ja preenchida e as sugestoes daquele produto.
+async function lerColado() {
+  textoColado = $("colar").value; avisos.colar = "";
+  if (!textoColado.trim()) { avisos.colar = "cole o texto do pedido"; return pintar(); }
+  const b = $("lerColado"); b.textContent = "lendo..."; b.disabled = true;
+  const [st, j] = await api("pedido=itens", {texto: textoColado});
+  if (st === 401) return;
+  if (st !== 200) { avisos.colar = j.erro || "não consegui ler o texto"; return pintar(); }
+  let entraram = 0;
+  const pendentes = [];
+  for (const it of j.itens) {
+    const ja = (rasc.itens.find(i => i.codigo === it.codigo) || {}).qtd || 0;
+    if (it.disponivel !== null && it.qtd + ja <= it.disponivel && it.valor > 0) {
+      rasc.itens = somarItem(rasc.itens, {id: it.id, codigo: it.codigo, nome: it.nome, qtd: it.qtd, valor: it.valor, disponivel: it.disponivel});
+      entraram++;
+    } else pendentes.push(it);
+  }
+  colados = {entraram, pendentes, naoAchados: j.naoAchados || []};
+  achados = null;                                         // um produto so aparece uma vez na tela
+  esquecerCotacao(); salvar(); pintar();
 }
 
 async function buscarCliente(texto, novo = false) {
@@ -309,7 +385,7 @@ async function buscarProduto() {
 }
 
 async function verDisponivel(codigo, botao) {
-  const p = [...achados.exatos, ...achados.sugestoes].find(x => x.codigo === codigo);
+  const p = mostrados().find(x => x.codigo === codigo);
   botao.textContent = "consultando...";
   const [st, j] = await api(`saldo=${encodeURIComponent(p.id)}&conta=Dutech`);
   if (st === 401) return;
@@ -326,7 +402,7 @@ function esquecerCotacao() {
 
 // Quantidade acima do disponivel nao entra (regra do dono): nem somando com o que ja esta no pedido.
 function adicionar(codigo) {
-  const p = [...achados.exatos, ...achados.sugestoes].find(x => x.codigo === codigo);
+  const p = mostrados().find(x => x.codigo === codigo);
   const qtd = Number($q(`[data-qtd="${CSS.escape(codigo)}"]`).value);
   const valor = numBR($q(`[data-valor="${CSS.escape(codigo)}"]`).value);
   const ja = (rasc.itens.find(i => i.codigo === codigo) || {}).qtd || 0;
@@ -335,7 +411,9 @@ function adicionar(codigo) {
   else if (qtd + ja > p.disponivel) erro = `só há ${p.disponivel} disponível${ja ? ` (${ja} já no pedido)` : ""}`;
   else if (!(valor > 0)) erro = "informe o valor negociado";
   if (erro) return alert(erro);
-  rasc.itens = somarItem(rasc.itens, {id: p.id, codigo: p.codigo, nome: p.nome, qtd, valor});
+  rasc.itens = somarItem(rasc.itens, {id: p.id, codigo: p.codigo, nome: p.nome, qtd, valor, disponivel: p.disponivel});
+  // resolvido: o item do texto (ou uma sugestao dele) sai de "Precisa de atencao"
+  if (colados) colados.pendentes = colados.pendentes.filter(x => x.codigo !== codigo && !(x.sugestoes || []).some(s => s.codigo === codigo));
   esquecerCotacao(); salvar(); pintar();
 }
 
@@ -423,7 +501,7 @@ function telaPronto(j) {
 function novoPedido(repinta = true) {
   rasc = carregarRascunho(undefined);
   rasc.vendedor_id = padrao || "";
-  achados = null; cotacao = null; avisos = {}; avisoBusca = ""; ultimaBusca = "";
+  achados = null; cotacao = null; avisos = {}; avisoBusca = ""; ultimaBusca = ""; colados = null; textoColado = "";
   salvar();
   if (repinta) pintar();
 }
