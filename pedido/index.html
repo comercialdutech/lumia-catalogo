@@ -274,8 +274,9 @@ function pintarAchados() {
 // O que veio do texto colado e nao entrou sozinho: falta de estoque (com as sugestoes daquele produto),
 // disponivel ilegivel ou linha sem preco; e o SKU que nao existe na Dutech.
 function pintarColados() {
-  const {entraram, pendentes, naoAchados} = colados;
+  const {entraram, pendentes, naoAchados, aviso} = colados;
   return `<div class="cx" style="margin-top:10px">
+    ${aviso ? `<div class="bloq">${esc(aviso)}</div>` : ""}
     ${entraram ? `<p class="ok">${entraram} produto${entraram === 1 ? "" : "s"} do texto entr${entraram === 1 ? "ou" : "aram"} no pedido.</p>` : ""}
     ${pendentes.length ? `<p><b>Precisa de atenção:</b></p>` + pendentes.map(p => {
       const aviso = p.disponivel === null ? "" : p.disponivel < p.qtd ? `pedido ${p.qtd}, disponível ${p.disponivel}`
@@ -356,7 +357,7 @@ async function lerColado() {
       entraram++;
     } else pendentes.push(it);
   }
-  colados = {entraram, pendentes, naoAchados: j.naoAchados || []};
+  colados = {entraram, pendentes, naoAchados: j.naoAchados || [], aviso: j.aviso || ""};
   achados = null;                                         // um produto so aparece uma vez na tela
   esquecerCotacao(); salvar(); pintar();
 }
