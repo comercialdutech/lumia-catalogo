@@ -77,10 +77,24 @@ const soDigitos = s => String(s || "").replace(/\D/g, "");
 // --- puras (o testa_pedido.mjs roda sem navegador) ---
 // "59,99" e "1.234,50" -> numero; vazio ou texto -> NaN (nunca zero: zero passaria como valor)
 function numBR(s) {
-  const t = String(s ?? "").replace(/\s|R\$/g, "");
+  let t = String(s ?? "").replace(/\s|R\$/g, "");
   if (!t) return NaN;
-  const n = Number(t.includes(",") ? t.replace(/\./g, "").replace(",", ".") : t);
+  if (t.includes(",")) t = t.replace(/\./g, "").replace(",", ".");
+  else if (/^\d{1,3}(\.\d{3})+$/.test(t)) t = t.replace(/\./g, "");   // "1.299" e milhar: R$ 1.299, nao R$ 1,30
+  const n = Number(t);
   return Number.isFinite(n) ? n : NaN;
+}
+// Um rascunho por login: no PC do balcao, o Gabriel nao abre o pedido do Eduardo com o Eduardo
+// marcado como vendedor (comissao no vendedor errado).
+function chaveRascunho(usuario) { return `pedidoHub:${String(usuario || "").trim().toLowerCase()}`; }
+// Erro ao criar: sem conexao, 5xx ou o recado "CONFIRA NO TINY" do worker = nao se sabe se gravou.
+// Nesse caso a tela manda conferir no Tiny e so oferece reenviar (com chave nova) DEPOIS disso.
+function avisoDoCriar(st, j) {
+  const msg = (j && j.erro) || "";
+  const incerto = st === 0 || st >= 500 || /CONFIRA NO TINY/i.test(msg);
+  if (!incerto) return {texto: msg || `o hub respondeu ${st}`, incerto: false};
+  return {incerto: true, texto: /CONFIRA NO TINY/i.test(msg) ? msg
+    : `${msg ? msg + ". " : ""}Não sei se o pedido foi criado. CONFIRA NO TINY ANTES DE REPETIR.`};
 }
 // O atendimento e interrompido o tempo todo: o rascunho fica no aparelho e volta com a MESMA chave
 // (a chave e o que impede o worker de criar o pedido duas vezes). Quebrado ou vazio = rascunho novo.
@@ -101,9 +115,11 @@ function somarItem(itens, item) {
 }
 // --- fim das puras ---
 
-let rasc = carregarRascunho(localStorage.pedidoHub);
+const lerRascunho = () => { try { return carregarRascunho(localStorage[chaveRascunho(localStorage.usuario)]); }
+                            catch { return carregarRascunho(undefined); } };
+let rasc = lerRascunho();
 let vendedores = [], padrao = null, achados = null, avisoBusca = "", ultimaBusca = "", cotacao = null, avisos = {};
-const salvar = () => { try { localStorage.pedidoHub = JSON.stringify(rasc); } catch {} };
+const salvar = () => { try { localStorage[chaveRascunho(localStorage.usuario)] = JSON.stringify(rasc); } catch {} };
 const rolosDe = itens => itens.filter(i => /^FILAMENTO/i.test(i.nome)).reduce((s, i) => s + i.qtd, 0);
 const totalItens = itens => itens.reduce((s, i) => s + i.qtd * i.valor, 0);
 
@@ -142,6 +158,7 @@ async function iniciar() {
       <p class="mini">Quem libera é o Paulo.</p><button class="sec" id="sair">Entrar com outro usuário</button></div>`;
     return ($("sair").onclick = sair);
   }
+  rasc = lerRascunho();                                   // quem entrou agora pode ser outro login
   const [, v] = await api("pedido=vendedores");
   vendedores = v.vendedores || [];
   padrao = v.padrao || null;
@@ -161,7 +178,7 @@ function pintar() {
   tela.innerHTML = `
   <div class="cx"><h2>1. Cliente</h2>
     ${c ? `<p><b>${esc(c.nome)}</b> <span class="mini">· código ${esc(c.codigo)}</span></p>
-           <p class="mini">${esc(c.cpf_cnpj)} · ${esc(c.cidade)}/${esc(c.uf)}${rasc.novo ? " · cadastrado agora" : ""}</p>
+           <p class="mini">${esc(c.cpf_cnpj)} · ${esc(c.cidade)}/${esc(c.uf)} · CEP ${esc(c.cep || "?")}${rasc.novo ? " · cadastrado agora" : ""}</p>
            <button class="sec mini-bt" id="trocaCli">Trocar cliente</button>`
         : `<label for="cli">Código do cliente ou CPF/CNPJ</label>
            <div class="linha"><div><input id="cli" inputmode="numeric" placeholder="18965"></div>
@@ -347,6 +364,7 @@ async function revisar() {
   const [st, j] = await api("pedido=resumo", entrada());
   if (st === 401) return;
   if (st !== 200) { avisos.revisar = j.erro || "não consegui montar o resumo"; return pintar(); }
+  if (j.criado) return telaPronto({...j.criado, repetido: true});   // a resposta do criar tinha se perdido
   telaResumo(j);
 }
 
@@ -384,7 +402,11 @@ async function criar() {
   if (st === 401) return;
   if (st === 200 && j.numero) return telaPronto(j);
   b.textContent = "Confirmar e criar pedido";
-  $("msg").innerHTML = `<div class="bloq">${esc(j.erro || "o hub não respondeu. CONFIRA NO TINY ANTES DE REPETIR")}</div>`;
+  const a = avisoDoCriar(st, j);
+  $("msg").innerHTML = `<div class="bloq">${esc(a.texto)}</div>` + (a.incerto
+    ? `<button class="sec" id="reenviar">Conferi no Tiny: o pedido NÃO está lá — enviar de novo</button>` : "");
+  // repetir so com a pessoa dizendo que conferiu; chave nova porque a antiga ficou travada no worker
+  if (a.incerto) $("reenviar").onclick = () => { rasc.chave = crypto.randomUUID(); salvar(); revisar(); };
 }
 
 function telaPronto(j) {
