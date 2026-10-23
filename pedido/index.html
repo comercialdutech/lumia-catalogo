@@ -184,6 +184,7 @@ async function api(qs, corpo) {
 }
 
 function telaLogin(aviso) {
+  telaAtual = "login";
   tela.innerHTML = `<div class="cx">${aviso ? `<p class="erro">${esc(aviso)}</p>` : ""}
     <label>Usuário</label><input id="u" autocapitalize="none">
     <label>Senha</label><input id="s" type="password">
@@ -195,6 +196,7 @@ function entrar() { localStorage.usuario = $("u").value.trim(); localStorage.sen
 function sair() { delete localStorage.usuario; delete localStorage.senha; telaLogin(); }
 
 async function iniciar() {
+  telaAtual = "carregando";
   tela.innerHTML = `<div class="cx">conferindo o acesso...</div>`;
   const [st, j] = await api("papel=1");
   if (st === 401) return;
@@ -221,6 +223,7 @@ async function iniciar() {
 
 // --- tela principal: redesenha so em acao (buscar, adicionar, escolher), nunca a cada tecla ---
 function pintar() {
+  telaAtual = "principal";
   sincronizarFrete();
   const c = rasc.cliente, rolos = rolosDe(rasc.itens), fr = rasc.frete || {};
   tela.innerHTML = `
@@ -258,19 +261,7 @@ function pintar() {
     <div id="achados">${achados ? pintarAchados() : ""}</div>
   </div>
 
-  <div class="cx"><h2>3. Frete</h2>
-    ${!c ? `<p class="mini">Escolha o cliente para cotar.</p>` : !rolos ? `<p class="mini">Pedido sem filamento: frete grátis ou outro valor.</p>` : ""}
-    ${cotando ? `<p class="mini">cotando o frete de ${rolos} rolo${rolos === 1 ? "" : "s"}...</p>` : ""}
-    ${avisos.frete ? `<p class="erro">${esc(avisos.frete)}</p>` : ""}
-    ${(cotacao || []).map((o, k) => `<label class="opc"><input type="radio" name="frete" value="c${k}"
-        ${fr.tipo === "c" + k ? "checked" : ""}><span>${esc(o.transportadora)} · ${esc(o.servico)} — <b>${brl(o.preco)}</b>
-        <span class="mini">${o.prazo || "?"} dias</span>${veredito(k)}</span></label>`).join("")}
-    ${cotacao ? pintarLimites() : ""}
-    <label class="opc"><input type="radio" name="frete" value="gratis" ${fr.tipo === "gratis" ? "checked" : ""}><span>Frete grátis</span></label>
-    <label class="opc"><input type="radio" name="frete" value="outro" ${fr.tipo === "outro" ? "checked" : ""}><span>Outro valor</span></label>
-    <input id="freteOutro" inputmode="decimal" placeholder="R$ 0,00" ${fr.tipo === "outro" ? "" : "hidden"}
-           value="${fr.tipo === "outro" && fr.valor >= 0 ? String(fr.valor).replace(".", ",") : ""}">
-  </div>
+  ${pintarSecaoFrete()}
 
   <div class="cx"><h2>4. Pagamento</h2>
     ${pintarPagamento()}
@@ -369,7 +360,7 @@ function pintarPagamento() {
   if (pg.repassar !== true && pg.repassar !== false)
     return h + `<p class="erro">Escolha se repassa a taxa ao cliente ou se a empresa absorve.</p>`;
   const c = cobrancaLocal(), n = c.parcelas.length;
-  return h + `<div class="quadro">
+  return h + `<div class="quadro" id="quadroPg">
     Cliente paga <b>${brl(c.cobrado)}</b>${pg.parcelas >= 2 ? ` (${n}× de ${brl(c.parcelas[0].valor)})` : ""}<br>
     Taxa ${pg.canal === "maquininha" ? "da maquininha" : "do link"} (${pctBR(c.taxa)}): ${brl(c.cobrado - c.recebe)}<br>
     Empresa recebe: <b>${brl(c.recebe)}</b>${c.repassar ? ` <span class="mini">(o negociado: ${brl(c.base)})</span>` : ""}
@@ -380,9 +371,9 @@ function pintarPagamento() {
 // rodape fixo: o total muda na hora a cada troca de frete, pagamento ou parcelas
 function pintarRodape() {
   const c = cobrancaLocal(), fr = rasc.frete || {};
-  const freteTxt = !rasc.frete ? "a escolher" : fr.valor === 0 ? "grátis" : brl(fr.valor) + (fr.transportadora ? ` (${esc(fr.transportadora)})` : "");
+  const freteTxt = !rasc.frete ? "a escolher" : !(fr.valor >= 0) ? "a informar" : fr.valor === 0 ? "grátis" : brl(fr.valor) + (fr.transportadora ? ` (${esc(fr.transportadora)})` : "");
   const repasse = c.repassar ? c.cobrado - c.base : 0;
-  return `<div class="rodape">Produtos <b>${brl(totalItens(rasc.itens))}</b> + Frete <b>${freteTxt}</b>` +
+  return `<div class="rodape" id="rodape">Produtos <b>${brl(totalItens(rasc.itens))}</b> + Frete <b>${freteTxt}</b>` +
     (repasse > 0 ? ` + taxa repassada <b>${brl(repasse)}</b>` : "") + ` = <b class="totalg">Total ${brl(c.cobrado)}</b></div>`;
 }
 
@@ -426,15 +417,16 @@ async function pedirCompensa() {
     pagamento: rasc.pagamento, opcoes: cotacao.map(o => ({preco: o.preco, rotulo: `${o.transportadora} ${o.servico}`}))});
   if (st === 401 || kc !== compensaChave) return;           // mudou no meio: o novo pedido ja foi agendado
   compensaRes = st === 200 ? j : {erro: j.erro || "não consegui calcular"};
-  pintar();
+  atualizarFrete();
 }
 
 function veredito(k) {
   if (!compensaRes) return ` <span class="mini">· calculando se o grátis compensa...</span>`;
   const o = (compensaRes.opcoes || [])[k];
   if (compensaRes.erro || !o) return "";
+  if ((compensaRes.semCusto || []).length) return ` <span class="mini">· sem custo no Tiny para calcular</span>`;
+  if (o.lucro !== null && o.lucro < 0) return `<div class="erro">❌ grátis dá prejuízo (${brl(o.lucro)})</div>`;
   if (o.compensa === null) return ` <span class="mini">· sem base no ML para comparar</span>`;
-  if (o.lucro < 0) return `<div class="erro">❌ grátis dá prejuízo (${brl(o.lucro)})</div>`;
   return o.compensa
     ? `<div class="ok">✅ grátis compensa — rende ${brl(o.diferenca)} a mais que no ML</div>`
     : `<div class="erro">❌ grátis não compensa — ${brl(-o.diferenca)} abaixo do ML</div>`;
@@ -444,24 +436,56 @@ function pintarLimites() {
   if (!compensaRes) return "";
   if (compensaRes.erro) return `<p class="erro">${esc(compensaRes.erro)}</p>`;
   const r = compensaRes;
+  if ((r.semCusto || []).length)
+    return `<p class="erro">Sem custo no Tiny para ${r.semCusto.map(esc).join(", ")}: não dá para saber se o grátis compensa — confira o custo no cadastro.</p>`;
   return `<p class="mini" style="margin-top:8px"><b>Frete máximo para empatar com o ML:</b> ${r.limiteML === null ? "—" : r.limiteML < 0 ? "nenhum" : brl(r.limiteML)}
     · <b>sem prejuízo:</b> ${r.limiteSemPrejuizo < 0 ? "nenhum" : brl(r.limiteSemPrejuizo)}</p>` +
     (r.semBase && r.semBase.length ? `<p class="mini">Fora da comparação com o ML (sem base): ${r.semBase.map(esc).join(", ")}</p>` : "");
 }
 
-function ligar() {
-  const on = (id, ev, fn) => { const el = $(id); if (el) el[ev] = fn; };
-  on("buscaCli", "onclick", () => buscarCliente($("cli").value).then(pintar));
-  on("cli", "onkeydown", e => { if (e.key === "Enter") buscarCliente($("cli").value).then(pintar); });
-  on("trocaCli", "onclick", () => { rasc.cliente = null; rasc.novo = false; cotacao = null; salvar(); pintar(); });
-  on("cadastrar", "onclick", () => { location.href = "../cadastro/?volta=pedido"; });
-  on("buscar", "onclick", buscarProduto);
-  on("q", "onkeydown", e => { if (e.key === "Enter") buscarProduto(); });
-  on("vend", "onchange", e => { rasc.vendedor_id = e.target.value; salvar(); });
-  on("obs", "oninput", e => { rasc.obs = e.target.value; salvar(); });
-  on("freteOutro", "oninput", e => { rasc.frete = {tipo: "outro", valor: numBR(e.target.value), transportadora: ""}; salvar(); });
-  on("revisar", "onclick", revisar);
-  on("descartar", "onclick", () => { if (confirm("Descartar este pedido e começar outro?")) novoPedido(); });
+// --- atualizacao em 2o plano (revisao final, 23/10): cotacao e "compensa?" chegam sozinhos e antes
+// REDESENHAVAM A TELA TODA — apagava o que o vendedor digitava e o tirava do resumo. Agora so a secao do
+// frete e os totais sao trocados, e so quando a tela principal esta aberta.
+let telaAtual = "carregando", freteVelho = false;
+
+function pintarSecaoFrete() {
+  const c = rasc.cliente, rolos = rolosDe(rasc.itens), fr = rasc.frete || {};
+  return `<div class="cx" id="secFrete"><h2>3. Frete</h2>
+    ${!c ? `<p class="mini">Escolha o cliente para cotar.</p>` : !rolos ? `<p class="mini">Pedido sem filamento: frete grátis ou outro valor.</p>` : ""}
+    ${cotando ? `<p class="mini">cotando o frete de ${rolos} rolo${rolos === 1 ? "" : "s"}...</p>` : ""}
+    ${avisos.frete ? `<p class="erro">${esc(avisos.frete)}</p>` : ""}
+    ${(cotacao || []).map((o, k) => `<label class="opc"><input type="radio" name="frete" value="c${k}"
+        ${fr.tipo === "c" + k ? "checked" : ""}><span>${esc(o.transportadora)} · ${esc(o.servico)} — <b>${brl(o.preco)}</b>
+        <span class="mini">${o.prazo || "?"} dias</span>${veredito(k)}</span></label>`).join("")}
+    ${cotacao ? pintarLimites() : ""}
+    <label class="opc"><input type="radio" name="frete" value="gratis" ${fr.tipo === "gratis" ? "checked" : ""}><span>Frete grátis</span></label>
+    <label class="opc"><input type="radio" name="frete" value="outro" ${fr.tipo === "outro" ? "checked" : ""}><span>Outro valor</span></label>
+    <input id="freteOutro" inputmode="decimal" placeholder="R$ 0,00" ${fr.tipo === "outro" ? "" : "hidden"}
+           value="${fr.tipo === "outro" && fr.valor >= 0 ? String(fr.valor).replace(".", ",") : ""}">
+  </div>`;
+}
+
+// rodape e quadro do pagamento (o total muda na hora, inclusive digitando o "Outro valor" do frete)
+function atualizarTotais() {
+  if (telaAtual !== "principal") return;
+  const r = $("rodape"); if (r) r.outerHTML = pintarRodape();
+  const q = $("quadroPg");
+  if (q) { const novo = document.createElement("div"); novo.innerHTML = pintarPagamento(); const n = novo.querySelector("#quadroPg"); if (n) q.replaceWith(n); }
+}
+
+// so a secao 3 + totais; quem esta digitando o "Outro valor" nao perde o campo (troca quando sair dele)
+function atualizarFrete() {
+  if (telaAtual !== "principal" || !$("secFrete")) return;
+  if (document.activeElement && document.activeElement.id === "freteOutro") { freteVelho = true; return; }
+  $("secFrete").outerHTML = pintarSecaoFrete();
+  atualizarTotais();
+  ligarFrete();
+}
+
+function ligarFrete() {
+  on("freteOutro", "oninput", e => {
+    rasc.frete = {tipo: "outro", valor: numBR(e.target.value), transportadora: ""}; salvar(); atualizarTotais(); });
+  on("freteOutro", "onblur", () => { if (freteVelho) { freteVelho = false; atualizarFrete(); } });
   document.querySelectorAll('input[name="frete"]').forEach(r => r.onchange = () => {
     const v = r.value;
     if (v === "gratis") rasc.frete = {tipo: "gratis", valor: 0, transportadora: ""};
@@ -469,6 +493,21 @@ function ligar() {
     else { const o = cotacao[Number(v.slice(1))]; rasc.frete = {tipo: v, valor: o.preco, transportadora: `${o.transportadora} ${o.servico}`}; }
     salvar(); pintar();
   });
+}
+const on = (id, ev, fn) => { const el = $(id); if (el) el[ev] = fn; };
+
+function ligar() {
+  on("buscaCli", "onclick", () => buscarCliente($("cli").value).then(pintar));
+  on("cli", "onkeydown", e => { if (e.key === "Enter") buscarCliente($("cli").value).then(pintar); });
+  on("trocaCli", "onclick", () => { rasc.cliente = null; rasc.novo = false; salvar(); pintar(); });
+  on("cadastrar", "onclick", () => { location.href = "../cadastro/?volta=pedido"; });
+  on("buscar", "onclick", buscarProduto);
+  on("q", "onkeydown", e => { if (e.key === "Enter") buscarProduto(); });
+  on("vend", "onchange", e => { rasc.vendedor_id = e.target.value; salvar(); });
+  on("obs", "oninput", e => { rasc.obs = e.target.value; salvar(); });
+  on("revisar", "onclick", revisar);
+  on("descartar", "onclick", () => { if (confirm("Descartar este pedido e começar outro?")) novoPedido(); });
+  ligarFrete();
   document.querySelectorAll('input[name="pgforma"]').forEach(r => r.onchange = () => {
     const pg = rasc.pagamento;
     rasc.pagamento = r.value === "pix" ? {forma: "pix"}
@@ -485,7 +524,7 @@ function ligar() {
   on("pgparc", "onchange", e => { rasc.pagamento.parcelas = Number(e.target.value); salvar(); pintar(); });
   document.querySelectorAll("[data-tira]").forEach(b => b.onclick = () => {
     rasc.itens = rasc.itens.filter(i => i.codigo !== b.dataset.tira);
-    esquecerCotacao(); salvar(); pintar();
+    salvar(); pintar();
   });
   document.querySelectorAll("[data-ver]").forEach(b => b.onclick = () => verDisponivel(b.dataset.ver, b));
   document.querySelectorAll("[data-add]").forEach(b => b.onclick = () => adicionar(b.dataset.add));
@@ -496,7 +535,7 @@ function ligar() {
     const i = rasc.itens.find(x => x.codigo === e.dataset.iqtd), qtd = Number(e.value);
     if (!Number.isInteger(qtd) || qtd < 1) { alert("quantidade inválida"); return pintar(); }
     if (i.disponivel != null && qtd > i.disponivel) { alert(`só há ${i.disponivel} disponível`); return pintar(); }
-    i.qtd = qtd; esquecerCotacao(); salvar(); pintar();
+    i.qtd = qtd; salvar(); pintar();
   });
   document.querySelectorAll("[data-ivalor]").forEach(e => e.onchange = () => {
     const i = rasc.itens.find(x => x.codigo === e.dataset.ivalor), valor = numBR(e.value);
@@ -525,7 +564,7 @@ async function lerColado() {
   }
   colados = {entraram, pendentes, naoAchados: j.naoAchados || [], aviso: j.aviso || ""};
   achados = null;                                         // um produto so aparece uma vez na tela
-  esquecerCotacao(); salvar(); pintar();
+  salvar(); pintar();
 }
 
 async function buscarCliente(texto, novo = false) {
@@ -536,7 +575,7 @@ async function buscarCliente(texto, novo = false) {
   const [st, j] = await api(`pedido=cliente&${qs}`);
   if (st === 401) return;
   if (st !== 200) { avisos.cliente = j.erro || "não achei"; avisos.cadastrar = !!j.cadastrar; return; }
-  rasc.cliente = j.cliente; rasc.novo = !!novo; esquecerCotacao(); salvar();
+  rasc.cliente = j.cliente; rasc.novo = !!novo; salvar();
 }
 
 async function buscarProduto() {
@@ -561,12 +600,6 @@ async function verDisponivel(codigo, botao) {
   pintar();
 }
 
-// cotacao vale para os rolos daquele momento: mudou o pedido, cota de novo
-function esquecerCotacao() {
-  freteChave = ""; cotacao = null;
-  if (rasc.frete && /^c\d/.test(rasc.frete.tipo || "")) rasc.frete = null;
-}
-
 // Quantidade acima do disponivel nao entra (regra do dono): nem somando com o que ja esta no pedido.
 function adicionar(codigo) {
   const p = mostrados().find(x => x.codigo === codigo);
@@ -581,21 +614,22 @@ function adicionar(codigo) {
   rasc.itens = somarItem(rasc.itens, {id: p.id, codigo: p.codigo, nome: p.nome, qtd, valor, disponivel: p.disponivel});
   // resolvido: o item do texto (ou uma sugestao dele) sai de "Precisa de atencao"
   if (colados) colados.pendentes = colados.pendentes.filter(x => x.codigo !== codigo && !(x.sugestoes || []).some(s => s.codigo === codigo));
-  esquecerCotacao(); salvar(); pintar();
+  salvar(); pintar();
 }
 
 async function cotarFrete() {
   const kf = freteChave;
   if (!kf) return;
-  cotando = true; avisos.frete = ""; pintar();
-  const [st, j] = await api(`frete=1&codigo=${encodeURIComponent(rasc.cliente.codigo)}&rolos=${rolosDe(rasc.itens)}`);
+  cotando = true; avisos.frete = ""; atualizarFrete();
+  const [st, j] = await api(`frete=1&${soDigitos(rasc.cliente.cep).length === 8 ? "cep=" + soDigitos(rasc.cliente.cep) : "codigo=" + encodeURIComponent(rasc.cliente.codigo)}&rolos=${rolosDe(rasc.itens)}`);
   cotando = false;
   if (st === 401) return;
-  if (kf !== freteChave) return pintar();                    // mudou no meio: a cotacao nova ja foi agendada
+  if (kf !== freteChave) return atualizarFrete();                   // mudou no meio: a cotacao nova ja foi agendada
   if (st !== 200 || j.erro) avisos.frete = j.erro || "a cotação falhou";
   else if (!j.opcoes.length) avisos.frete = "nenhuma transportadora atende esse CEP";
   else cotacao = j.opcoes;
-  pintar();
+  sincronizarFrete();                                     // agenda o compensa da cotacao nova
+  atualizarFrete();
 }
 
 const entrada = () => ({chave: rasc.chave, cliente: {codigo: rasc.cliente.codigo}, novo: rasc.novo,
@@ -610,6 +644,7 @@ async function revisar() {
                  rasc.pagamento.forma === "cartao" && typeof rasc.pagamento.repassar !== "boolean" && "repassar ou absorver a taxa do cartão",
                  rasc.pagamento.forma === "cartao" && !TABELA && "as taxas (recarregue a página)"].filter(Boolean);
   if (falta.length) { avisos.revisar = "Falta escolher: " + falta.join(", ") + "."; return pintar(); }
+  telaAtual = "carregando";
   tela.innerHTML = `<div class="cx">conferindo o disponível de cada produto...</div>`;
   const [st, j] = await api("pedido=resumo", entrada());
   if (st === 401) return;
@@ -628,7 +663,11 @@ function textoPagamento(pg, cob) {
 }
 
 function telaResumo(j) {
+  telaAtual = "resumo";
   const r = j.resumo, pg = r.pagamento;
+  // a pagina le taxas.json do site; o worker leva a copia do deploy. Divergiu = cobrar errado: trava.
+  const local = calcularCobranca({itens: rasc.itens, frete: {valor: freteAtual()}, pagamento: rasc.pagamento}, TABELA || {});
+  const diverge = !!(j.cobranca && Math.abs(local.cobrado - j.cobranca.cobrado) > 0.004);
   tela.innerHTML = `<div class="cx"><h2>Confira antes de criar</h2>
     <p><b>${esc(r.cliente.nome)}</b> <span class="mini">· código ${esc(r.cliente.codigo)}</span></p>
     <p class="mini">${esc(r.cliente.cpf_cnpj)} · ${esc(r.cliente.cidade)}/${esc(r.cliente.uf)}</p>
@@ -639,9 +678,10 @@ function telaResumo(j) {
     <p class="mini">${textoPagamento(pg, j.cobranca || {taxa: 0, repassar: false, recebe: r.total, parcelas: pg.parcelas || []})}
       · vendedor <b>${esc(r.vendedor ? r.vendedor.nome : "?")}</b></p>
     ${rasc.obs ? `<p class="mini">Obs.: ${esc(rasc.obs)}</p>` : ""}
+    ${diverge ? `<div class="bloq"><b>A cobrança desta tela (${brl(local.cobrado)}) difere da do servidor (${brl(j.cobranca.cobrado)}).</b><br>A tabela de taxas mudou e o worker ainda não foi publicado com ela: avise o Paulo antes de cobrar o cliente.</div>` : ""}
     ${j.bloqueios.length ? `<div class="bloq"><b>Não dá para criar ainda:</b><br>${j.bloqueios.map(esc).join("<br>")}</div>` : ""}
     <div id="msg"></div>
-    <button id="criar" ${j.ok ? "" : "disabled"}>Confirmar e criar pedido</button>
+    <button id="criar" ${j.ok && !diverge ? "" : "disabled"}>Confirmar e criar pedido</button>
     <button class="sec" id="corrigir">Voltar e corrigir</button></div>`;
   $("corrigir").onclick = pintar;
   $("criar").onclick = criar;
@@ -663,6 +703,7 @@ async function criar() {
 }
 
 function telaPronto(j) {
+  telaAtual = "pronto";
   const nome = rasc.cliente ? rasc.cliente.nome : "";
   novoPedido(false);
   tela.innerHTML = `<div class="cx"><p class="ok">${j.repetido ? "Este pedido já tinha sido criado" : "Pedido criado no Tiny da Dutech"}</p>

@@ -1,5 +1,5 @@
 {
- "_obs": "Taxas negociadas, em %. Lista por bandeira: [debito, credito a vista, 2x, 3x, ...]; lista mais curta = a operadora nao parcela alem disso. Bandeira outras usa a tabela elo. Unica fonte: lida pela pagina de taxas e pela tela de pedido (site/pedido) e importada pelo worker do hub. Cielo nao separa por bandeira (visa = elo).",
+ "_obs": "Taxas negociadas, em %. Lista por bandeira: [debito, credito a vista, 2x, 3x, ...]; lista mais curta = a operadora nao parcela alem disso. Bandeira outras usa a tabela elo. Unica fonte: lida pela pagina de taxas e pela tela de pedido (site/pedido) e importada pelo worker do hub. Cielo nao separa por bandeira (visa = elo). MUDOU UMA TAXA: dar push no site E 'npx wrangler deploy' no proxy/ (o worker leva uma copia deste arquivo no deploy). Sem o deploy, a tela de pedido avisa a diferenca e trava o Confirmar.",
  "MAX_PARC": {
   "PagSeguro": 18,
   "Cielo": 12
