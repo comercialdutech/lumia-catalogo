@@ -46,12 +46,17 @@
  .lixo{width:auto;background:transparent;color:var(--suave);padding:4px 8px;margin:0;font-size:18px}
  .opc{display:flex;gap:10px;align-items:center;margin:8px 0;color:var(--texto);font-size:15px;flex-wrap:wrap}
  .opc input{width:auto;margin:0}
+ .opc>span{flex:1;min-width:0}
  .bloq{background:var(--erro-bg);border:1px solid var(--erro-borda);border-radius:10px;padding:10px 12px;margin-top:12px;font-size:14px}
  table{width:100%;border-collapse:collapse}
  td{padding:7px 0;border-bottom:1px solid var(--linha);font-size:14px;vertical-align:top;overflow-wrap:anywhere}
  td.v{text-align:right;white-space:nowrap;padding-left:10px}
  tr.tot td{font-weight:800;font-size:17px;border-bottom:0}
  .num{font-size:34px;font-weight:800;color:var(--am-txt)}
+ .quadro{background:var(--fundo);border:1px solid var(--borda);border-radius:10px;padding:10px 12px;margin-top:12px;font-size:14px}
+ .rodape{position:sticky;bottom:0;z-index:5;background:var(--cx);border:1px solid var(--borda);border-radius:12px;
+         padding:10px 12px;margin-top:14px;font-size:14px;box-shadow:0 -4px 12px rgba(0,0,0,.08)}
+ .rodape .totalg{font-size:17px;white-space:nowrap}
 </style></head><body>
 
 <div class="cabeca">
@@ -100,10 +105,11 @@ function avisoDoCriar(st, j) {
 // (a chave e o que impede o worker de criar o pedido duas vezes). Quebrado ou vazio = rascunho novo.
 function carregarRascunho(texto) {
   const novo = () => ({chave: crypto.randomUUID(), cliente: null, novo: false, itens: [], frete: null,
-                       pagamento: {forma: "pix", vezes: 1}, vendedor_id: "", obs: ""});
+                       pagamento: {forma: "pix"}, vendedor_id: "", obs: ""});
   try {
     const r = JSON.parse(texto || "");
-    if (r && /^[0-9a-f-]{36}$/.test(r.chave) && Array.isArray(r.itens)) return {...novo(), ...r};
+    if (r && /^[0-9a-f-]{36}$/.test(r.chave) && Array.isArray(r.itens))
+      return {...novo(), ...r, pagamento: normalizarPagamento(r.pagamento)};
   } catch {}
   return novo();
 }
@@ -113,12 +119,51 @@ function somarItem(itens, item) {
     ? itens.map(i => i.codigo === item.codigo ? {...i, qtd: i.qtd + item.qtd, valor: item.valor} : i)
     : [...itens, item];
 }
+// Cobranca: a MESMA conta do worker (proxy/pedido.mjs: taxaCartao/cobranca) — o testa_pedido.mjs compara as
+// duas. Fica aqui so para o rodape e o quadro mudarem na hora; o que vale no fim e o resumo do worker.
+// Taxa = canal x operadora x bandeira x parcelas (0 = debito, 1 = a vista); "outras" = tabela da Elo.
+function taxaDoCartao(tabela, pg) {
+  const op = (((tabela && tabela.TAXAS) || {})[pg.canal] || {})[pg.operadora];
+  if (!op || !Number.isInteger(pg.parcelas) || pg.parcelas < 0 || pg.parcelas > ((tabela.MAX_PARC || {})[pg.operadora] || 0)) return null;
+  const t = (op[pg.bandeira === "outras" ? "elo" : pg.bandeira] || [])[pg.parcelas];
+  return typeof t === "number" ? t : null;
+}
+// Repassar = taxa EMBUTIDA nos precos (dono, 23/10): cada preco sobe pelo mesmo fator, ate o centavo de cima.
+function calcularCobranca(e, tabela) {
+  const centavos = n => Math.round(n * 100);
+  const pg = e.pagamento || {};
+  const frete = centavos(e.frete.valor);
+  const prod = e.itens.reduce((s, i) => s + centavos(i.qtd * i.valor), 0);
+  const base = (prod + frete) / 100;
+  const cartao = pg.forma === "cartao";
+  const taxa = cartao ? (taxaDoCartao(tabela, pg) ?? 0) : 0;
+  const repassar = cartao && pg.repassar === true;
+  let itens = e.itens.map(i => ({codigo: i.codigo, qtd: i.qtd, valor: i.valor})), fator = 1;
+  if (repassar && taxa > 0 && prod > 0) {
+    fator = (base * 100 / (1 - taxa / 100) - frete) / prod;
+    itens = itens.map(i => ({...i, valor: Math.ceil(i.valor * fator * 100 - 1e-9) / 100}));
+  }
+  const cob = itens.reduce((s, i) => s + centavos(i.qtd * i.valor), 0) + frete;
+  const n = cartao ? Math.max(1, pg.parcelas) : pg.forma === "credito" ? pg.vezes : 1;
+  const cada = Math.floor(cob / n);
+  return {taxa, repassar, base, cobrado: cob / 100, recebe: Math.round(cob * (1 - taxa / 100)) / 100, fator, itens,
+          parcelas: Array.from({length: n}, (_, k) => ({valor: (k === n - 1 ? cob - cada * (n - 1) : cada) / 100}))};
+}
+// Rascunho de antes de 23/10: "credito" + "vezes" era o "cartao de credito (link)", sem operadora nem
+// bandeira. Vira cartao por link PagSeguro Visa, com repassar/absorver a escolher.
+function normalizarPagamento(pg) {
+  if (pg && pg.forma === "cartao") return pg;
+  if (pg && pg.forma === "credito")
+    return {forma: "cartao", canal: "link", operadora: "PagSeguro", bandeira: "visa", parcelas: Number(pg.vezes) || 1, repassar: null};
+  return {forma: "pix"};
+}
 // --- fim das puras ---
 
 const lerRascunho = () => { try { return carregarRascunho(localStorage[chaveRascunho(localStorage.usuario)]); }
                             catch { return carregarRascunho(undefined); } };
 let rasc = lerRascunho();
 let vendedores = [], padrao = null, achados = null, avisoBusca = "", ultimaBusca = "", cotacao = null, avisos = {};
+let TABELA = null;                                       // site/taxas/taxas.json (fonte unica das taxas)
 let colados = null, textoColado = "";                    // resultado do "Ler pedido colado"
 const valorBR = n => (Number(n) || 0).toFixed(2).replace(".", ",");
 const salvar = () => { try { localStorage[chaveRascunho(localStorage.usuario)] = JSON.stringify(rasc); } catch {} };
@@ -161,6 +206,7 @@ async function iniciar() {
     return ($("sair").onclick = sair);
   }
   rasc = lerRascunho();                                   // quem entrou agora pode ser outro login
+  if (!TABELA) try { TABELA = await (await fetch("../taxas/taxas.json", {cache: "no-cache"})).json(); } catch {}
   const [, v] = await api("pedido=vendedores");
   vendedores = v.vendedores || [];
   padrao = v.padrao || null;
@@ -226,10 +272,7 @@ function pintar() {
   </div>
 
   <div class="cx"><h2>4. Pagamento</h2>
-    <label class="opc"><input type="radio" name="pg" value="pix" ${rasc.pagamento.forma === "pix" ? "checked" : ""}> Pix</label>
-    <label class="opc"><input type="radio" name="pg" value="credito" ${rasc.pagamento.forma === "credito" ? "checked" : ""}> Cartão de crédito (link)</label>
-    ${rasc.pagamento.forma === "credito" ? `<label for="vezes">Em quantas vezes</label><select id="vezes">${Array.from({length: 18}, (_, k) =>
-        `<option value="${k + 1}" ${rasc.pagamento.vezes === k + 1 ? "selected" : ""}>${k + 1}×</option>`).join("")}</select>` : ""}
+    ${pintarPagamento()}
   </div>
 
   <div class="cx"><h2>5. Vendedor</h2>
@@ -241,7 +284,8 @@ function pintar() {
 
   ${avisos.revisar ? `<div class="bloq">${esc(avisos.revisar)}</div>` : ""}
   <button id="revisar">Revisar pedido</button>
-  <button class="sec" id="descartar">Descartar e começar outro</button>`;
+  <button class="sec" id="descartar">Descartar e começar outro</button>
+  ${pintarRodape()}`;
   ligar();
 }
 
@@ -292,6 +336,61 @@ function pintarColados() {
 const mostrados = () => [...(achados ? [...achados.exatos, ...achados.sugestoes] : []),
   ...(colados ? colados.pendentes.flatMap(p => [p, ...(p.sugestoes || [])]) : [])];
 
+// --- pagamento (retificacoes de 23/10): Pix, maquininha ou link; operadora e bandeira pela sondagem;
+// parcelas com a taxa ao lado; repassar (embutido nos precos) ou absorver — nada vem marcado.
+const BANDEIRA_NOME = {visa: "Visa / Master", elo: "Elo", outras: "Outras"};
+const pctBR = n => n.toFixed(2).replace(".", ",") + "%";
+const freteAtual = () => (rasc.frete && rasc.frete.valor >= 0 ? rasc.frete.valor : 0);
+const cobrancaLocal = () => calcularCobranca({itens: rasc.itens, frete: {valor: freteAtual()}, pagamento: rasc.pagamento}, TABELA || {});
+const nomeParcela = p => p === 0 ? "Débito" : p === 1 ? "Crédito à vista" : `${p}×`;
+
+// opcoes de parcela que a operadora faz, cada uma com a taxa da tabela da pagina de taxas
+function parcelasPossiveis(pg) {
+  const max = ((TABELA && TABELA.MAX_PARC) || {})[pg.operadora] || 0;
+  return Array.from({length: max + 1}, (_, p) => p).filter(p => taxaDoCartao(TABELA, {...pg, parcelas: p}) !== null);
+}
+
+function pintarPagamento() {
+  const pg = rasc.pagamento, cartao = pg.forma === "cartao";
+  const radio = (nome, valor, marcado, texto) =>
+    `<label class="opc"><input type="radio" name="${nome}" value="${valor}" ${marcado ? "checked" : ""}><span>${texto}</span></label>`;
+  let h = radio("pgforma", "pix", !cartao, "Pix") +
+          radio("pgforma", "maquininha", cartao && pg.canal === "maquininha", "Cartão na maquininha") +
+          radio("pgforma", "link", cartao && pg.canal === "link", "Cartão por link de pagamento");
+  if (!cartao) return h;
+  if (!TABELA) return h + `<p class="erro">não consegui carregar as taxas — recarregue a página</p>`;
+  h += `<label>Operadora</label>` + ["PagSeguro", "Cielo"].map(o => radio("pgop", o, pg.operadora === o, o)).join("") +
+       `<label>Bandeira</label>` + Object.entries(BANDEIRA_NOME).map(([b, t]) => radio("pgband", b, pg.bandeira === b, t)).join("") +
+       `<label for="pgparc">Parcelas</label><select id="pgparc">${parcelasPossiveis(pg).map(p =>
+         `<option value="${p}" ${pg.parcelas === p ? "selected" : ""}>${nomeParcela(p)} — ${pctBR(taxaDoCartao(TABELA, {...pg, parcelas: p}))}</option>`).join("")}</select>` +
+       `<label>Taxa do cartão</label>` + radio("pgrep", "repassar", pg.repassar === true, "Repassar ao cliente (embutida nos preços)") +
+       radio("pgrep", "absorver", pg.repassar === false, "A empresa absorve");
+  if (pg.repassar !== true && pg.repassar !== false)
+    return h + `<p class="erro">Escolha se repassa a taxa ao cliente ou se a empresa absorve.</p>`;
+  const c = cobrancaLocal(), n = c.parcelas.length;
+  return h + `<div class="quadro">
+    Cliente paga <b>${brl(c.cobrado)}</b>${pg.parcelas >= 2 ? ` (${n}× de ${brl(c.parcelas[0].valor)})` : ""}<br>
+    Taxa ${pg.canal === "maquininha" ? "da maquininha" : "do link"} (${pctBR(c.taxa)}): ${brl(c.cobrado - c.recebe)}<br>
+    Empresa recebe: <b>${brl(c.recebe)}</b>${c.repassar ? ` <span class="mini">(o negociado: ${brl(c.base)})</span>` : ""}
+    ${c.repassar ? `<div class="mini">no Tiny cada produto sobe ${pctBR((c.fator - 1) * 100)} — o cliente não vê a taxa separada</div>` : ""}
+  </div>`;
+}
+
+// rodape fixo: o total muda na hora a cada troca de frete, pagamento ou parcelas
+function pintarRodape() {
+  const c = cobrancaLocal(), fr = rasc.frete || {};
+  const freteTxt = !rasc.frete ? "a escolher" : fr.valor === 0 ? "grátis" : brl(fr.valor) + (fr.transportadora ? ` (${esc(fr.transportadora)})` : "");
+  const repasse = c.repassar ? c.cobrado - c.base : 0;
+  return `<div class="rodape">Produtos <b>${brl(totalItens(rasc.itens))}</b> + Frete <b>${freteTxt}</b>` +
+    (repasse > 0 ? ` + taxa repassada <b>${brl(repasse)}</b>` : "") + ` = <b class="totalg">Total ${brl(c.cobrado)}</b></div>`;
+}
+
+// trocou forma/operadora/bandeira: se a parcela escolhida nao existe nessa combinacao, volta p/ a vista
+function ajustarParcelas() {
+  const pg = rasc.pagamento;
+  if (pg.forma === "cartao" && TABELA && taxaDoCartao(TABELA, pg) === null) pg.parcelas = 1;
+}
+
 function ligar() {
   const on = (id, ev, fn) => { const el = $(id); if (el) el[ev] = fn; };
   on("buscaCli", "onclick", () => buscarCliente($("cli").value).then(pintar));
@@ -303,7 +402,6 @@ function ligar() {
   on("cotar", "onclick", cotarFrete);
   on("vend", "onchange", e => { rasc.vendedor_id = e.target.value; salvar(); });
   on("obs", "oninput", e => { rasc.obs = e.target.value; salvar(); });
-  on("vezes", "onchange", e => { rasc.pagamento.vezes = Number(e.target.value); salvar(); });
   on("freteOutro", "oninput", e => { rasc.frete = {tipo: "outro", valor: numBR(e.target.value), transportadora: ""}; salvar(); });
   on("revisar", "onclick", revisar);
   on("descartar", "onclick", () => { if (confirm("Descartar este pedido e começar outro?")) novoPedido(); });
@@ -314,9 +412,20 @@ function ligar() {
     else { const o = cotacao[Number(v.slice(1))]; rasc.frete = {tipo: v, valor: o.preco, transportadora: `${o.transportadora} ${o.servico}`}; }
     salvar(); pintar();
   });
-  document.querySelectorAll('input[name="pg"]').forEach(r => r.onchange = () => {
-    rasc.pagamento = {forma: r.value, vezes: 1}; salvar(); pintar();
+  document.querySelectorAll('input[name="pgforma"]').forEach(r => r.onchange = () => {
+    const pg = rasc.pagamento;
+    rasc.pagamento = r.value === "pix" ? {forma: "pix"}
+      : {forma: "cartao", canal: r.value, operadora: pg.operadora || "PagSeguro", bandeira: pg.bandeira || "visa",
+         parcelas: Number.isInteger(pg.parcelas) ? pg.parcelas : 1, repassar: pg.repassar === true || pg.repassar === false ? pg.repassar : null};
+    ajustarParcelas(); salvar(); pintar();
   });
+  document.querySelectorAll('input[name="pgop"]').forEach(r => r.onchange = () => {
+    rasc.pagamento.operadora = r.value; ajustarParcelas(); salvar(); pintar(); });
+  document.querySelectorAll('input[name="pgband"]').forEach(r => r.onchange = () => {
+    rasc.pagamento.bandeira = r.value; ajustarParcelas(); salvar(); pintar(); });
+  document.querySelectorAll('input[name="pgrep"]').forEach(r => r.onchange = () => {
+    rasc.pagamento.repassar = r.value === "repassar"; salvar(); pintar(); });
+  on("pgparc", "onchange", e => { rasc.pagamento.parcelas = Number(e.target.value); salvar(); pintar(); });
   document.querySelectorAll("[data-tira]").forEach(b => b.onclick = () => {
     rasc.itens = rasc.itens.filter(i => i.codigo !== b.dataset.tira);
     esquecerCotacao(); salvar(); pintar();
@@ -437,7 +546,9 @@ const entrada = () => ({chave: rasc.chave, cliente: {codigo: rasc.cliente.codigo
 async function revisar() {
   avisos.revisar = "";
   const falta = [!rasc.cliente && "o cliente", !rasc.itens.length && "os produtos",
-                 !(rasc.frete && rasc.frete.valor >= 0) && "o frete", !rasc.vendedor_id && "o vendedor"].filter(Boolean);
+                 !(rasc.frete && rasc.frete.valor >= 0) && "o frete", !rasc.vendedor_id && "o vendedor",
+                 rasc.pagamento.forma === "cartao" && typeof rasc.pagamento.repassar !== "boolean" && "repassar ou absorver a taxa do cartão",
+                 rasc.pagamento.forma === "cartao" && !TABELA && "as taxas (recarregue a página)"].filter(Boolean);
   if (falta.length) { avisos.revisar = "Falta escolher: " + falta.join(", ") + "."; return pintar(); }
   tela.innerHTML = `<div class="cx">conferindo o disponível de cada produto...</div>`;
   const [st, j] = await api("pedido=resumo", entrada());
@@ -447,16 +558,25 @@ async function revisar() {
   telaResumo(j);
 }
 
+function textoPagamento(pg, cob) {
+  if (!pg || pg.forma === "pix") return "Pix à vista";
+  if (pg.forma !== "cartao") return `Cartão em ${pg.vezes}×`;
+  const parc = pg.parcelas === 0 ? "débito" : pg.parcelas === 1 ? "crédito à vista"
+    : `${pg.parcelas}× de ${brl(cob.parcelas[0].valor)}`;
+  return `${pg.canal === "maquininha" ? "Cartão na maquininha" : "Cartão por link"} ${esc(pg.operadora)} ${BANDEIRA_NOME[pg.bandeira] || ""} · ${parc}` +
+    ` · taxa ${pctBR(cob.taxa)} ${cob.repassar ? "repassada (embutida nos preços)" : "absorvida"} · empresa recebe ${brl(cob.recebe)}`;
+}
+
 function telaResumo(j) {
   const r = j.resumo, pg = r.pagamento;
   tela.innerHTML = `<div class="cx"><h2>Confira antes de criar</h2>
     <p><b>${esc(r.cliente.nome)}</b> <span class="mini">· código ${esc(r.cliente.codigo)}</span></p>
     <p class="mini">${esc(r.cliente.cpf_cnpj)} · ${esc(r.cliente.cidade)}/${esc(r.cliente.uf)}</p>
-    <table>${r.itens.map(i => `<tr><td>${esc(i.nome)}<div class="mini">${esc(i.codigo)} · ${i.qtd} × ${brl(i.valor)}
+    <table>${r.itens.map(i => `<tr><td>${esc(i.nome)}<div class="mini">${esc(i.codigo)} · ${i.qtd} × ${brl(i.valor)}${i.negociado && i.negociado !== i.valor ? ` (negociado ${brl(i.negociado)})` : ""}
         · ${i.disponivel === null ? "disponível ?" : i.disponivel + " disponível"}</div></td><td class="v">${brl(i.subtotal)}</td></tr>`).join("")}
       <tr><td>Frete${r.frete.transportadora ? ` · ${esc(r.frete.transportadora)}` : r.frete.valor ? "" : " grátis"}</td><td class="v">${brl(r.frete.valor)}</td></tr>
       <tr class="tot"><td>Total</td><td class="v">${brl(r.total)}</td></tr></table>
-    <p class="mini">${pg.forma === "pix" ? "Pix à vista" : `Cartão de crédito em ${pg.vezes}× de ${brl(pg.parcelas[0].valor)}`}
+    <p class="mini">${textoPagamento(pg, j.cobranca || {taxa: 0, repassar: false, recebe: r.total, parcelas: pg.parcelas || []})}
       · vendedor <b>${esc(r.vendedor ? r.vendedor.nome : "?")}</b></p>
     ${rasc.obs ? `<p class="mini">Obs.: ${esc(rasc.obs)}</p>` : ""}
     ${j.bloqueios.length ? `<div class="bloq"><b>Não dá para criar ainda:</b><br>${j.bloqueios.map(esc).join("<br>")}</div>` : ""}
