@@ -166,6 +166,7 @@
 <script>
 const PROXY = "https://ml-vivo.dutech.workers.dev";
 const CONTAS = ["Dutech", "Lumia", "Oneway"];
+let contasVis = CONTAS;   // as que o login ve: o worker manda em "contas" (sem vivo_oneway, a OneWay fica de fora)
 const CANAIS = [["", "Todos"], ["ML", "Mercado Livre"], ["Shopee", "Shopee"]];
 const PERIODOS = [["hoje", "Hoje"], ["7d", "7d"], ["15d", "15d"], ["30d", "30d"], ["mes", "Este mês"], ["mesant", "Mês passado"], ["custom", "Personalizado"]];
 const COR = {cmv: "--cmv", tarifa: "--tarifa", imposto: "--imposto", frete: "--frete", cancel: "--cancel", ads: "--ads"};
@@ -216,7 +217,11 @@ async function carregar() {
   try { r = await fetch(`${PROXY}/?${qs}`, {headers: cab()}); }
   catch { $("status").textContent = "sem conexão — tentando de novo"; $("ponto").className = "ponto"; return; }
   if (r.status === 401) return telaLogin(localStorage.usuario ? "Usuário ou senha errados (precisa ser da equipe)." : "");
+  // conta guardada no aparelho que este login nao ve (ex.: OneWay): volta p/ "Todas"
+  if (r.status === 403 && conta) { conta = ""; localStorage.mlConta = ""; return carregar(); }
+  if (r.status === 403) { $("tela").innerHTML = `<div class="vazio">Este login não tem acesso a este painel.</div>`; return; }
   const j = await r.json(); ultimaOk = Date.now();
+  if (j.contas) contasVis = j.contas;
   desenharVistas();
   if (vista === "detalhe") { det = j; desenharDetalhe(); } else { dados = j; desenhar(); }
 }
@@ -247,7 +252,7 @@ function linhasAgrupadas() {
 }
 function desenharDetalhe() {
   if (!det || !det.linhas) return;
-  $("dir").innerHTML = seg(CANAIS, canal, "canal") + seg([["", "Todas"], ...CONTAS.map(c => [c, c])], conta, "conta");
+  $("dir").innerHTML = seg(CANAIS, canal, "canal") + seg([["", "Todas"], ...contasVis.map(c => [c, c])], conta, "conta");
   const todas = !conta, L = linhasAgrupadas(), [ci, dir] = detOrd;
   const val = l => ci === 99 ? (l[7] ? l[12] / l[7] : 0) : l[ci];
   L.sort((a, b) => { const x = val(a), y = val(b); return (x == null) - (y == null) || (x < y ? -dir : x > y ? dir : 0); });
@@ -296,12 +301,12 @@ function desenhar() {
   const d = dados, p = d.painel, pr = d.periodo;
   const rotPer = rotuloPer(pr), vs = vsPer(pr);
   $("ponto").className = "ponto on";
-  $("dir").innerHTML = seg(CANAIS, canal, "canal") + seg([["", "Todas"], ...CONTAS.map(c => [c, c])], conta, "conta") +
+  $("dir").innerHTML = seg(CANAIS, canal, "canal") + seg([["", "Todas"], ...contasVis.map(c => [c, c])], conta, "conta") +
     `<span class="chip"><b>${num(d.ativos.anuncios)}</b>anúncios ativos</span><span class="chip"><b>${num(d.ativos.skus)}</b>SKUs ativos</span>`;
 
   // avisos de qualidade do dado
   const av = [];
-  const faltam = (d.conta === "Todas" ? CONTAS : [d.conta]).filter(c => !d.conectadas.includes(c));   // so as que o login ve
+  const faltam = (d.conta === "Todas" ? contasVis : [d.conta]).filter(c => !d.conectadas.includes(c));   // so as que o login ve
   if (faltam.length) av.push(`Conta${faltam.length > 1 ? "s" : ""} ainda não conectada${faltam.length > 1 ? "s" : ""}: <b>${faltam.join(", ")}</b>.`);
   const carreg = d.historico.filter(h => !h.completo);
   if (carreg.length) av.push(`<span data-info>Carregando o histórico de 95 dias (para comparar com o período anterior): ${carreg.map(h => `${h.conta} ${h.pct}%`).join(" · ")}. Os “vs” ficam certos quando terminar.</span>`);

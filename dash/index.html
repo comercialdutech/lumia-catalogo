@@ -59,12 +59,12 @@ async function pedir(caminho) {
   return r;
 }
 
-// Paineis ao vivo (paginas proprias do hub, com login proprio): aparecem para quem ve aquela empresa.
-function aoVivo(paginas) {
-  const tem = e => paginas.some(p => p.emp === e);
+// Paineis ao vivo (paginas proprias do hub, com login proprio): aparecem p/ quem tem "vivo" /
+// "vivo_oneway" no acesso. Sem vivo_oneway, o Vendas ao vivo mostra so Dutech e Lumia.
+function aoVivo(acesso) {
   return [
-    (tem("Dutech") || tem("Lumia")) && ["../ml-ao-vivo/", "⚡ Vendas ao vivo", "Mercado Livre e Shopee das 3 contas, atualizando sozinho"],
-    tem("Oneway") && ["../ml-oneway/", "🔷 OneWay · Mercado Livre ao vivo", "O mesmo painel, só com as vendas da OneWay"],
+    acesso.includes("vivo") && ["../ml-ao-vivo/", "⚡ Vendas ao vivo", `Mercado Livre e Shopee ${acesso.includes("vivo_oneway") ? "das 3 contas" : "da Dutech e da Lumia"}, atualizando sozinho`],
+    acesso.includes("vivo_oneway") && ["../ml-oneway/", "🔷 OneWay · Mercado Livre ao vivo", "O mesmo painel, só com as vendas da OneWay"],
   ].filter(Boolean).map(([h, t, d]) => `<a class="cartao" href="${h}">
       <div><div class="tit">${t}</div><div class="desc">${d}</div></div>
       <div class="seta">›</div></a>`).join("");
@@ -85,13 +85,18 @@ async function iniciar() {
   }
   const r = await pedir("/lista");
   if (!r) return;
-  const {paginas} = await r.json();
+  const {paginas, acesso: lista} = await r.json();
+  // worker antigo nao manda "acesso": deduz das paginas, como antes (quem ve Dutech/Lumia ve o ao vivo)
+  const tem = e => paginas.some(p => p.emp === e);
+  const acesso = Array.isArray(lista) ? lista
+    : [...(tem("Dutech") || tem("Lumia") ? ["vivo"] : []), ...(tem("Oneway") ? ["vivo_oneway"] : [])];
   const quando = iso => new Date(iso).toLocaleString("pt-BR", {day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"});
-  $("tela").innerHTML = paginas.length ? paginas.map(p => `<a class="cartao" href="?emp=${p.emp}">
+  const cartoes = paginas.map(p => `<a class="cartao" href="?emp=${p.emp}">
       <div><div class="tit">${NOMES[p.emp] || p.emp}</div><div class="desc">atualizada em ${quando(p.em)}</div></div>
-      <div class="seta">›</div></a>`).join("") + aoVivo(paginas) + `<div class="desc" style="text-align:center;margin-top:18px">
-      logado como ${localStorage.usuario} · <a href="#" id="sair" style="color:#999">sair</a></div>`
-    : `<div class="msg">Nenhuma dashboard disponível para este login.</div>`;
+      <div class="seta">›</div></a>`).join("") + aoVivo(acesso);
+  $("tela").innerHTML = (cartoes || `<div class="msg">Nenhuma dashboard disponível para este login.</div>`) +
+    `<div class="desc" style="text-align:center;margin-top:18px">
+      logado como ${localStorage.usuario} · <a href="#" id="sair" style="color:#999">sair</a></div>`;
   const s = $("sair"); if (s) s.onclick = e => { e.preventDefault(); delete localStorage.usuario; delete localStorage.senha; telaLogin(); };
 }
 (localStorage.usuario && localStorage.senha) ? iniciar() : telaLogin();

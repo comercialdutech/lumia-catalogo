@@ -246,6 +246,7 @@ async function entrar(usuario, senha) {
     const r = await fetch(`${PROXY}/?q=`, {headers: {authorization: `Bearer ${usuario}:${senha}`},
                                            cache: "no-store"});
     if (r.status === 401) return ($("#erro").textContent = "usuário ou senha errados");
+    if (r.status === 403) return ($("#erro").textContent = "este login não tem acesso ao Balcão");
     if (!r.ok) return ($("#erro").textContent = `o proxy respondeu ${r.status}`);
   } catch { return ($("#erro").textContent = "sem internet"); }
   localStorage.usuario = usuario;

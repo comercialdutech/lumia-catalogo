@@ -215,6 +215,7 @@ async function carregar() {
   try { r = await fetch(`${PROXY}/?${qs}`, {headers: cab()}); }
   catch { $("status").textContent = "sem conexão — tentando de novo"; $("ponto").className = "ponto"; return; }
   if (r.status === 401) return telaLogin(localStorage.usuario ? "Usuário ou senha errados (precisa ser da equipe)." : "");
+  if (r.status === 403) { $("tela").innerHTML = `<div class="vazio">Este login não tem acesso ao painel da OneWay.</div>`; return; }
   const j = await r.json(); ultimaOk = Date.now();
   desenharVistas();
   if (vista === "detalhe") { det = j; desenharDetalhe(); } else { dados = j; desenhar(); }

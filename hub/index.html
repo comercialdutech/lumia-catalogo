@@ -42,31 +42,54 @@
 <h1>Ferramentas</h1>
 <p class="sub">Lumia Suprimentos 3D · uso interno</p>
 
-<a class="cartao" href="../balcao/">
+<a class="cartao" href="../balcao/" data-precisa="balcao">
   <div class="ic">🏪</div>
   <div><div class="tit">Balcão</div>
        <div class="desc">Estoque, catálogo, cadastro no Tiny, frete, taxas da maquininha e disparo</div></div>
   <div class="seta">›</div>
 </a>
-<a class="cartao" href="../dash/">
+<a class="cartao" href="../dash/" data-precisa="Dutech Lumia Oneway MACRO painel CRM vivo vivo_oneway">
   <div class="ic">📊</div>
   <div><div class="tit">Dashboards</div>
        <div class="desc">Dutech, Lumia, OneWay, MACRO, painel geral e vendas ao vivo</div></div>
   <div class="seta">›</div>
 </a>
-<a class="cartao" href="../meli/">
+<a class="cartao" href="../meli/" data-precisa="meli">
   <div class="ic">🏷️</div>
   <div><div class="tit">Meli Promos</div>
        <div class="desc">Campanhas do Mercado Livre das 3 contas: preço mínimo, catálogo, fretes e mais</div></div>
   <div class="seta">›</div>
 </a>
-<a class="cartao" href="../shopee/">
+<a class="cartao" href="../shopee/" data-precisa="shopee">
   <div class="ic">🛍️</div>
   <div><div class="tit">Shopee Promo</div>
        <div class="desc">Margem por anúncio pela regra e aplicar o preço na loja</div></div>
   <div class="seta">›</div>
 </a>
+<div class="aviso" id="semAcesso" hidden>Este login não tem nenhuma ferramenta liberada. Fale com o Paulo.</div>
 <div class="aviso">O botão <b>Claro / Escuro</b> lá em cima troca o tema de todas as telas. Login: o mesmo usuário e senha em todas — feito uma vez, o celular guarda.</div>
 
 <footer>comercialdutech.github.io/hub</footer>
+<script>
+// Com login guardado, mostra so os cartoes que ele abre (lista "acesso" do worker do hub).
+// Sem login, ou senha errada, mostra todos: cada ferramenta pede o login dela.
+(async () => {
+  if (!localStorage.usuario || !localStorage.senha) return;
+  let j;
+  try {
+    const r = await fetch("https://estoque-olist.dutech.workers.dev/?papel=1",
+      {headers: {authorization: `Bearer ${localStorage.usuario}:${localStorage.senha}`}, cache: "no-store"});
+    if (!r.ok) return;
+    j = await r.json();
+  } catch { return; }
+  if (!Array.isArray(j.acesso)) return;   // worker antigo (sem lista de acesso): mostra tudo, como antes
+  const acesso = j.acesso;
+  let algum = false;
+  document.querySelectorAll("[data-precisa]").forEach(a => {
+    const pode = a.dataset.precisa.split(" ").some(f => acesso.includes(f));
+    a.style.display = pode ? "" : "none"; algum = algum || pode;   // hidden perde p/ o display:flex do .cartao
+  });
+  document.getElementById("semAcesso").hidden = algum;
+})();
+</script>
 </body></html>
