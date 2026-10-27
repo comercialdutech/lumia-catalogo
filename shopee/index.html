@@ -161,12 +161,16 @@ async function carregar() {
   desenhar();
 }
 const regra = () => ({...REGRA_PADRAO, ...D.regra});
+const igual = (a, b) => a != null && b != null && Math.abs(a - b) < 0.005;
+// pendente = o que o Rodar mudaria de fato (mesma conta do aplicarItem do worker): o cheio, ou a campanha de quem está nela.
+// Quem foi tirado da campanha com o cheio já certo não conta: o Rodar não põe de volta.
+const muda = (a, alvo) => !!alvo && (!igual(a.cheio, alvo.cheio) || (a.discount_id != null && !igual(a.campanha, alvo.venda)));
 function linhas() {
   const R = regra();
   return D.anuncios.map(a => {
     const salvo = D.manuais[a.sku], alvo = alvoDe(a, R, salvo), min = minimoVenda(a.custo, R);
     const sit = a.status !== "NORMAL" ? "pausado" : situacao(a, alvo);
-    return {...a, salvo, alvo, min, sit, pendente: a.status === "NORMAL" && ["pendente", "prejuizo", "fora_campanha"].includes(sit) && !!alvo};
+    return {...a, salvo, alvo, min, sit, pendente: a.status === "NORMAL" && ["pendente", "prejuizo", "fora_campanha"].includes(sit) && muda(a, alvo)};
   });
 }
 const tagSit = l => `<span class="tag t-${l.sit}">${NOME[l.sit]}</span>`;
@@ -184,7 +188,9 @@ function desenhar() {
 // ---------------- PAINEL ----------------
 function painel() {
   const L = linhas(), at = L.filter(l => l.status === "NORMAL"), n = s => at.filter(l => l.sit === s).length, pend = L.filter(l => l.pendente);
+  const emCamp = L.filter(l => l.discount_id != null);   // "todos" inclui os pausados que estão no desconto
   const V = at.filter(l => !busca || (l.sku + " " + l.titulo).toLowerCase().includes(busca.toLowerCase()));
+  const marcavel = l => !!l.alvo || l.discount_id != null;
   $("main").innerHTML = `
    <div class="card"><div class="runbar">
      <div class="stat"><b>${at.length}</b><span>anúncios ativos</span></div>
@@ -195,15 +201,17 @@ function painel() {
      <div class="spacer"></div>
      <button class="btn" id="simular" ${rodando ? "disabled" : ""}>Simular</button>
      <button class="btn primary" id="rodar" ${rodando || !pend.length ? "disabled" : ""}>Rodar agora (${pend.length})</button>
+     <button class="btn danger" id="tirarTodos" ${rodando || !emCamp.length ? "disabled" : ""}>Tirar todos da campanha (${emCamp.length})</button>
      <button class="btn danger ${rodando ? "" : "hide"}" id="parar">Parar</button></div>
      <div class="console" id="console">${logHtml}</div></div>
-   <div class="card"><h2>Aplicar só alguns anúncios</h2>
-     <div class="sub">Marque os anúncios e coloque na campanha só eles, pelo preço mínimo salvo na aba Produtos.</div>
+   <div class="card"><h2>Mexer só em alguns anúncios</h2>
+     <div class="sub">Marque os anúncios e coloque na campanha só eles, pelo preço mínimo salvo na aba Produtos, ou tire só eles da campanha.</div>
      <div class="toolbar"><input class="search" id="busca" placeholder="Buscar por SKU ou título…" value="${esc(busca)}">
-       <button class="btn primary" id="aplicarSel" ${rodando ? "disabled" : ""}>Aplicar selecionados (${marcados.size})</button></div>
+       <button class="btn primary" id="aplicarSel" ${rodando ? "disabled" : ""}></button>
+       <button class="btn danger" id="tirarSel" ${rodando ? "disabled" : ""}></button></div>
      <div class="twrap" style="max-height:360px"><table><thead><tr><th><input type="checkbox" id="todos"></th><th>SKU</th><th>Título</th>
        <th class="n">Campanha hoje</th><th class="n">Preço mínimo</th><th class="n">Margem contrib.</th><th>Situação</th></tr></thead><tbody>
-       ${V.map(l => `<tr><td><input type="checkbox" data-m="${l.item_id}" ${marcados.has(l.item_id) ? "checked" : ""} ${l.alvo ? "" : "disabled"}></td>
+       ${V.map(l => `<tr><td><input type="checkbox" data-m="${l.item_id}" ${marcados.has(l.item_id) ? "checked" : ""} ${marcavel(l) ? "" : "disabled"}></td>
          <td class="sku"><b>${esc(l.sku)}</b></td><td><div class="titulo">${esc(l.titulo)}</div></td><td class="n">${brl(l.campanha)}</td>
          <td class="n">${l.alvo ? brl(l.alvo.venda) : "—"}</td>
          <td class="n ${l.alvo?.margem < 0 ? "neg" : ""}" title="${esc(contaMargem(l.alvo))}">${l.alvo?.margem != null ? brl(l.alvo.margem) : "—"}</td><td>${tagSit(l)}</td></tr>`).join("")}
@@ -211,10 +219,15 @@ function painel() {
   $("simular").onclick = simular;
   $("rodar").onclick = () => rodar(linhas().filter(l => l.pendente), "todos com preço mínimo diferente da loja");
   $("parar").onclick = () => { parar = true; log("sys", "parando depois do lote atual…"); };
-  $("aplicarSel").onclick = () => rodar(linhas().filter(l => marcados.has(l.item_id) && l.alvo), "selecionados");
+  $("tirarTodos").onclick = () => retirar(linhas().filter(l => l.discount_id != null), "TODOS os que estão em campanha");
+  const selAplicar = () => linhas().filter(l => marcados.has(l.item_id) && l.alvo), selTirar = () => linhas().filter(l => marcados.has(l.item_id) && l.discount_id != null);
+  const contaSel = () => { $("aplicarSel").textContent = `Aplicar selecionados (${selAplicar().length})`; $("tirarSel").textContent = `Tirar selecionados da campanha (${selTirar().length})`; };
+  contaSel();
+  $("aplicarSel").onclick = () => rodar(selAplicar(), "selecionados");
+  $("tirarSel").onclick = () => retirar(selTirar(), "selecionados");
   $("busca").oninput = e => { busca = e.target.value; painel(); $("busca").focus(); $("busca").setSelectionRange(busca.length, busca.length); };
-  $("todos").onchange = e => { V.filter(l => l.alvo).forEach(l => e.target.checked ? marcados.add(l.item_id) : marcados.delete(l.item_id)); painel(); };
-  document.querySelectorAll("[data-m]").forEach(c => c.onchange = () => { const id = Number(c.dataset.m); c.checked ? marcados.add(id) : marcados.delete(id); $("aplicarSel").textContent = `Aplicar selecionados (${marcados.size})`; });
+  $("todos").onchange = e => { V.filter(marcavel).forEach(l => e.target.checked ? marcados.add(l.item_id) : marcados.delete(l.item_id)); painel(); };
+  document.querySelectorAll("[data-m]").forEach(c => c.onchange = () => { const id = Number(c.dataset.m); c.checked ? marcados.add(id) : marcados.delete(id); contaSel(); });
   const cons = $("console"); cons.scrollTop = cons.scrollHeight;
 }
 function log(cls, txt) {
@@ -236,13 +249,22 @@ async function rodar(L, oque) {
   let aceito = false;
   if (neg.length) aceito = confirm(`${neg.length} anúncio(s) estão ABAIXO do mínimo p/ venda (prejuízo): ${neg.map(l => l.sku).join(", ")}.\n\nOK = aplicar mesmo assim · Cancelar = pular esses`);
   const itens = L.filter(l => aceito || !(l.alvo.margem < 0)).map(l => ({item_id: l.item_id, cheio: l.alvo.cheio, venda: l.alvo.venda, aceito_prejuizo: l.alvo.margem < 0}));
-  rodando = true; parar = false; logHtml = ""; estado("aplicando na Shopee…", "run"); painel();
-  log("head", `[${hora()}] RODANDO — ${itens.length} anúncio(s)`);
+  await emLotes("/aplicar", itens, "RODANDO", "aplicando na Shopee…");
+}
+async function retirar(L, oque) {
+  if (!L.length) return;
+  if (!confirm(`Tirar ${L.length} anúncio(s) da campanha NA SHOPEE (${oque})?\n\nEles ficam SEM desconto: o cliente passa a pagar o preço cheio.\nO Rodar agora não põe de volta.`)) return;
+  await emLotes("/retirar", L.map(l => ({item_id: l.item_id})), "TIRANDO DA CAMPANHA", "tirando da campanha…");
+}
+const RES = {aplicado: ["ok", "✅"], igual: ["skip", "="], divergente: ["err", "⚠️ gravou diferente"], falhou: ["err", "❌"], fora_do_desconto: ["err", "🚨 FORA DO DESCONTO"],
+  desatualizado: ["skip", "↻ desatualizado"], recusado: ["skip", "⛔"], retirado: ["ok", "✅ tirado"], fora: ["skip", "= já estava fora"]};
+async function emLotes(rota, itens, titulo, aviso) {
+  rodando = true; parar = false; logHtml = ""; estado(aviso, "run"); painel();
+  log("head", `[${hora()}] ${titulo} — ${itens.length} anúncio(s)`);
   const cont = {};
-  const RES = {aplicado: ["ok", "✅"], igual: ["skip", "="], divergente: ["err", "⚠️ gravou diferente"], falhou: ["err", "❌"], fora_do_desconto: ["err", "🚨 FORA DO DESCONTO"], desatualizado: ["skip", "↻ desatualizado"], recusado: ["skip", "⛔"]};
   try {
     for (let i = 0; i < itens.length && !parar; i += 5) {   // lotes de 5: log anda e o worker fica longe do limite de subrequests
-      const j = await api("/aplicar", {itens: itens.slice(i, i + 5)});
+      const j = await api(rota, {itens: itens.slice(i, i + 5)});
       for (const r of j.resultados) {
         cont[r.resultado] = (cont[r.resultado] || 0) + 1;
         const [cls, ic] = RES[r.resultado] || ["sys", r.resultado];
@@ -371,7 +393,8 @@ function ajuda() {
     <li><b>Produtos</b>: veja o <b>Mín. p/ venda</b> de cada anúncio (o menor preço sem prejuízo) e digite o <b>Preço mínimo</b>, que é o preço da campanha. Clique em <b>Salvar preços</b>. Salvar não mexe na Shopee.</li>
     <li><b>Painel → Simular</b>: mostra no log o que mudaria, sem enviar nada.</li>
     <li><b>Painel → Rodar agora</b>: coloca na campanha, pelo preço mínimo salvo, todos os anúncios que estão diferentes. Anúncio sem preço mínimo não é mexido. Ou marque alguns e use <b>Aplicar selecionados</b>.</li>
-    <li><b>Parar</b> interrompe depois do lote atual (5 anúncios); o que já foi aplicado fica.</li></ol></div>
+    <li><b>Painel → Tirar todos da campanha</b>: tira do desconto todos os anúncios que estão em campanha. Para tirar só alguns, marque e use <b>Tirar selecionados da campanha</b>. Eles passam a vender pelo preço cheio, e o Rodar agora não põe de volta.</li>
+    <li><b>Parar</b> interrompe depois do lote atual (5 anúncios); o que já foi feito fica.</li></ol></div>
    <div class="card ajuda"><h2>A conta</h2><ul>
     <li><b>Mín. p/ venda</b> = (custo + taxa fixa da Shopee + frete) ÷ (1 − comissão − imposto). É a margem de contribuição zero: <b>não</b> inclui custo operacional (aluguel, folha…) nem lucro.</li>
     <li><b>Margem de contribuição</b> = preço − comissão − taxa fixa − imposto − frete − custo. Passe o mouse nos valores para ver a conta.</li>
