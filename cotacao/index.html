@@ -42,13 +42,14 @@
 
 <script>
 const PROXY = "https://estoque-olist.dutech.workers.dev";
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
 const cab = () => ({authorization: `Bearer ${localStorage.usuario || ""}:${localStorage.senha || ""}`});
 const $ = id => document.getElementById(id);
 const tela = $("tela");
 const brl = n => n.toLocaleString("pt-BR", {style:"currency", currency:"BRL"});
 
 function telaLogin(aviso){
-  tela.innerHTML = `<div class="cx">${aviso ? `<p class="erro">${aviso}</p>` : ""}
+  tela.innerHTML = `<div class="cx">${aviso ? `<p class="erro">${esc(aviso)}</p>` : ""}
     <label>Usuário</label><input id="u" autocapitalize="none">
     <label>Senha</label><input id="s" type="password">
     <button onclick="entrar()">Entrar</button></div>`;
@@ -56,14 +57,14 @@ function telaLogin(aviso){
 function entrar(){ localStorage.usuario = $("u").value.trim(); localStorage.senha = $("s").value; telaForm(); }
 
 function telaForm(aviso, valores = {}){
-  tela.innerHTML = `<div class="cx">${aviso ? `<p class="erro">${aviso}</p>` : ""}
+  tela.innerHTML = `<div class="cx">${aviso ? `<p class="erro">${esc(aviso)}</p>` : ""}
     <label>Código do cliente <span class="mini">· busca o CEP na Olist</span></label>
-    <input id="codigo" inputmode="numeric" placeholder="16114" value="${valores.codigo || ""}">
+    <input id="codigo" inputmode="numeric" placeholder="16114" value="${esc(valores.codigo)}">
     <div class="linha">
       <div><label>ou CEP de destino</label>
-           <input id="cep" inputmode="numeric" placeholder="01310-100" value="${valores.cep || ""}"></div>
+           <input id="cep" inputmode="numeric" placeholder="01310-100" value="${esc(valores.cep)}"></div>
       <div><label>Rolos</label>
-           <input id="rolos" inputmode="numeric" placeholder="6" value="${valores.rolos || ""}"></div>
+           <input id="rolos" inputmode="numeric" placeholder="6" value="${esc(valores.rolos)}"></div>
     </div>
     <div id="pac" class="mini"></div>
     <button onclick="cotar()">Cotar</button>
@@ -107,12 +108,12 @@ async function cotar(){
   if (j.erro) return telaForm(j.erro, valores);
   if (!j.opcoes.length) return telaForm("nenhuma transportadora atende esse CEP", valores);
   $("res").innerHTML = `<div class="cx">
-    ${j.cliente ? `<p><b>${j.cliente.nome}</b><span class="mini"> · CEP ${j.cep}</span></p>` : ""}
+    ${j.cliente ? `<p><b>${esc(j.cliente.nome)}</b><span class="mini"> · CEP ${esc(j.cep)}</span></p>` : ""}
     <table>${j.opcoes.map(o => `<tr>
-      <td>${o.transportadora} · ${o.servico}<div class="mini">${o.prazo || "?"} dias</div></td>
+      <td>${esc(o.transportadora)} · ${esc(o.servico)}<div class="mini">${esc(o.prazo || "?")} dias</div></td>
       <td class="p">${brl(o.preco)}</td></tr>`).join("")}</table>
     <p class="mini">${j.pacotes.length} volume(s), ${j.pacotes.reduce((s,p)=>s+p.peso,0).toFixed(1)} kg no total.
-    ${j.recusados.length ? "Fora: " + j.recusados.join("; ") : ""}</p></div>`;
+    ${j.recusados.length ? "Fora: " + esc(j.recusados.join("; ")) : ""}</p></div>`;
 }
 
 (localStorage.usuario && localStorage.senha) ? telaForm() : telaLogin();

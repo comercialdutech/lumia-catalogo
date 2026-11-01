@@ -39,6 +39,9 @@
 
 <script>
 const PROXY = "https://estoque-olist.dutech.workers.dev";
+// O nome vem do WhatsApp e o resto do que o cliente escreve na conversa, e o login do hub fica no
+// localStorage deste endereco: tudo que vem de fora passa por esc() antes de entrar no HTML.
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
 // GET vai so com authorization (chamada simples, sem preflight). O content-type entra
 // so no POST, que precisa dele - e o worker autoriza os dois no CORS.
 const cab = () => ({authorization: `Bearer ${localStorage.usuario || ""}:${localStorage.senha || ""}`});
@@ -61,7 +64,7 @@ let contato = null, extra = {};
 
 function telaLogin(aviso){
   tela.innerHTML = `<div class="cx">
-    ${aviso ? `<p class="erro">${aviso}</p>` : ""}
+    ${aviso ? `<p class="erro">${esc(aviso)}</p>` : ""}
     <label>Usuário</label><input id="u" autocapitalize="none">
     <label>Senha</label><input id="s" type="password">
     <button onclick="entrar()">Entrar</button></div>`;
@@ -75,7 +78,7 @@ function sair(){ delete localStorage.usuario; delete localStorage.senha; telaLog
 
 function telaBusca(aviso){
   tela.innerHTML = `<div class="cx">
-    ${aviso ? `<p class="erro">${aviso}</p>` : ""}
+    ${aviso ? `<p class="erro">${esc(aviso)}</p>` : ""}
     <label>Telefone do cliente (como está no CRM)</label>
     <input id="fone" inputmode="numeric" placeholder="(44) 9 9883-7242" autofocus>
     <button onclick="buscar()">Buscar no CRM</button>
@@ -108,26 +111,26 @@ const de = campo => {
 
 function telaForm(){
   tela.innerHTML = `<div class="cx">
-    <b>${contato.nome}</b><div class="mini">${contato.fone}</div>
-    ${extra.codigoTiny ? `<p class="falta">Este contato já tem código ${extra.codigoTiny} no CRM —
+    <b>${esc(contato.nome)}</b><div class="mini">${esc(contato.fone)}</div>
+    ${extra.codigoTiny ? `<p class="falta">Este contato já tem código ${esc(extra.codigoTiny)} no CRM —
        cadastrar de novo só completa o que faltar.</p>` : ""}
     <label>Nome para a nota fiscal${de("nome")}</label>
-    <input id="nome" value="${extra.nome || contato.nome.replace(/\s*-\s*\d{3,6}\s*$/,"")}">
+    <input id="nome" value="${esc(extra.nome || contato.nome.replace(/\s*-\s*\d{3,6}\s*$/,""))}">
     <label>CPF ou CNPJ${de("cpf")}</label>
-    <input id="cpf" inputmode="numeric" value="${extra.cpf || ""}">
+    <input id="cpf" inputmode="numeric" value="${esc(extra.cpf)}">
     <div class="linha">
       <div><label>CEP${de("cep")}</label>
-           <input id="cep" inputmode="numeric" value="${extra.cep || ""}"></div>
+           <input id="cep" inputmode="numeric" value="${esc(extra.cep)}"></div>
       <div><label>Número${de("numero")}</label>
-           <input id="numero" inputmode="numeric" value="${extra.numero || ""}"></div>
+           <input id="numero" inputmode="numeric" value="${esc(extra.numero)}"></div>
     </div>
     <label>Endereço</label>
-    <input id="endereco" value="${extra.endereco || ''}">
+    <input id="endereco" value="${esc(extra.endereco)}">
     <label>Bairro</label>
     <input id="bairro">
     <div id="end" class="mini"></div>
     <label>Complemento (opcional)</label><input id="compl">
-    <label>E-mail${de("email")}</label><input id="email" value="${extra.email || contato.email || ""}">
+    <label>E-mail${de("email")}</label><input id="email" value="${esc(extra.email || contato.email)}">
     <button onclick="gravar()">Cadastrar no Tiny</button>
     <button class="sec" onclick="telaBusca()">Cancelar</button></div>`;
   $("cep").addEventListener("blur", async () => {
@@ -163,12 +166,12 @@ async function gravar(){
               $("cep").value = corpo.cep; $("numero").value = corpo.numero;
               $("endereco").value = corpo.endereco; $("bairro").value = corpo.bairro;
               $("compl").value = corpo.complemento; $("email").value = corpo.email;
-              tela.insertAdjacentHTML("afterbegin", `<div class="cx erro">${j.erro}</div>`); return; }
+              tela.insertAdjacentHTML("afterbegin", `<div class="cx erro">${esc(j.erro)}</div>`); return; }
   tela.innerHTML = `<div class="cx">
     <p class="ok">Cliente ${j.acao} na Dutech</p>
-    <div class="cod">${j.codigo}</div>
-    <div class="mini">${j.endereco || ""}</div>
-    <p class="mini">No CRM o contato virou <b>${j.nomeCrm || "-"}</b></p>
+    <div class="cod">${esc(j.codigo)}</div>
+    <div class="mini">${esc(j.endereco)}</div>
+    <p class="mini">No CRM o contato virou <b>${esc(j.nomeCrm || "-")}</b></p>
     ${voltaPedido ? `<button onclick="location.href='../pedido/#cliente=${encodeURIComponent(j.codigo)}&novo=${j.acao === "criado" ? 1 : 0}'">Usar no pedido</button>` : ""}
     <button ${voltaPedido ? 'class="sec"' : ""} onclick="telaBusca()">Cadastrar outro</button></div>`;
 }
