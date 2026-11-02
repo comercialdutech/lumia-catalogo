@@ -49,7 +49,7 @@ const cabPost = () => ({...cab(), "content-type": "application/json"});
 const $ = id => document.getElementById(id);
 
 // Formato do cadastro: (44) 9 9883-7242. Escreve enquanto digita, tirando o 55 se o vendedor
-// colar o numero do jeito que o CRM mostra. O worker devolve o 55 antes de buscar no iPro.
+// colar o numero do jeito que o CRM mostra. O worker devolve o 55 antes de buscar no CRM.
 function mascaraFone(v){
   let n = String(v||"").replace(/\D/g,"");
   if(n.startsWith("55") && n.length > 11) n = n.slice(2);
@@ -172,6 +172,7 @@ async function gravar(){
     <div class="cod">${esc(j.codigo)}</div>
     <div class="mini">${esc(j.endereco)}</div>
     <p class="mini">No CRM o contato virou <b>${esc(j.nomeCrm || "-")}</b></p>
+    ${j.avisoCrm ? `<p class="mini erro">${esc(j.avisoCrm)}</p>` : ""}
     ${voltaPedido ? `<button onclick="location.href='../pedido/#cliente=${encodeURIComponent(j.codigo)}&novo=${j.acao === "criado" ? 1 : 0}'">Usar no pedido</button>` : ""}
     <button ${voltaPedido ? 'class="sec"' : ""} onclick="telaBusca()">Cadastrar outro</button></div>`;
 }
