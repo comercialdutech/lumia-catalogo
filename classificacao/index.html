@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Classificação de Leads</title>
+<meta name="theme-color" content="#F4F4F5">
+<link rel="stylesheet" href="../tema.css">
+<script src="../tema.js"></script>
+<link rel="apple-touch-icon" href="../app/icone-192.png">
+<meta name="robots" content="noindex">
+<style>
+@font-face{font-family:"Buvera";font-weight:400;src:url(../marca/Buvera-Regular.ttf) format("truetype");font-display:swap}
+@font-face{font-family:"Buvera";font-weight:800;src:url(../marca/Buvera-ExtraBold.ttf) format("truetype");font-display:swap}
+*{box-sizing:border-box}
+body{font:16px/1.45 "Buvera",system-ui,"Segoe UI",Roboto,sans-serif;background:var(--fundo);color:var(--texto);margin:0;padding:22px 16px 60px;max-width:720px;margin-inline:auto}
+h1{font-size:22px;font-weight:800;margin:0 0 2px}
+.sub{color:var(--suave);font-size:13px;margin:0 0 16px}
+.volta{color:var(--suave);text-decoration:none;font-size:13px}
+.empresas{display:flex;gap:8px;margin-bottom:14px}
+.empresas button{flex:1;background:var(--cx);border:1px solid var(--borda);color:var(--texto);border-radius:10px;padding:9px;font:inherit;cursor:pointer}
+.empresas button.ativa{background:var(--ic-bg);border-color:var(--am);font-weight:700}
+.cartao{background:var(--cx);border:1px solid var(--borda);border-radius:14px;padding:16px;margin-bottom:14px}
+.topo{display:flex;gap:12px;align-items:flex-start}
+.ic{width:42px;height:42px;flex:none;border-radius:11px;background:var(--ic-bg);border-left:3px solid var(--am);display:grid;place-items:center;font-size:21px}
+.tit{font-weight:700}
+.desc{color:var(--suave);font-size:13px;margin-top:2px}
+.num{font-weight:700;color:var(--texto)}
+.linha{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}
+button.acao{background:var(--am);color:var(--sobre-am);border:0;border-radius:10px;padding:11px 14px;font:inherit;font-weight:700;cursor:pointer;flex:1 1 200px}
+button.leve{background:transparent;color:var(--texto);border:1px solid var(--borda);border-radius:10px;padding:10px 12px;font:inherit;cursor:pointer}
+button:disabled{opacity:.5;cursor:default}
+select,input[type=time]{padding:9px;border-radius:9px;border:1px solid var(--borda);background:var(--campo);color:var(--texto);font:inherit}
+input[type=text],input[type=password]{width:100%;padding:11px;border-radius:9px;border:1px solid var(--borda);background:var(--campo);color:var(--texto);font:inherit}
+label.check{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--rotulo);margin-top:10px}
+.auto{border-top:1px solid var(--linha);margin-top:12px;padding-top:2px}
+.res{margin-top:12px;font-size:13px}
+.res .item{padding:9px 0;border-top:1px solid var(--linha)}
+.res .item b{font-weight:700}
+.res a{color:inherit}
+.res .fraco{color:var(--suave)}
+.res .tags{margin-top:2px}
+.pilula{display:inline-block;font-size:11px;padding:1px 8px;border-radius:999px;background:var(--ic-bg);margin-left:4px;white-space:nowrap}
+.pilula.quente{background:#fee2e2;color:#b91c1c}.pilula.morno{background:#fef3c7;color:#92400e}.pilula.frio{background:#dbeafe;color:#1e40af}
+pre{white-space:pre-wrap;word-break:break-word;font:inherit;font-size:13px;background:var(--fundo);border-radius:10px;padding:10px;margin:12px 0 0}
+.aviso{background:var(--cx);border:1px dashed var(--borda);border-radius:12px;padding:12px;color:var(--suave);font-size:13px;margin-bottom:14px}
+.erro{color:var(--erro);margin-top:10px;font-size:13px}.msg{color:var(--suave);margin-top:30px;text-align:center}
+label.campo{display:block;margin:12px 0 4px;color:var(--rotulo);font-size:13px}
+</style></head><body>
+<a class="volta" href="../hub/">‹ Ferramentas</a>
+<h1>Classificação de Leads</h1>
+<p class="sub">SDR que lê as conversas do CRM e organiza os leads</p>
+<div id="tela"><div class="msg">carregando…</div></div>
+<script>
+(() => {
+const HUB = "https://estoque-olist.dutech.workers.dev/?papel=1";
+const LOCAL = location.hostname === "localhost";     // teste da pagina: tudo no mesmo servidor
+const CRMS = [{nome: "Lumia", url: LOCAL ? location.origin : "https://crm.dutech.workers.dev", acesso: "CRM"},
+              {nome: "OneWay", url: LOCAL ? location.origin : "https://crm-oneway.dutech.workers.dev", acesso: "Oneway"}];
+const CUSTO_PADRAO = {"claude-opus-5-5": 0.02, "claude-sonnet-5-5": 0.01, "claude-haiku-5-5": 0.001};   // US$ por conversa, antes de haver medicao
+const NOME_MODELO = {"claude-opus-5-5": "Claude Opus 5.5 (mais capaz)", "claude-sonnet-5-5": "Claude Sonnet 5.5 (equilíbrio)", "claude-haiku-5-5": "Claude Haiku 5.5 (mais barato)"};
+const TEMP = {quente: "🔥 quente", morno: "🌤️ morno", frio: "❄️ frio", perdido: "❌ perdido", sem_contexto: "sem contexto"};
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+const cab = () => ({authorization: `Bearer ${localStorage.usuario || ""}:${localStorage.senha || ""}`, "content-type": "application/json"});
+const S = {crms: [], crm: null, d: null, dias: 7, ocupado: null, parar: false, res: {}, painel: null, sugestoes: null, erro: ""};
+
+function telaLogin(erro) {
+  $("tela").innerHTML = `<label class="campo">Usuário</label><input type="text" id="u" autocomplete="username">
+    <label class="campo">Senha</label><input id="s" type="password" autocomplete="current-password">
+    <div class="linha"><button class="acao" id="ok">Entrar</button></div>${erro ? `<div class="erro">${esc(erro)}</div>` : ""}`;
+  $("ok").onclick = () => { localStorage.usuario = $("u").value.trim(); localStorage.senha = $("s").value; iniciar(); };
+}
+async function api(caminho, corpo) {
+  const r = await fetch(S.crm.url + caminho, {method: corpo ? "POST" : "GET", headers: cab(), body: corpo ? JSON.stringify(corpo) : undefined});
+  if (r.status === 401) { telaLogin("Usuário ou senha errados."); throw new Error("login"); }
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.erro || (d.erros && d.erros[0]) || `erro ${r.status}`);
+  return d;
+}
+const falhou = e => { if (e.message !== "login") { S.erro = e.message; pinta(); } };
+
+async function iniciar() {
+  if (!localStorage.usuario || !localStorage.senha) return telaLogin();
+  let acesso = ["CRM", "Oneway"];
+  if (!LOCAL) {
+    try {
+      const r = await fetch(HUB, {headers: cab(), cache: "no-store"});
+      if (r.status === 401) return telaLogin("Usuário ou senha errados.");
+      acesso = (await r.json()).acesso || [];
+    } catch { $("tela").innerHTML = '<div class="erro">Sem conexão com o servidor. Tente de novo.</div>'; return; }
+  }
+  S.crms = CRMS.filter(c => acesso.includes(c.acesso));
+  if (!S.crms.length) { $("tela").innerHTML = '<div class="erro">Este login não tem acesso ao CRM. Fale com o Paulo.</div>'; return; }
+  let guardada = null; try { guardada = localStorage.leadsEmpresa; } catch {}
+  await trocaCrm(S.crms.find(c => c.nome === guardada) || S.crms[0]);
+}
+async function trocaCrm(c) {
+  S.crm = c; S.res = {}; S.painel = S.sugestoes = null; S.erro = "";
+  try { localStorage.leadsEmpresa = c.nome; } catch {}
+  await carrega();
+}
+async function carrega() {
+  try {
+    [S.d, S.painel] = await Promise.all([api(`/sdr?dias=${S.dias}`), api("/sdr/indicadores")]);
+    S.erro = "";
+    pinta();
+  } catch (e) { falhou(e); }
+}
+
+const usd = v => "US$ " + Number(v || 0).toFixed(2).replace(".", ",");
+const qtd = (n, um, varios) => `<span class="num">${n}</span> ${n === 1 ? um : varios}`;
+const estimativa = n => usd(n * (S.d.custo.por_leitura || CUSTO_PADRAO[S.d.config.modelo] || 0.02));
+const linkConversa = id => `${esc(S.crm.url)}/#conversa=${Number(id)}`;
+const nome = i => `<a href="${linkConversa(i.conversa_id)}" target="_blank" rel="noopener"><b>${esc(i.nome || "Sem nome")}</b></a>`;
+const temp = t => t ? `<span class="pilula ${esc(t)}">${esc(TEMP[t] || t)}</span>` : "";
+
+const ITEM = {
+  tags: i => `<div class="item">${nome(i)}${temp(i.temperatura)}<div class="tags">${i.tags.length ? "🏷️ " + i.tags.map(esc).join(", ") : '<span class="fraco">nenhuma tag nova</span>'}</div>
+    <div class="fraco">${esc(i.resumo)}</div><div>👉 ${esc(i.proximo_passo)}</div></div>`,
+  mover: i => `<div class="item">${nome(i)}${temp(i.temperatura)}<div>${i.para ? `📌 ${esc(i.de)} → <b>${esc(i.para)}</b>` : `<span class="fraco">fica em ${esc(i.de)}</span>`}</div><div class="fraco">${esc(i.resumo)}</div></div>`,
+  fechar: i => `<div class="item">${nome(i)} <span class="fraco">última interação ${esc(new Date(i.ultima_em).toLocaleString("pt-BR", {dateStyle: "short", timeStyle: "short"}))}</span></div>`,
+};
+function htmlRes(ch) {
+  const r = S.res[ch]; if (!r) return "";
+  const titulo = S.ocupado === ch ? `Trabalhando… ${r.feitas} de ${r.total}` : r.simulado ? `Simulação: ${qtd(r.feitas, "conversa", "conversas")}, nada foi gravado` : `Pronto: ${qtd(r.feitas, "conversa", "conversas")}`;
+  return `<div class="res"><b>${titulo}</b>${S.ocupado === ch ? ' <button class="leve" id="parar">Parar</button>' : ""}
+    ${r.erros.map(e => `<div class="erro">${esc(e.nome || "")}: ${esc(e.erro)}</div>`).join("")}${r.itens.map(ITEM[ch]).join("")}</div>`;
+}
+const auto = (chave, texto) => `<label class="check"><input type="checkbox" data-auto="${chave}"${S.d.config[chave.replace("sdr_", "")] === "1" ? " checked" : ""}> ${texto}</label>`;
+
+function pinta() {
+  if (!S.d) { $("tela").innerHTML = S.erro ? `<div class="erro">${esc(S.erro)}</div>` : '<div class="msg">carregando…</div>'; return; }
+  const p = S.d.pendentes, c = S.d.config, ind = S.painel, oc = !!S.ocupado, dis = oc ? " disabled" : "";
+  const numeros = String(c.numeros || "").split(/[,;\s]+/).filter(Boolean);
+  $("tela").innerHTML = `
+  ${S.crms.length > 1 ? `<div class="empresas">${S.crms.map((x, i) => `<button data-crm="${i}" class="${x === S.crm ? "ativa" : ""}"${dis}>${esc(x.nome)}</button>`).join("")}</div>` : ""}
+  <div class="aviso">O SDR lê as conversas dos números ligados ao CRM. O que ainda roda no iPro não aparece aqui.</div>
+  ${S.erro ? `<div class="erro">${esc(S.erro)}</div>` : ""}
+
+  <div class="cartao"><div class="topo"><div class="ic">🏷️</div><div><div class="tit">Classificar e colocar tags</div>
+    <div class="desc">${qtd(p.tags, "conversa", "conversas")} para ler. A IA dá a temperatura do lead e marca as tags pelo que o cliente disse. Nunca tira tag.</div></div></div>
+    <div class="linha"><select id="dias"${dis}>${[[7, "Últimos 7 dias"], [30, "Últimos 30 dias"], [90, "Últimos 90 dias"], [365, "Último ano"]].map(([v, t]) => `<option value="${v}"${v === S.dias ? " selected" : ""}>${t}</option>`).join("")}</select>
+      <button class="acao" id="b-tags"${dis || (p.tags ? "" : " disabled")}>Classificar e marcar tags</button><button class="leve" id="s-tags"${dis || (p.tags ? "" : " disabled")}>Simular 5</button></div>
+    <div class="auto">${auto("sdr_auto_tags", "Automático: de hora em hora, nas conversas que pararam há 30 minutos")}</div>${htmlRes("tags")}</div>
+
+  <div class="cartao"><div class="topo"><div class="ic">📌</div><div><div class="tit">Mover no kanban</div>
+    <div class="desc">${qtd(p.mover, "negócio parado", "negócios parados")} na coluna de entrada, já ${p.mover === 1 ? "atendido" : "atendidos"} por pessoa. Lead só de IA ou automação fica onde está, e card que a equipe já moveu não é tocado.</div></div></div>
+    <div class="linha"><button class="acao" id="b-mover"${dis || (p.mover ? "" : " disabled")}>Mover negócios parados</button><button class="leve" id="s-mover"${dis || (p.mover ? "" : " disabled")}>Simular 5</button></div>
+    <div class="auto">${auto("sdr_auto_mover", "Automático: de hora em hora")}</div>${htmlRes("mover")}</div>
+
+  <div class="cartao"><div class="topo"><div class="ic">🔒</div><div><div class="tit">Fechar conversas paradas</div>
+    <div class="desc">${qtd(p.fechar, "conversa", "conversas")} há mais de ${esc(c.horas_fechar)}h sem interação${p.sem_resposta ? `, e <span class="num">${p.sem_resposta}</span> em que o cliente falou por último e ninguém respondeu` : ""}. Não envia nada ao cliente. Conversa com agendamento ou automação em espera fica aberta.</div></div></div>
+    ${p.sem_resposta ? '<label class="check"><input type="checkbox" id="incluir"> Fechar também as que ficaram sem resposta</label>' : ""}
+    <div class="linha"><button class="acao" id="b-fechar"${dis || (p.fechar + p.sem_resposta ? "" : " disabled")}>Fechar conversas</button></div>
+    <div class="auto">${auto("sdr_auto_fechar", "Automático: de hora em hora, sem as que ficaram sem resposta")}</div>${htmlRes("fechar")}</div>
+
+  <div class="cartao"><div class="topo"><div class="ic">📊</div><div><div class="tit">Indicadores no WhatsApp</div>
+    <div class="desc">Resumo do dia para ${numeros.length} ${numeros.length === 1 ? "número" : "números"} (os mesmos do aviso de número caído, em Configurações do CRM).</div></div></div>
+    ${ind ? `<pre id="previa">${esc(ind.texto)}</pre>` : ""}
+    <div class="linha"><button class="acao" id="b-ind"${dis || (numeros.length ? "" : " disabled")}>Enviar agora no WhatsApp</button></div>
+    <div class="auto"><label class="check"><input type="checkbox" data-auto="sdr_auto_relatorio"${c.auto_relatorio === "1" ? " checked" : ""}> Enviar todo dia às <input type="time" id="hora" value="${esc(c.hora)}"></label></div>
+    ${S.res.ind ? `<div class="res">${esc(S.res.ind)}</div>` : ""}</div>
+
+  <div class="cartao"><div class="topo"><div class="ic">💡</div><div><div class="tit">Sugestões</div>
+    <div class="desc">A IA olha os números do dia e as conversas classificadas, e diz o que fazer agora.</div></div></div>
+    <div class="linha"><button class="acao" id="b-sug"${dis}>Gerar sugestões</button></div>${S.ocupado === "sug" ? '<div class="res">Pensando…</div>' : ""}${htmlSugestoes()}</div>
+
+  <div class="cartao"><label class="campo" style="margin-top:0">Modelo de IA</label><select id="modelo"${dis} style="width:100%">${S.d.modelos.map(m => `<option value="${esc(m)}"${m === c.modelo ? " selected" : ""}>${esc(NOME_MODELO[m] || m)}</option>`).join("")}</select>
+    <div class="desc" style="margin-top:8px">Últimos 30 dias: ${qtd(S.d.custo.chamadas, "leitura", "leituras")}, ${usd(S.d.custo.usd)}.</div></div>`;
+  liga();
+}
+function htmlSugestoes() {
+  const s = S.sugestoes; if (!s) return "";
+  return `<div class="res">${s.aviso ? `<div class="fraco">${esc(s.aviso)}</div>` : ""}${s.sugestoes.map(x => `<div class="item"><b>${esc(x.titulo)}</b><div>${esc(x.detalhe)}</div></div>`).join("")}
+    ${s.leads.length ? `<div class="item"><b>Leads esperando resposta</b></div>${s.leads.map(l => `<div class="item">${nome(l)}${temp(l.temperatura)}<div class="fraco">${esc(l.interesse)}</div><div>👉 ${esc(l.proximo_passo)}</div></div>`).join("")}` : ""}</div>`;
+}
+// repete o lote ate acabar: a leitura leva segundos por conversa e uma chamada so nao aguentaria
+async function rodar(ch, rota, corpo, total) {
+  const r = S.res[ch] = {itens: [], erros: [], feitas: 0, total, simulado: false};
+  S.ocupado = ch; S.parar = false; S.erro = ""; pinta();
+  try {
+    for (;;) {
+      const d = await api(rota, corpo);
+      r.itens.push(...(d.itens || [])); r.erros.push(...(d.erros || [])); r.feitas += d.feitas || 0; r.simulado = !!d.simulado;
+      pinta();
+      if (d.simulado || !d.restam || !d.feitas || S.parar) break;
+    }
+  } catch (e) { S.erro = e.message === "login" ? "" : e.message; }
+  S.ocupado = null;
+  await carrega();
+}
+function liga() {
+  document.querySelectorAll("[data-crm]").forEach(b => b.onclick = () => trocaCrm(S.crms[Number(b.dataset.crm)]));
+  if ($("parar")) $("parar").onclick = e => { S.parar = true; e.currentTarget.disabled = true; };
+  $("dias").onchange = async e => { S.dias = Number(e.target.value); await carrega(); };
+  $("modelo").onchange = async e => { try { await api("/config", {sdr_modelo: e.target.value}); await carrega(); } catch (x) { falhou(x); } };
+  $("hora").onchange = async e => { try { await api("/config", {sdr_hora: e.target.value}); await carrega(); } catch (x) { falhou(x); } };
+  document.querySelectorAll("[data-auto]").forEach(c => c.onchange = async () => {
+    try { await api("/config", {[c.dataset.auto]: c.checked ? "1" : "0"}); await carrega(); } catch (x) { falhou(x); }
+  });
+  const p = S.d.pendentes;
+  $("b-tags").onclick = () => confirm(`Ler ${p.tags} conversas e marcar as tags? Custo estimado: ${estimativa(p.tags)}.`) && rodar("tags", "/sdr/classificar", {dias: S.dias}, p.tags);
+  $("s-tags").onclick = () => rodar("tags", "/sdr/classificar", {dias: S.dias, simular: true}, Math.min(5, p.tags));
+  $("b-mover").onclick = () => confirm(`Ler ${p.mover} negócios parados e mover os que a conversa indicar? Custo estimado: até ${estimativa(p.mover)}.`) && rodar("mover", "/sdr/mover", {}, p.mover);
+  $("s-mover").onclick = () => rodar("mover", "/sdr/mover", {simular: true}, Math.min(5, p.mover));
+  $("b-fechar").onclick = () => {
+    const incluir = !!($("incluir") && $("incluir").checked), n = p.fechar + (incluir ? p.sem_resposta : 0);
+    if (n && confirm(`Fechar ${n} conversas? Dá para reabrir uma a uma no CRM.`)) rodar("fechar", "/sdr/fechar", {incluir_sem_resposta: incluir}, n);
+  };
+  $("b-ind").onclick = async () => {
+    if (!confirm("Enviar o resumo do dia agora no WhatsApp?")) return;
+    S.ocupado = "ind"; pinta();
+    try { const r = await api("/sdr/indicadores", {}); S.res.ind = `Enviado para ${r.entregues} de ${r.total} números, por ${r.canal}.`; }
+    catch (e) { S.res.ind = "Não foi enviado: " + e.message; }
+    S.ocupado = null; pinta();
+  };
+  $("b-sug").onclick = async () => {
+    S.ocupado = "sug"; S.sugestoes = null; S.erro = ""; pinta();
+    try { S.sugestoes = await api("/sdr/sugestoes", {}); } catch (e) { S.erro = e.message === "login" ? "" : e.message; }
+    S.ocupado = null; pinta();
+  };
+}
+iniciar();
+})();
+</script>
+</body></html>
