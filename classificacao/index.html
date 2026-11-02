@@ -53,8 +53,7 @@ label.campo{display:block;margin:12px 0 4px;color:var(--rotulo);font-size:13px}
 (() => {
 const HUB = "https://estoque-olist.dutech.workers.dev/?papel=1";
 const LOCAL = location.hostname === "localhost";     // teste da pagina: tudo no mesmo servidor
-const CRMS = [{nome: "Lumia", url: LOCAL ? location.origin : "https://crm.dutech.workers.dev", acesso: "CRM"},
-              {nome: "OneWay", url: LOCAL ? location.origin : "https://crm-oneway.dutech.workers.dev", acesso: "Oneway"}];
+const CRMS = [{nome: "Lumia", url: LOCAL ? location.origin : "https://crm.dutech.workers.dev", acesso: "CRM"}];
 const CUSTO_PADRAO = {"claude-opus-5-5": 0.02, "claude-sonnet-5-5": 0.01, "claude-haiku-5-5": 0.001};   // US$ por conversa, antes de haver medicao
 const NOME_MODELO = {"claude-opus-5-5": "Claude Opus 5.5 (mais capaz)", "claude-sonnet-5-5": "Claude Sonnet 5.5 (equilíbrio)", "claude-haiku-5-5": "Claude Haiku 5.5 (mais barato)"};
 const TEMP = {quente: "🔥 quente", morno: "🌤️ morno", frio: "❄️ frio", perdido: "❌ perdido", sem_contexto: "sem contexto"};
