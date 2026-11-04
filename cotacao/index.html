@@ -36,7 +36,7 @@
 
 <a class="volta" href="../balcao/">‹ Balcão</a>
 <h1>Cotar frete</h1>
-<p class="sub">Sai de Maringá · usa a embalagem real da Dutech</p>
+<p class="sub">Sai de Maringá · usa a tabela de caixas</p>
 
 <div id="tela"></div>
 
@@ -76,14 +76,11 @@ function telaForm(aviso, valores = {}){
   mostraPacotes();
 }
 
-// mesma regra do worker, so pra mostrar antes de cotar
+// mesma tabela do worker (padrao 04/11/2026), so pra mostrar antes de cotar
 function pacotesLocal(n){
+  const CX = {1:"10x22x22",2:"22x22x22",3:"22x22x22",4:"30x22x22",5:"22x22x44",6:"22x22x44",7:"30x22x44",8:"30x22x44"};
   n = Math.max(0, parseInt(n || 0, 10)); const out = [];
-  while (n >= 10){ const v = Math.min(n, 12); out.push(`44x44x24 (${v})`); n -= v; }
-  const resto = {0:[0,0],1:[0,1],2:[1,0],3:[1,0],4:[1,1],5:[2,0],6:[2,0],7:[2,1],8:[3,0],9:[3,0]}[n] || [0,0];
-  let r = n - (resto[1] ? 1 : 0);
-  for (let i = 0; i < resto[0]; i++){ const v = Math.min(r, 3); out.push(`22x22x24 (${v})`); r -= v; }
-  if (resto[1]) out.push("saco 25x25x10 (1)");
+  while (n > 0){ const v = Math.min(n, 14); out.push(`caixa ${CX[v] || "22x44x44"} (${v} · ${(v*1.3).toFixed(1).replace(".", ",")} kg)`); n -= v; }
   return out;
 }
 function mostraPacotes(){
