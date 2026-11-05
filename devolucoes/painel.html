@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel de devoluções</title>
+<meta name="robots" content="noindex">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f7f6f3;
+    --panel:#FFFFFF;
+    --ink:#000000;
+    --brand:#FFD100;
+    --muted:#716C62;
+    --border:#E1DDD3;
+    --accent:#D64E1F;
+    --accent-soft:#FBE7DD;
+    --success:#1E7A5C;
+    --success-soft:#DEEFE7;
+    --neutral:#8A8579;
+    --neutral-soft:#ECEAE4;
+    --pending:#B8860B;
+    --pending-soft:#F5EBD1;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    display:flex; min-height:100vh;
+  }
+  nav{ width:190px; background:#000; color:white; padding:20px 0; flex-shrink:0; position:sticky; top:0; height:100vh; font-family:Arial,sans-serif; }
+  nav .marca{ font-size:24px; font-weight:bold; letter-spacing:4px; color:#FFD100; padding:0 20px 20px; border-bottom:1px solid #222; margin-bottom:10px; }
+  nav a{ display:block; color:#ddd; text-decoration:none; padding:10px 20px; font-size:14px; }
+  nav a.ativo, nav a:hover{ background:#FFD100; color:#000; font-weight:bold; }
+  .conteudo{flex:1; min-width:0;}
+  .display{font-family:'Space Grotesk',sans-serif;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+
+  header.top{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:22px 32px; border-bottom:3px solid var(--brand);
+    background:var(--panel);
+    position:sticky; top:0; z-index:50;
+  }
+  header.top .brand{display:flex; align-items:center; gap:14px;}
+  .brand .mark{
+    width:40px;height:40px;border-radius:8px;
+    background:var(--brand); color:var(--ink);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px;
+    letter-spacing:-0.5px;
+  }
+  .brand h1{font-size:19px; margin:0; font-weight:700; letter-spacing:-0.3px;}
+  .brand p{font-size:12.5px; color:var(--muted); margin:2px 0 0;}
+  .top-actions{display:flex; align-items:center; gap:12px;}
+  .btn{
+    border:1px solid var(--border); background:var(--panel); color:var(--ink);
+    padding:9px 16px; border-radius:7px; font-size:13.5px; font-weight:600;
+    cursor:pointer; font-family:inherit; transition:all .15s ease;
+    display:flex; align-items:center; gap:7px;
+  }
+  .btn:hover{border-color:var(--ink); background:var(--brand);}
+  .status-pill{
+    font-size:11.5px; color:var(--muted); background:var(--neutral-soft);
+    padding:5px 10px; border-radius:20px; font-weight:600;
+  }
+
+  main{padding:28px 32px 60px; max-width:1400px; margin:0 auto;}
+
+  .kpi-grid{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:16px;
+  }
+  .kpi{
+    background:var(--panel); border:1px solid var(--border); border-radius:12px;
+    padding:18px 18px 16px; position:relative; overflow:hidden;
+  }
+  .kpi .tag{
+    font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted);
+    font-weight:700; margin-bottom:10px; display:flex; align-items:center; gap:5px;
+  }
+  .kpi .tag .info{
+    width:14px; height:14px; border-radius:50%; border:1px solid var(--muted); color:var(--muted);
+    font-size:9.5px; display:inline-flex; align-items:center; justify-content:center;
+    cursor:help; font-weight:700; text-transform:none;
+  }
+  .kpi .val{font-size:26px; font-weight:700; letter-spacing:-0.5px;}
+  .kpi .sub{font-size:12px; color:var(--muted); margin-top:5px;}
+  .kpi .mini-stats{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;}
+  .kpi .mini-stats span{font-size:11px; color:var(--muted); background:var(--paper); border:1px solid var(--border); border-radius:6px; padding:3px 8px;}
+  .kpi .mini-stats b{color:var(--ink);}
+  .kpi.accent .val{color:var(--accent);}
+  .kpi.success .val{color:var(--success);}
+  .kpi.pending .val{color:var(--pending);}
+  .kpi.neutral .val{color:var(--neutral);}
+  .kpi-bar{
+    position:absolute; left:0; bottom:0; height:3px; width:100%;
+    background:var(--brand);
+  }
+  .kpi.accent .kpi-bar{background:var(--accent);}
+  .kpi.success .kpi-bar{background:var(--success);}
+  .kpi.pending .kpi-bar{background:var(--pending);}
+  .kpi.neutral .kpi-bar{background:var(--neutral);}
+
+  .op-cost-panel{
+    background:var(--panel); border:1px dashed var(--border); border-radius:12px;
+    padding:16px 18px; margin:0 0 26px; display:none; align-items:center; gap:18px; flex-wrap:wrap;
+  }
+  .op-cost-panel.show{display:flex;}
+  .op-cost-panel .val{font-size:20px; font-weight:700; color:var(--pending); font-family:'Space Grotesk',sans-serif;}
+  .op-cost-panel .desc{font-size:12px; color:var(--muted); max-width:520px;}
+  .toggle-filter{display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:var(--muted); cursor:pointer;}
+
+  .erp-row{
+    background:var(--panel); border:1px dashed var(--border); border-radius:12px;
+    padding:14px 18px; margin-bottom:26px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+  }
+  .erp-row label{font-size:13px; font-weight:600; color:var(--muted);}
+  .erp-row input[type=number]{
+    border:1px solid var(--border); border-radius:7px; padding:7px 10px; font-family:'IBM Plex Mono',monospace;
+    font-size:13px; width:160px;
+  }
+  .erp-result{font-size:13.5px; font-weight:700;}
+  .erp-note{font-size:11.5px; color:var(--muted); margin-left:auto;}
+
+  .filters{
+    background:var(--panel); border:1px solid var(--border); border-radius:12px;
+    padding:16px 18px; margin-bottom:26px;
+    display:flex; flex-wrap:wrap; gap:10px 14px; align-items:flex-end;
+  }
+  .filter-group{display:flex; flex-direction:column; gap:5px;}
+  .filter-group label{font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); font-weight:700;}
+  .filter-group select, .filter-group input{
+    border:1px solid var(--border); border-radius:7px; padding:7px 10px; font-size:13px;
+    font-family:inherit; background:var(--paper); min-width:130px;
+  }
+  .filter-group input[type=date]{min-width:130px;}
+  .filter-group.search input{min-width:180px;}
+  .btn-clear{margin-left:auto; align-self:flex-end;}
+
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;}
+  .grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:16px;}
+  .panel{
+    background:var(--panel); border:1px solid var(--border); border-radius:12px;
+    padding:18px 20px;
+  }
+  .panel h3{font-size:14px; margin:0 0 3px; font-weight:700;}
+  .panel .desc{font-size:11.5px; color:var(--muted); margin:0 0 14px;}
+  .chart-wrap{position:relative; height:230px;}
+  .chart-wrap.tall{height:290px;}
+
+  .manifest{
+    background:var(--panel); border:1px solid var(--border); border-radius:12px; overflow:hidden;
+  }
+  .manifest-head{
+    padding:16px 20px; border-bottom:1px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .manifest-head h3{margin:0; font-size:14px; font-weight:700;}
+  .manifest-head span{font-size:12px; color:var(--muted);}
+  table{width:100%; border-collapse:collapse; font-size:12.5px;}
+  thead th{
+    text-align:left; padding:10px 14px; background:var(--paper); color:var(--muted);
+    font-weight:700; font-size:10.5px; text-transform:uppercase; letter-spacing:.05em;
+    border-bottom:1px solid var(--border); white-space:nowrap; position:sticky; top:0;
+  }
+  tbody td{padding:10px 14px; border-bottom:1px solid var(--border); vertical-align:middle; white-space:nowrap;}
+  tbody tr:hover{background:var(--paper);}
+  .table-scroll{max-height:520px; overflow:auto;}
+
+  .rma-tag{
+    font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:12px;
+    background:var(--paper); border:1px dashed var(--border); border-radius:5px;
+    padding:3px 8px; display:inline-block;
+  }
+  .badge{
+    font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; white-space:nowrap;
+    display:inline-block;
+  }
+  .badge.prejuizo{background:var(--accent-soft); color:var(--accent);}
+  .badge.ganho{background:var(--success-soft); color:var(--success);}
+  .badge.neutro{background:var(--neutral-soft); color:var(--muted);}
+  .badge.aberto{background:var(--pending-soft); color:var(--pending);}
+  .badge.status-aprovado{background:var(--success-soft); color:var(--success);}
+  .badge.status-recusado{background:var(--accent-soft); color:var(--accent);}
+  .badge.status-emanalise{background:var(--pending-soft); color:var(--pending);}
+
+  .empty-state{padding:60px 20px; text-align:center; color:var(--muted); font-size:13.5px;}
+
+  footer.note{
+    max-width:1400px; margin:20px auto 0; padding:0 32px 30px; font-size:11.5px; color:var(--muted); line-height:1.6;
+  }
+  footer.note b{color:var(--ink);}
+
+  @media (max-width: 1100px){
+    .kpi-grid{grid-template-columns:repeat(2,1fr);}
+    .grid2, .grid3{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="marca">LUMIA</div>
+  <a href="./">‹ DEVOLUÇÕES</a>
+  <a href="?emp=dutech" id="nav-dutech">DASH Dutech</a>
+  <a href="?emp=lumia" id="nav-lumia">DASH Lumia</a>
+</nav>
+
+<div class="conteudo">
+<header class="top">
+  <div class="brand">
+    <div class="mark">RMA</div>
+    <div>
+      <h1>Painel de Devoluções – <span id="empNome"></span></h1>
+      <p id="lastUpdate">Lido do hub (antes: planilha Controle de Devoluções e RMA) — aperte F5 para atualizar</p>
+    </div>
+  </div>
+  <div class="top-actions">
+    <span class="status-pill" id="rowCountPill">— registros</span>
+  </div>
+</header>
+
+<main>
+
+  <div class="kpi-grid" id="kpiGrid"></div>
+
+  <div class="erp-row">
+    <label>Faturamento Olist desde 01/05/2026 (<span id="fatRegra"></span>)</label>
+    <input type="number" id="erpInput" placeholder="R$ 0,00" step="0.01" value="">
+    <span class="erp-result" id="erpResult">Informe um valor para calcular</span>
+    <span class="erp-note" id="fatNota"></span>
+  </div>
+
+  <div class="filters">
+    <div class="filter-group search">
+      <label>Buscar RMA / Cliente / SKU</label>
+      <input type="text" id="fSearch" placeholder="Ex: 2026-014 ou nome...">
+    </div>
+    <div class="filter-group">
+      <label>Status</label>
+      <select id="fStatus"><option value="">Todos</option></select>
+    </div>
+    <div class="filter-group">
+      <label>Plataforma</label>
+      <select id="fPlataforma"><option value="">Todas</option></select>
+    </div>
+    <div class="filter-group">
+      <label>Motivo</label>
+      <select id="fMotivo"><option value="">Todos</option></select>
+    </div>
+    <div class="filter-group">
+      <label>Resolução</label>
+      <select id="fResolucao"><option value="">Todas</option></select>
+    </div>
+    <div class="filter-group">
+      <label>Destino</label>
+      <select id="fDestino"><option value="">Todos</option></select>
+    </div>
+    <div class="filter-group">
+      <label>Classificação</label>
+      <select id="fClass">
+        <option value="">Todas</option>
+        <option value="Prejuízo">Prejuízo</option>
+        <option value="Ganho">Ganho</option>
+        <option value="Neutro">Neutro</option>
+        <option value="Em aberto">Em aberto</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>NF de devolução</label>
+      <select id="fNf">
+        <option value="">Todas</option>
+        <option value="com">Somente com NF emitida</option>
+        <option value="sem">Somente sem NF</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Recebido de</label>
+      <input type="date" id="fDataIni">
+    </div>
+    <div class="filter-group">
+      <label>até</label>
+      <input type="date" id="fDataFim">
+    </div>
+    <label class="toggle-filter">
+      <input type="checkbox" id="fShowOpCost"> Mostrar custo operacional (11,10%)
+    </label>
+    <button class="btn btn-clear" id="clearFilters">Limpar filtros</button>
+  </div>
+
+  <div class="op-cost-panel" id="opCostPanel">
+    <div>
+      <div style="font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); font-weight:700; margin-bottom:4px;">Custo operacional</div>
+      <div class="val mono" id="opCostVal">R$ 0,00</div>
+    </div>
+    <div class="desc">Taxa fixa de 11,10% sobre o valor da venda, aplicada a toda devolução no filtro atual (frete, embalagem e mão de obra do processo). É um custo de operar o RMA, separado da classificação de prejuízo/ganho/neutro.</div>
+  </div>
+
+  <div class="grid2">
+    <div class="panel">
+      <h3>Motivo da devolução</h3>
+      <p class="desc">O que mais está levando o cliente a devolver</p>
+      <div class="chart-wrap"><canvas id="chartMotivo"></canvas></div>
+    </div>
+    <div class="panel">
+      <h3>Resolução aplicada</h3>
+      <p class="desc">Como cada RMA foi fechado com a plataforma</p>
+      <div class="chart-wrap"><canvas id="chartResolucao"></canvas></div>
+    </div>
+  </div>
+
+  <div class="grid3">
+    <div class="panel">
+      <h3>Status do RMA</h3>
+      <p class="desc">Aprovado / recusado / em análise</p>
+      <div class="chart-wrap"><canvas id="chartStatus"></canvas></div>
+    </div>
+    <div class="panel">
+      <h3>Destino do produto</h3>
+      <p class="desc">Estoque, uso interno ou descarte</p>
+      <div class="chart-wrap"><canvas id="chartDestino"></canvas></div>
+    </div>
+    <div class="panel">
+      <h3>Resultado financeiro</h3>
+      <p class="desc">Prejuízo, ganho, neutro ou em aberto</p>
+      <div class="chart-wrap"><canvas id="chartClassificacao"></canvas></div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="panel">
+      <h3>Evolução mensal</h3>
+      <p class="desc">Quantidade de RMAs e prejuízo (R$) por mês</p>
+      <div class="chart-wrap tall"><canvas id="chartEvolucao"></canvas></div>
+    </div>
+    <div class="panel">
+      <h3>Prejuízo por plataforma</h3>
+      <p class="desc">Onde a devolução está pesando mais no bolso</p>
+      <div class="chart-wrap tall"><canvas id="chartPlataforma"></canvas></div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="panel">
+      <h3>SKUs com mais devolução</h3>
+      <p class="desc">Top 8 produtos que mais voltam</p>
+      <div class="chart-wrap tall"><canvas id="chartSku"></canvas></div>
+    </div>
+    <div class="panel">
+      <h3>Tempo médio de atendimento</h3>
+      <p class="desc">Dias entre o recebimento e a conclusão do RMA, por plataforma</p>
+      <div class="chart-wrap tall"><canvas id="chartTempo"></canvas></div>
+      <p class="desc" id="tempoNote" style="margin-top:8px; color:var(--pending);"></p>
+    </div>
+  </div>
+
+  <div class="manifest">
+    <div class="manifest-head">
+      <h3>Lista de RMAs</h3>
+      <span id="tableCount">— itens</span>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>RMA</th>
+            <th>Recebido</th>
+            <th>Status</th>
+            <th>Plataforma</th>
+            <th>Cliente</th>
+            <th>SKU / Produto</th>
+            <th>Valor venda</th>
+            <th>Custo devolução</th>
+            <th>Motivo</th>
+            <th>Resolução</th>
+            <th>Destino</th>
+            <th>Resultado</th>
+            <th>Operador</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <div class="empty-state" id="emptyState" style="display:none;">Nenhum RMA encontrado com esses filtros.</div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<script>
+// hub (05/11/2026): os dados vem da tabela rma do hub; o codigo do painel abaixo e o do Gabriel, sem mudar
+const EMP = new URLSearchParams(location.search).get("emp") === "lumia" ? "lumia" : "dutech";
+document.getElementById("empNome").textContent = EMP.toUpperCase();
+document.getElementById("nav-" + EMP).className = "ativo";
+document.getElementById("fatRegra").textContent = EMP === "dutech" ? "pedidos entregues do Mercado Livre e Shopee" : "pedidos enviados e entregues do Mercado Livre";
+(async () => {
+  let j;
+  try {
+    const r = await fetch(`https://estoque-olist.dutech.workers.dev/?rma=lista&emp=${EMP}`, {cache: "no-store",
+      headers: {authorization: `Bearer ${localStorage.usuario || ""}:${localStorage.senha || ""}`}});
+    if (r.status === 401 || r.status === 403) { location.href = "./"; return; }
+    j = await r.json();
+  } catch { document.getElementById("lastUpdate").textContent = "sem conexão com o hub"; return; }
+  const rmaDe = n => "2026-" + String(n).padStart(3, "0");
+  window.__RAW = j.linhas.filter(l => l.data_recebimento).map(l => ({...l, rma: rmaDe(l.n), num_venda: String(l.num_venda || ""),
+    valor_venda: +l.valor_venda || 0, custo_devolucao: +l.custo_devolucao || 0,
+    nf_devolucao: l.nf_devolucao && l.nf_devolucao !== "N/A" ? l.nf_devolucao : null}));
+  const f = j.fat;
+  if (f.completo) document.getElementById("erpInput").value = f.total;
+  document.getElementById("fatNota").textContent = f.completo ? `${f.qtd} pedidos · atualizado em ${f.atualizado.slice(8, 10)}/${f.atualizado.slice(5, 7)}` : "sem faturamento ainda — preencha à mão";
+  const s = document.createElement("script");
+  s.textContent = "const RAW_DATA = window.__RAW;\n" + document.getElementById("painel-js").textContent;
+  document.body.appendChild(s);
+})();
+</script>
+<script type="text/plain" id="painel-js">
+const state = { data: RAW_DATA.map(enrich), charts: {} };
+
+function enrich(r){
+  const resolucao = (r.resolucao||'').trim();
+  const destino = (r.destino||'').trim();
+  const custo = r.custo_devolucao || 0;
+  const valor = r.valor_venda || 0;
+
+  let categoria = 0;
+  let classe = 'Em aberto';
+
+  if(!resolucao){
+    classe = 'Em aberto';
+  } else if(/dinheiro da venda liberado/i.test(resolucao)){
+    categoria = valor;
+  } else if(/custo do produto reembolsado/i.test(resolucao)){
+    categoria = 0;
+  } else if(/reembolso para cliente|troca/i.test(resolucao)){
+    if(/descarte/i.test(destino)){
+      categoria = -valor;
+    } else {
+      categoria = 0;
+    }
+  }
+
+  const impacto = resolucao ? (categoria - custo) : 0;
+
+  if(resolucao){
+    if(impacto < -0.001) classe = 'Prejuízo';
+    else if(impacto > 0.001) classe = 'Ganho';
+    else classe = 'Neutro';
+  }
+
+  const custoOperacional = valor * 0.111;
+
+  let dias = null;
+  let dataInvalida = false;
+  if(r.data_recebimento && r.data_conclusao){
+    const d1 = new Date(r.data_recebimento), d2 = new Date(r.data_conclusao);
+    if(!isNaN(d1) && !isNaN(d2)){
+      const diff = Math.round((d2-d1)/(1000*60*60*24));
+      if(diff >= 0 && diff <= 365){
+        dias = diff;
+      } else {
+        dataInvalida = true;
+      }
+    } else {
+      dataInvalida = true;
+    }
+  }
+
+  return {...r, classe, impacto, custoOperacional, dias, dataInvalida};
+}
+
+function fmtBRL(v){
+  return (v||0).toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+}
+function fmtDate(d){
+  if(!d) return '—';
+  const dt = new Date(d + 'T00:00:00');
+  if(isNaN(dt)) return d;
+  return dt.toLocaleDateString('pt-BR');
+}
+
+function uniqueVals(arr, key){
+  return [...new Set(arr.map(r=>r[key]).filter(Boolean))].sort();
+}
+
+function populateFilterOptions(){
+  const map = {fStatus:'status', fPlataforma:'plataforma', fMotivo:'motivo', fResolucao:'resolucao', fDestino:'destino'};
+  Object.entries(map).forEach(([id,key])=>{
+    const sel = document.getElementById(id);
+    const current = sel.value;
+    sel.querySelectorAll('option:not(:first-child)').forEach(o=>o.remove());
+    uniqueVals(state.data, key).forEach(v=>{
+      const opt = document.createElement('option');
+      opt.value = v; opt.textContent = v;
+      sel.appendChild(opt);
+    });
+    sel.value = current;
+  });
+}
+
+function getFiltered(){
+  const search = document.getElementById('fSearch').value.trim().toLowerCase();
+  const status = document.getElementById('fStatus').value;
+  const plataforma = document.getElementById('fPlataforma').value;
+  const motivo = document.getElementById('fMotivo').value;
+  const resolucao = document.getElementById('fResolucao').value;
+  const destino = document.getElementById('fDestino').value;
+  const classe = document.getElementById('fClass').value;
+  const nf = document.getElementById('fNf').value;
+  const dIni = document.getElementById('fDataIni').value;
+  const dFim = document.getElementById('fDataFim').value;
+
+  return state.data.filter(r=>{
+    if(search){
+      const hay = `${r.rma||''} ${r.cliente||''} ${r.sku||''} ${r.produto||''} ${r.num_venda||''}`.toLowerCase();
+      if(!hay.includes(search)) return false;
+    }
+    if(status && r.status !== status) return false;
+    if(plataforma && r.plataforma !== plataforma) return false;
+    if(motivo && r.motivo !== motivo) return false;
+    if(resolucao && r.resolucao !== resolucao) return false;
+    if(destino && r.destino !== destino) return false;
+    if(classe && r.classe !== classe) return false;
+    if(nf === 'com' && !r.nf_devolucao) return false;
+    if(nf === 'sem' && r.nf_devolucao) return false;
+    if(dIni && r.data_recebimento && r.data_recebimento < dIni) return false;
+    if(dFim && r.data_recebimento && r.data_recebimento > dFim) return false;
+    return true;
+  });
+}
+
+function statusBadgeClass(s){
+  if(/aprovado/i.test(s)) return 'status-aprovado';
+  if(/recusado|reprovado/i.test(s)) return 'status-recusado';
+  return 'status-emanalise';
+}
+function classeBadgeClass(c){
+  if(c==='Prejuízo') return 'prejuizo';
+  if(c==='Ganho') return 'ganho';
+  if(c==='Neutro') return 'neutro';
+  return 'aberto';
+}
+
+function renderKPIs(rows){
+  const total = rows.length;
+  const aprovados = rows.filter(r=>/aprovado/i.test(r.status||'')).length;
+  const recusados = rows.filter(r=>/recusado|reprovado/i.test(r.status||'')).length;
+  const emAnalise = rows.filter(r=>/an[aá]lise/i.test(r.status||'')).length;
+
+  const faturamento = rows.reduce((s,r)=>s+ (r.valor_venda||0), 0);
+  const prejuizoRows = rows.filter(r=>r.classe==='Prejuízo');
+  const ganhoRows = rows.filter(r=>r.classe==='Ganho');
+  const neutroRows = rows.filter(r=>r.classe==='Neutro');
+  const abertoRows = rows.filter(r=>r.classe==='Em aberto');
+
+  const prejuizoTotal = prejuizoRows.reduce((s,r)=>s+Math.abs(r.impacto),0);
+  const ganhoTotal = ganhoRows.reduce((s,r)=>s+r.impacto,0);
+  const custoOp = rows.reduce((s,r)=>s+r.custoOperacional,0);
+  const pctPrejFaturamento = faturamento>0 ? (prejuizoTotal/faturamento*100) : 0;
+
+  const kpis = [
+    {tag:'RMAs no filtro', info:'Total de devoluções que atendem aos filtros ativos, com a divisão por status.', val: total, cls:'',
+      mini: `<span><b>${aprovados}</b> aprovados</span><span><b>${recusados}</b> recusados</span><span><b>${emAnalise}</b> em análise</span>`},
+    {tag:'Faturamento das devoluções', info:'Soma do valor de venda de todos os RMAs no filtro, independente do status ou resultado.', val: fmtBRL(faturamento), sub:`${total} RMA(s) somado(s)`, cls:''},
+    {tag:'Prejuízo total', info:'Soma do impacto negativo: valor da venda perdido quando o produto foi descartado, mais o custo do frete de devolução, quando houve.', val: fmtBRL(prejuizoTotal), sub: `${prejuizoRows.length} RMA(s) · ${pctPrejFaturamento.toFixed(2)}% do faturamento das devoluções`, cls:'accent'},
+    {tag:'Ganho retido', info:'Soma do valor de venda mantido quando a plataforma libera o dinheiro da venda para vocês (RMA não gerou prejuízo — a receita continua sendo sua).', val: fmtBRL(ganhoTotal), sub: `${ganhoRows.length} RMA(s)`, cls:'success'},
+    {tag:'Neutro (0x0)', info:'RMAs onde o custo do produto foi reembolsado pela plataforma, ou o produto voltou ao estoque/uso interno sem custo de frete — não gerou prejuízo nem ganho.', val: neutroRows.length, sub:'RMA(s) sem impacto financeiro', cls:'neutral'},
+    {tag:'Em aberto', info:'RMAs que ainda não têm uma resolução definida pela plataforma — não entram na conta de prejuízo/ganho até serem concluídos.', val: abertoRows.length, sub:'RMA(s) aguardando resolução', cls:'pending'},
+  ];
+
+  document.getElementById('kpiGrid').innerHTML = kpis.map(k=>`
+    <div class="kpi ${k.cls}">
+      <span class="tag">${k.tag}<span class="info" title="${k.info}">i</span></span>
+      <div class="val display">${k.val}</div>
+      ${k.mini ? `<div class="mini-stats">${k.mini}</div>` : `<div class="sub">${k.sub||''}</div>`}
+      <div class="kpi-bar"></div>
+    </div>
+  `).join('');
+
+  document.getElementById('opCostVal').textContent = fmtBRL(custoOp);
+
+  updateErpCalc(prejuizoTotal);
+  state._prejuizoTotal = prejuizoTotal;
+}
+
+function updateErpCalc(prejuizoTotal){
+  const erpVal = parseFloat(document.getElementById('erpInput').value);
+  const el = document.getElementById('erpResult');
+  if(!erpVal || erpVal<=0){
+    el.textContent = 'Informe um valor para calcular';
+    el.style.color = 'var(--muted)';
+    return;
+  }
+  const pct = (prejuizoTotal/erpVal*100);
+  el.textContent = `Prejuízo = ${pct.toFixed(2)}% do faturamento total informado (${fmtBRL(prejuizoTotal)} / ${fmtBRL(erpVal)})`;
+  el.style.color = 'var(--accent)';
+}
+
+function countBy(rows, key){
+  const m = {};
+  rows.forEach(r=>{
+    const v = r[key] || '—';
+    m[v] = (m[v]||0)+1;
+  });
+  return m;
+}
+
+const PALETTE = ['#FFD100','#000000','#8A8579','#E6A800','#4D4D4D','#FFE680','#B3B3B3','#806800'];
+
+const PLATFORM_COLORS = {
+  'Mercado Livre': '#ffe600',
+  'Shopee': '#f7472e',
+};
+function platformColor(name){
+  return PLATFORM_COLORS[name] || '#8A8579';
+}
+
+function destroyChart(id){
+  if(state.charts[id]){ state.charts[id].destroy(); }
+}
+
+function barChart(id, labels, data, opts={}){
+  destroyChart(id);
+  const ctx = document.getElementById(id).getContext('2d');
+  state.charts[id] = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets:[{ data, backgroundColor: opts.colors || PALETTE, borderRadius:5, barThickness: opts.thick||undefined }]},
+    options: {
+      indexAxis: opts.horizontal ? 'y' : 'x',
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{callbacks: opts.tooltipCb ? {label: opts.tooltipCb} : undefined} },
+      scales:{
+        x:{ grid:{display: opts.horizontal}, ticks:{font:{size:10.5}} },
+        y:{ grid:{color:'#EDEAE3'}, ticks:{font:{size:10.5}}, beginAtZero:true }
+      }
+    }
+  });
+}
+
+function doughnutChart(id, labels, data, colors){
+  destroyChart(id);
+  const ctx = document.getElementById(id).getContext('2d');
+  state.charts[id] = new Chart(ctx, {
+    type:'doughnut',
+    data:{ labels, datasets:[{ data, backgroundColor: colors, borderWidth:2, borderColor:'#fff' }]},
+    options:{
+      responsive:true, maintainAspectRatio:false, cutout:'62%',
+      plugins:{ legend:{ position:'bottom', labels:{ font:{size:11}, boxWidth:10, padding:12 } } }
+    }
+  });
+}
+
+function renderCharts(rows){
+  const motivo = countBy(rows,'motivo');
+  barChart('chartMotivo', Object.keys(motivo), Object.values(motivo));
+
+  const resolucao = countBy(rows.filter(r=>r.resolucao),'resolucao');
+  barChart('chartResolucao', Object.keys(resolucao), Object.values(resolucao), {horizontal:true});
+
+  const statusCount = countBy(rows,'status');
+  doughnutChart('chartStatus', Object.keys(statusCount), Object.values(statusCount),
+    Object.keys(statusCount).map(s=> /aprovado/i.test(s)?'#1E7A5C': /recusado/i.test(s)?'#D64E1F':'#B8860B'));
+
+  const destinoCount = countBy(rows,'destino');
+  doughnutChart('chartDestino', Object.keys(destinoCount), Object.values(destinoCount), PALETTE);
+
+  const classeCount = countBy(rows,'classe');
+  doughnutChart('chartClassificacao', Object.keys(classeCount), Object.values(classeCount),
+    Object.keys(classeCount).map(c=> c==='Prejuízo'?'#D64E1F': c==='Ganho'?'#1E7A5C': c==='Neutro'?'#8A8579':'#B8860B'));
+
+  const monthMap = {};
+  rows.forEach(r=>{
+    if(!r.data_recebimento) return;
+    const d = new Date(r.data_recebimento);
+    if(isNaN(d)) return;
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    if(!monthMap[key]) monthMap[key] = {count:0, prejuizo:0};
+    monthMap[key].count++;
+    if(r.classe==='Prejuízo') monthMap[key].prejuizo += Math.abs(r.impacto);
+  });
+  const months = Object.keys(monthMap).sort();
+  destroyChart('chartEvolucao');
+  state.charts['chartEvolucao'] = new Chart(document.getElementById('chartEvolucao').getContext('2d'), {
+    data:{
+      labels: months,
+      datasets:[
+        {type:'bar', label:'RMAs', data: months.map(m=>monthMap[m].count), backgroundColor:'#FFD100', borderRadius:5, yAxisID:'y'},
+        {type:'line', label:'Prejuízo (R$)', data: months.map(m=>monthMap[m].prejuizo), borderColor:'#D64E1F', backgroundColor:'#D64E1F', tension:.3, yAxisID:'y1', pointRadius:3}
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{position:'bottom', labels:{font:{size:11}, boxWidth:10}},
+        tooltip:{callbacks:{ label: (ctx)=> ctx.dataset.yAxisID==='y1' ? `${ctx.dataset.label}: ${fmtBRL(ctx.parsed.y)}` : `${ctx.dataset.label}: ${ctx.parsed.y}` }}
+      },
+      scales:{
+        y:{ position:'left', beginAtZero:true, title:{display:true, text:'Qtd RMAs', font:{size:10}}, grid:{color:'#EDEAE3'} },
+        y1:{ position:'right', beginAtZero:true, title:{display:true, text:'R$', font:{size:10}}, grid:{display:false}, ticks:{ callback:(v)=>fmtBRL(v) } }
+      }
+    }
+  });
+
+  const platMap = {};
+  rows.forEach(r=>{
+    const p = r.plataforma||'—';
+    if(!platMap[p]) platMap[p]={prejuizo:0, ganho:0};
+    if(r.classe==='Prejuízo') platMap[p].prejuizo += Math.abs(r.impacto);
+    if(r.classe==='Ganho') platMap[p].ganho += r.impacto;
+  });
+  const plats = Object.keys(platMap);
+  destroyChart('chartPlataforma');
+  state.charts['chartPlataforma'] = new Chart(document.getElementById('chartPlataforma').getContext('2d'), {
+    type:'bar',
+    data:{
+      labels: plats,
+      datasets:[
+        {label:'Prejuízo', data: plats.map(p=>platMap[p].prejuizo), backgroundColor:'#D64E1F', borderRadius:5},
+        {label:'Ganho', data: plats.map(p=>platMap[p].ganho), backgroundColor:'#1E7A5C', borderRadius:5}
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{position:'bottom', labels:{font:{size:11}, boxWidth:10}},
+        tooltip:{callbacks:{ label:(ctx)=> `${ctx.dataset.label}: ${fmtBRL(ctx.parsed.y)}` }}
+      },
+      scales:{ y:{beginAtZero:true, grid:{color:'#EDEAE3'}, ticks:{callback:(v)=>fmtBRL(v)}} }
+    }
+  });
+
+  const skuMap = {};
+  rows.forEach(r=>{
+    const key = r.sku || '—';
+    skuMap[key] = (skuMap[key]||0)+1;
+  });
+  const topSkus = Object.entries(skuMap).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  barChart('chartSku', topSkus.map(s=>s[0]), topSkus.map(s=>s[1]), {horizontal:true, colors:'#000000'});
+
+  const withDias = rows.filter(r=>r.dias !== null && r.dias !== undefined);
+  const invalidos = rows.filter(r=>r.dataInvalida);
+  const byPlat = {};
+  withDias.forEach(r=>{
+    const p = r.plataforma || '—';
+    if(!byPlat[p]) byPlat[p] = [];
+    byPlat[p].push(r.dias);
+  });
+  const platLabels = Object.keys(byPlat);
+  const platAvg = platLabels.map(p=> (byPlat[p].reduce((a,b)=>a+b,0)/byPlat[p].length) );
+  barChart('chartTempo', platLabels, platAvg.map(v=>Math.round(v*10)/10), {
+    colors: platLabels.map(p=>platformColor(p)),
+    tooltipCb: (ctx)=> `${ctx.label}: ${ctx.parsed.x ?? ctx.parsed.y} dia(s) em média`
+  });
+  document.getElementById('tempoNote').textContent = invalidos.length
+    ? `Ignorado(s) por data inconsistente na planilha: ${invalidos.map(r=>r.rma).join(', ')}.`
+    : '';
+}
+
+function renderTable(rows){
+  const tbody = document.getElementById('tableBody');
+  document.getElementById('tableCount').textContent = `${rows.length} item(ns)`;
+  document.getElementById('emptyState').style.display = rows.length ? 'none' : 'block';
+
+  const sorted = [...rows].sort((a,b)=> (b.rma||'').localeCompare(a.rma||'', undefined, {numeric:true}));
+
+  tbody.innerHTML = sorted.map(r=>`
+    <tr>
+      <td><span class="rma-tag">${r.rma||'—'}</span></td>
+      <td>${fmtDate(r.data_recebimento)}${r.dataInvalida ? ' <span title="Data com erro na planilha" style="color:var(--pending);">⚠</span>' : ''}</td>
+      <td><span class="badge ${statusBadgeClass(r.status)}">${r.status||'—'}</span></td>
+      <td><span style="display:inline-flex; align-items:center; gap:6px;"><span style="width:9px;height:9px;border-radius:50%;background:${platformColor(r.plataforma)};display:inline-block;border:1px solid rgba(0,0,0,.15);"></span>${r.plataforma||'—'}</span></td>
+      <td>${r.cliente||'—'}</td>
+      <td>${r.sku||'—'}<br><span style="color:var(--muted); font-size:11px;">${(r.produto||'').slice(0,38)}${(r.produto||'').length>38?'…':''}</span></td>
+      <td class="mono">${fmtBRL(r.valor_venda)}</td>
+      <td class="mono">${fmtBRL(r.custo_devolucao)}</td>
+      <td>${r.motivo||'—'}</td>
+      <td>${r.resolucao||'—'}</td>
+      <td>${r.destino||'—'}</td>
+      <td><span class="badge ${classeBadgeClass(r.classe)}">${r.classe}</span></td>
+      <td>${r.operador||'—'}</td>
+    </tr>
+  `).join('');
+}
+
+function renderAll(){
+  const rows = getFiltered();
+  document.getElementById('rowCountPill').textContent = `${state.data.length} registros na base`;
+  renderKPIs(rows);
+  renderCharts(rows);
+  renderTable(rows);
+}
+
+['fSearch','fStatus','fPlataforma','fMotivo','fResolucao','fDestino','fClass','fNf','fDataIni','fDataFim'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', renderAll);
+});
+document.getElementById('erpInput').addEventListener('input', ()=> updateErpCalc(state._prejuizoTotal||0));
+document.getElementById('fShowOpCost').addEventListener('change', function(){
+  document.getElementById('opCostPanel').classList.toggle('show', this.checked);
+});
+document.getElementById('clearFilters').addEventListener('click', ()=>{
+  ['fSearch','fStatus','fPlataforma','fMotivo','fResolucao','fDestino','fClass','fNf','fDataIni','fDataFim'].forEach(id=>{
+    document.getElementById(id).value = '';
+  });
+  renderAll();
+});
+
+populateFilterOptions();
+renderAll();
+</script>
+</body>
+</html>
