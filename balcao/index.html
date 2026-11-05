@@ -42,6 +42,20 @@
 <h1>Balcão</h1>
 <p class="sub">O que se usa atendendo cliente</p>
 
+<a class="cartao" href="https://crm.dutech.workers.dev/" data-precisa="CRM">
+  <div class="ic">💬</div>
+  <div><div class="tit">CRM</div>
+       <div class="desc">Conversas do WhatsApp, funil de vendas, recursos e campanhas</div></div>
+  <div class="seta">›</div>
+</a>
+
+<a class="cartao" href="../classificacao/" data-precisa="CRM">
+  <div class="ic">🎯</div>
+  <div><div class="tit">Classificação de Leads</div>
+       <div class="desc">SDR: tags, kanban, conversas paradas, indicadores e sugestões</div></div>
+  <div class="seta">›</div>
+</a>
+
 <a class="cartao" href="../app/">
   <div class="ic">📦</div>
   <div><div class="tit">Estoque ao vivo</div>
@@ -99,6 +113,29 @@
 </a>
 
 <div class="aviso">Estoque, cadastro, frete e disparo pedem <b>login</b> — o mesmo usuário e senha em todos.</div>
+
+<script>
+// Com login guardado, mostra so os cartoes que ele abre (lista "acesso" do worker do hub).
+// Sem login, ou senha errada, mostra todos: cada ferramenta pede o login dela.
+(async () => {
+  if (!localStorage.usuario || !localStorage.senha) return;
+  let j;
+  try {
+    const r = await fetch("https://estoque-olist.dutech.workers.dev/?papel=1",
+      {headers: {authorization: `Bearer ${localStorage.usuario}:${localStorage.senha}`}, cache: "no-store"});
+    if (!r.ok) return;
+    j = await r.json();
+  } catch { return; }
+  if (!Array.isArray(j.acesso)) return;   // worker antigo (sem lista de acesso): mostra tudo, como antes
+  const acesso = j.acesso;
+  let algum = false;
+  document.querySelectorAll("[data-precisa]").forEach(a => {
+    const pode = a.dataset.precisa.split(" ").some(f => acesso.includes(f));
+    a.style.display = pode ? "" : "none"; algum = algum || pode;   // hidden perde p/ o display:flex do .cartao
+  });
+  
+})();
+</script>
 
 <footer>comercialdutech.github.io/hub</footer>
 </body></html>
