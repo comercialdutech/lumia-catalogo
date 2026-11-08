@@ -73,6 +73,10 @@ const GRUPOS = {
             ["faturar_lumia", "Faturar Lumia", "Faturar a Lumia", "Faturar TODOS os aprovados da Lumia e cancelar as origens na Dutech?"],
             ["faturar_dutech", "Faturar Dutech", "Faturar a Dutech", "Faturar TODOS os aprovados da Dutech?"],
             ["faturar_ambas", "Faturar as duas", "Faturar as duas", "Faturar TODOS os aprovados da Lumia (cancelando as origens na Dutech) e depois da Dutech?"]]},
+  nfdev: {titulo: "NF de devolução", sub: "Devoluções do hub sem NF de devolução → cria a devolução na Olist, lança estoque (quando volta ao estoque), gera e autoriza a nota e grava o número no RMA · roda no servidor",
+    aviso: "Devolução parcial e venda com destinos diferentes ficam para fazer à mão (igual ao robô do Gabriel). Enquanto o Gabriel não desligar os robôs fiscais do PC, o botão de verdade é recusado no servidor.",
+    robos: [["nf_devolucao", "De verdade", "Emitir as NF de devolução", "Criar as devoluções na Olist e AUTORIZAR as NF de devolução das vendas pendentes?"],
+            ["nf_devolucao_teste", "Teste (não emite nada)", "Ver as pendentes"]]},
   shopee: {titulo: "Aviso Shopee", sub: "Pedidos da Shopee aprovados, Dutech e Lumia · manda no Telegram do Gabriel",
     robos: [["aviso_shopee", "Telegram", "Mandar aviso agora"]]},
 };
