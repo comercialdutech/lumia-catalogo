@@ -57,10 +57,6 @@ const GRUPOS = {
     aviso: "Entra na Olist com o login do Gabriel: quem estiver usando a Olist DUTECH com esse login pode cair enquanto roda (leva uns 10 a 20 min).",
     robos: [["sincronizar", "Envio de verdade", "Sincronizar agora", "Enviar o estoque da Olist DUTECH para TODOS os e-commerces agora?"],
             ["sincronizar_teste", "Teste (não envia)", "Rodar teste"]]},
-  enviados: {titulo: "Marcar como enviados", sub: "Preparando envio, faturado e pronto para envio → Enviado · Dutech e Lumia, fora a cópia multiempresa · no botão (a tarefa das 14h segue no PC do Gabriel)",
-    aviso: "Mesmo trabalho do “Alterar situação dos pedidos” e da tarefa das 14h do PC do Gabriel. Rodar duas vezes não estraga: a segunda não acha nada.",
-    robos: [["enviados", "De verdade", "Marcar agora", "Passar para ENVIADO todos os pedidos em preparando envio, faturado e pronto para envio (Dutech e Lumia)?"],
-            ["enviados_teste", "Teste (só lista)", "Ver quais seriam marcados"]]},
   estorno: {titulo: "Estorno de cancelados", sub: "Venda cancelada no ML (Dutech e Lumia, 7 dias) com estoque ainda lançado na Olist DUTECH → estorna · roda no servidor",
     aviso: "Entra na Olist com o login do Gabriel. Só estorna quando o pedido está CANCELADO na Olist e o estoque ainda está lançado; o resto ele só lista para você olhar.",
     robos: [["estorno", "De verdade", "Estornar agora", "Estornar o estoque na Olist DUTECH das vendas canceladas que ainda estão com estoque lançado?"],
@@ -77,8 +73,6 @@ const GRUPOS = {
     aviso: "Devolução parcial e venda com destinos diferentes ficam para fazer à mão (igual ao robô do Gabriel). Enquanto o Gabriel não desligar os robôs fiscais do PC, o botão de verdade é recusado no servidor.",
     robos: [["nf_devolucao", "De verdade", "Emitir as NF de devolução", "Criar as devoluções na Olist e AUTORIZAR as NF de devolução das vendas pendentes?"],
             ["nf_devolucao_teste", "Teste (não emite nada)", "Ver as pendentes"]]},
-  shopee: {titulo: "Aviso Shopee", sub: "Pedidos da Shopee aprovados, Dutech e Lumia · manda no Telegram do Gabriel",
-    robos: [["aviso_shopee", "Telegram", "Mandar aviso agora"]]},
 };
 const G = GRUPOS[new URLSearchParams(location.search).get("g")] || GRUPOS.sincronizar;
 document.title = G.titulo; $("titulo").textContent = G.titulo; $("sub").textContent = G.sub;
