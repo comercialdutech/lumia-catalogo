@@ -7,73 +7,102 @@
 <link rel="apple-touch-icon" href="../app/icone-192.png">
 <meta name="robots" content="noindex">
 <style>
- /* visual do painel de devolucoes que rodava no PC do Gabriel */
+ /* visual do painel de devolucoes que rodava no PC do Gabriel (localhost:5001) */
  * { box-sizing: border-box; }
  body { font-family: Arial, sans-serif; margin: 0; background: #f7f6f3; color: #222; display: flex; min-height: 100vh; }
  nav { width: 190px; background: #000; color: #fff; padding: 20px 0; flex-shrink: 0; position: sticky; top: 0; height: 100vh; }
  nav .marca { font-size: 24px; font-weight: bold; letter-spacing: 4px; color: #FFD100; padding: 0 20px 20px; border-bottom: 1px solid #222; margin-bottom: 10px; }
  nav a { display: block; color: #ddd; text-decoration: none; padding: 10px 20px; font-size: 14px; cursor: pointer; }
  nav a.on, nav a:hover { background: #FFD100; color: #000; font-weight: bold; }
- nav .volta { color: #888; font-size: 12px; margin-top: 14px; border-top: 1px solid #222; padding-top: 14px; }
+ nav .volta { color: #777; font-size: 12px; margin-top: 14px; border-top: 1px solid #222; padding-top: 14px; }
  main { flex: 1; padding: 18px 24px; min-width: 0; }
- h1 { margin: 0 0 12px; font-size: 22px; }
- .cx { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 14px; }
- .cx + .cx, .grade + .cx { margin-top: 16px; }
- .grade > div > .cx + .cx, .grade > div > .aviso { margin-top: 16px; }
- .cx > b:first-child { display: block; margin: 0 0 8px; font-size: 15px; }
- .erro { color: #9a4b00; } p.erro, div.cx.erro { background: #fff4e5; border: 1px solid #f0c36d; padding: 8px 12px; border-radius: 6px; }
- .ok { background: #e6f4ea; border: 1px solid #1a7f37; color: #1a7f37; font-weight: bold; padding: 8px 12px; border-radius: 6px; }
- .aviso { background: #fff4e5; border: 1px solid #f0c36d; padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; font-size: 14px; }
- .mini { color: #777; font-size: 12px; margin-top: 3px; }
- label { display: block; margin: 10px 0 3px; color: #555; font-size: 12px; }
- input, select, textarea { padding: 6px 8px; border-radius: 6px; border: 1px solid #ccc; font: 14px Arial, sans-serif; width: 100%; background: #fff; color: #222; }
- textarea { font-size: 13px; resize: vertical; }
- button { background: #FFD100; color: #000; font-weight: bold; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; margin-top: 12px; }
+ .topo { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; flex-wrap: wrap; }
+ .topo h1 { margin: 0; font-size: 22px; white-space: nowrap; }
+ .topo .form { display: flex; gap: 8px; flex: 1; max-width: 720px; }
+ .topo .form input { flex: 1; } #filtro { width: 180px; flex-shrink: 0; }
+ .copiar { background: none; border: none; padding: 2px 4px; cursor: pointer; color: #555; vertical-align: middle; margin: 0; }
+ .copiar:hover { background: none; color: #000; }
+ .ver-ml { background: #ffe600; color: #333; padding: 3px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+ .grade { display: grid; grid-template-columns: 1fr 1.3fr; gap: 16px; align-items: start; margin-bottom: 16px; }
+ .caixa { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 14px; }
+ .caixa + .caixa { margin-top: 16px; }
+ h3 { margin: 0 0 8px; font-size: 15px; }
+ .ok, .erro, .aviso { padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; font-size: 14px; }
+ .ok { background: #e6f4ea; border: 1px solid #1a7f37; color: #1a7f37; font-weight: bold; }
+ .erro { background: #fdecea; border: 1px solid #c0392b; color: #c0392b; }
+ .aviso { background: #fff4e5; border: 1px solid #f0c36d; }
+ button { background: #FFD100; color: #000; font-weight: bold; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; }
  button:hover { background: #000; color: #FFD100; }
- button.sec { background: #eee; margin-left: 8px; }
- .busca { display: flex; gap: 8px; max-width: 720px; align-items: center; }
- .busca input { flex: 1; } .busca button { margin: 0; white-space: nowrap; }
- #res { margin-top: 16px; }
- .grade { display: grid; grid-template-columns: 1fr 1.3fr; gap: 16px; align-items: start; }
- .campos { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0 10px; margin: 6px 0; }
- table { border-collapse: collapse; width: 100%; }
- td, th { border: 1px solid #e0e0e0; padding: 6px 10px; text-align: left; font-size: 13px; vertical-align: top; }
- th { background: #fff6cc; }
- td.t:first-child { color: #777; width: 140px; }
- .num { font-family: monospace; white-space: nowrap; }
- .q { width: 64px !important; }
- .rol { max-height: 70vh; overflow: auto; margin: 0 -14px -14px; }
- table.l { white-space: nowrap; }
- table.l th { position: sticky; top: 0; text-transform: uppercase; font-size: 11px; color: #555; }
- table.l td, table.l th { border-left: none; border-right: none; padding: 6px 8px; }
- a.rma { font-family: monospace; background: #f4f4f4; border: 1px dashed #ccc; border-radius: 4px; padding: 2px 6px; color: #222; cursor: pointer; text-decoration: none; }
- a.rma:hover { background: #FFD100; }
+ textarea { width: 100%; margin-top: 8px; padding: 8px; border-radius: 6px; border: 1px solid #ccc; font: 13px Arial, sans-serif; resize: vertical; }
+ .linha-msg { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 12px; color: #777; }
+ .lista { margin-top: 16px; padding: 0; overflow: hidden; }
+ .lista-topo { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; }
+ .lista-topo h3 { margin: 0; } .lista-topo small { color: #222; }
+ .rolagem { max-height: 380px; overflow: auto; }
+ .lista table { white-space: nowrap; }
+ .lista th { position: sticky; top: 0; text-transform: uppercase; font-size: 11px; color: #555; z-index: 1; }
+ .lista td, .lista th { border-left: none; border-right: none; padding: 6px 8px; }
+ .lista th:last-child, .lista .status-ml { width: 100%; white-space: normal; }
+ .rma { font-family: monospace; background: #f4f4f4; border: 1px dashed #ccc; border-radius: 4px; padding: 2px 6px; }
  .selo { border-radius: 10px; padding: 2px 10px; font-size: 12px; font-weight: bold; background: #eee; }
  .selo.aprovado { background: #e3f4ea; color: #1a7f37; }
- .selo.recusado { background: #fff0e0; color: #9a4b00; }
+ .selo.recusado { background: #fdecea; color: #c0392b; }
  .selo.em-analise { background: #fff3cd; color: #9a6b00; }
- a.mini { background: #ffe600; color: #333; padding: 2px 8px; border-radius: 6px; font-weight: 600; text-decoration: none; display: inline-block; }
+ .ponto { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #FFD100; margin-right: 6px; }
+ .ponto.shopee { background: #ee4d2d; }
+ .num { font-family: monospace; }
+ .cinza { color: #888; }
+ a.venda { color: #1a4fd6; cursor: pointer; }
+ input, select { padding: 6px 8px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; width: 100%; background: #fff; color: #222; font-family: Arial, sans-serif; }
+ table { border-collapse: collapse; width: 100%; }
+ th, td { border: 1px solid #e0e0e0; padding: 6px 10px; text-align: left; font-size: 13px; }
+ th { background: #fff6cc; }
+ .auto td:first-child { color: #777; width: 140px; }
+ .campos { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 12px 0; }
+ .campos label, .ed label { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: #555; }
+ input[type=number].qtd { width: 64px; }
+ .lixo { background: none; padding: 4px 8px; font-size: 16px; } .lixo:hover { background: #fdecea; }
+ small { word-break: break-all; }
+ /* tela Devolucoes (editar uma venda lancada) */
+ .ed { max-width: 950px; }
+ .barra { position: sticky; top: 0; z-index: 2; background: #000; color: #fff; display: flex; align-items: center; gap: 14px; padding: 10px 14px; border-radius: 8px; margin-bottom: 14px; }
+ .barra .rma-b { font-family: monospace; font-size: 16px; }
+ .barra .selo { background: #FFD100; color: #000; }
+ .barra .botao { margin-left: auto; background: #333; color: #fff; }
+ .barra button:hover { background: #fff; color: #000; }
+ .ed .caixa { border-left: 4px solid #FFD100; margin-bottom: 14px; }
+ .ed .caixa + .caixa { margin-top: 0; }
+ .ed .caixa h3 { margin: 0 0 10px; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #777; }
+ .ed .campos { grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 0; }
+ .ed .largo { grid-column: span 2; }
+ .ed input, .ed select { padding: 7px 9px; border-color: #ddd; background: #fafafa; }
+ .ed input:focus, .ed select:focus { outline: none; border-color: #FFD100; background: #fff; }
+ .ed .mudou { background: #fff3cd; border-color: #f0c36d; }
+ .ed .mini { font-size: 12px; color: #777; }
+ .escolha button { margin: 0 8px 8px 0; }
+ .login { max-width: 360px; } .login label { display: block; margin: 10px 0 3px; font-size: 12px; color: #555; } .login button { margin-top: 12px; }
  @media (max-width: 760px) {
    body { display: block; }
    nav { width: auto; height: auto; position: static; display: flex; flex-wrap: wrap; padding: 8px; }
    nav .marca { border: 0; padding: 6px 12px; margin: 0; font-size: 18px; }
    nav a, nav .volta { padding: 8px 10px; margin: 0; border: 0; }
    main { padding: 14px 12px; }
-   .grade, .campos { grid-template-columns: 1fr; }
+   .grade, .campos, .ed .campos { grid-template-columns: 1fr; }
+   .ed .largo { grid-column: auto; }
+   .topo .form { flex-wrap: wrap; } #filtro { width: 100%; }
  }
 </style></head><body>
 
 <nav>
   <div class="marca">LUMIA</div>
-  <div id="abas"></div>
+  <a id="n-iniciar" onclick="trocar('iniciar')">INICIAR DEVOLUÇÃO</a>
+  <a id="n-planilha" onclick="trocar('planilha')">DEVOLUÇÕES</a>
   <a href="nf.html">NF DE DEVOLUÇÃO</a>
-  <a href="painel.html">PAINEL</a>
-  <a class="volta" href="../ecommerce/">‹ E-commerce</a>
+  <a href="painel.html?emp=dutech">DASH Dutech</a>
+  <a href="painel.html?emp=lumia">DASH Lumia</a>
 </nav>
 
-<main>
-<div id="tela"></div>
-</main>
+<main id="tela"></main>
 
 <script>
 const PROXY = "https://estoque-olist.dutech.workers.dev";
@@ -81,8 +110,9 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "
 const cab = () => ({authorization: `Bearer ${localStorage.usuario || ""}:${localStorage.senha || ""}`, "content-type": "application/json"});
 const $ = id => document.getElementById(id);
 const tela = $("tela");
-const reais = v => v == null || v === "" ? "" : Number(v).toLocaleString("pt-BR", {style: "currency", currency: "BRL"});
+const reais = v => v == null || v === "" ? "" : "R$ " + Number(v).toFixed(2).replace(".", ",");
 const dataBR = v => /^\d{4}-\d{2}-\d{2}/.test(v || "") ? v.slice(8, 10) + "/" + v.slice(5, 7) + "/" + v.slice(0, 4) : (v || "");
+const limpa = v => String(v ?? "").replace(/ /g, "").trim();
 // textos da mensagem para o ML (iguais aos do painel do Gabriel)
 const LIM = 320;
 const ALEG = {"Arrependimento": "disse que recebeu em boas condições e não quer mais o produto,", "Produto Incorreto": "alegou produto diferente do anunciado,",
@@ -91,15 +121,22 @@ const PROB = {"Vácuo violado": "com a embalagem a vácuo violada. Sem o vácuo,
   "Sinais de uso": "com sinais de uso. O material foi manipulado, perdeu a qualidade e não tem mais condição de revenda.",
   "Produto trocado": "um produto diferente do que enviamos, que não tem condição de revenda.",
   "Produto danificado": "danificado, impróprio para uso e sem condição de revenda."};
-const NOMES = {data_recebimento: "Data do recebimento", status: "Status", plataforma: "Plataforma", num_venda: "Nº venda", cliente: "Cliente",
-  valor_venda: "Valor da venda", nf_origem: "NF de origem", nf_devolucao: "NF de devolução", custo_devolucao: "Custo da devolução", sku: "SKU",
-  produto: "Produto", itens_problema: "Nº de itens com problema", motivo: "Motivo", resolucao: "Resolução", destino: "Destino do produto",
-  data_conclusao: "Data da conclusão", operador: "Operador"};
-let OP = null, aba = "iniciar", listas = {}, filtro = "";
-try { aba = sessionStorage.devAba || "iniciar"; } catch {}
+// campos da tela Devolucoes, nos grupos do painel do PC
+const GRUPOS = [
+  ["Controle", {data_recebimento: "Data do recebimento", status: "Status"}],
+  ["Dados da venda", {plataforma: "Plataforma", num_venda: "Nº venda", cliente: "Cliente", valor_venda: "Valor da venda", nf_origem: "NF de origem",
+    nf_devolucao: "NF de devolução", custo_devolucao: "Custo da devolução"}],
+  ["Produto", {sku: "SKU", produto: "Produto", itens_problema: "Nº de itens com problema"}],
+  ["Conclusões", {motivo: "Motivo", resolucao: "Resolução", destino: "Destino do produto"}],
+  ["Fechamento", {data_conclusao: "Data da conclusão", operador: "Operador"}]];
+const LARGO = ["cliente", "produto"];
+const NUMEROS = ["valor_venda", "custo_devolucao", "itens_problema"];
+const COPIA = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="12" height="14" rx="2"/><path d="M4 16V4a2 2 0 0 1 2-2h10"/></svg>`;
+let OP = null, aba = "iniciar", listas = {}, filtro = "", V = null;
+try { aba = sessionStorage.devAba === "planilha" ? "planilha" : "iniciar"; } catch {}
 
 function telaLogin(aviso){
-  tela.innerHTML = `<div class="cx">${aviso ? `<p class="erro">${esc(aviso)}</p>` : ""}
+  tela.innerHTML = `<div class="topo"><h1>Devoluções</h1></div><div class="caixa login">${aviso ? `<div class="erro">${esc(aviso)}</div>` : ""}
     <label>Usuário</label><input id="u" autocapitalize="none"><label>Senha</label><input id="s" type="password">
     <button onclick="entrar()">Entrar</button></div>`;
 }
@@ -109,83 +146,118 @@ async function api(q, corpo){
   try { r = await fetch(PROXY + q, corpo ? {method: "POST", headers: cab(), body: JSON.stringify(corpo)} : {headers: cab(), cache: "no-store"}); }
   catch { return {erro: "sem conexão"}; }
   if (r.status === 401) { telaLogin("usuário ou senha inválidos"); return null; }
-  if (r.status === 403) { tela.innerHTML = `<div class="cx erro">Seu usuário não abre as Devoluções.</div>`; return null; }
+  if (r.status === 403) { tela.innerHTML = `<div class="erro">Seu usuário não abre as Devoluções.</div>`; return null; }
   return r.json().catch(() => ({erro: "resposta inválida do servidor"}));
 }
 const opts = (lista, atual, vazio) => (vazio !== undefined ? `<option value="">${vazio}</option>` : "") +
-  lista.map(o => `<option ${o === atual ? "selected" : ""}>${esc(o)}</option>`).join("");
+  lista.map(o => `<option ${o === atual ? "selected" : ""}>${esc(o)}</option>`).join("") +
+  (atual && !lista.includes(atual) ? `<option selected>${esc(atual)}</option>` : "");
 
-function desenhaAbas(){
-  $("abas").innerHTML = [["iniciar", "INICIAR DEVOLUÇÃO"], ["dutech", "DEVOLUÇÕES Dutech"], ["lumia", "DEVOLUÇÕES Lumia"]]
-    .map(([k, t]) => `<a class="${aba === k ? "on" : ""}" onclick="trocar('${k}')">${t}</a>`).join("");
+async function carregarListas(){
+  const [d, l] = await Promise.all([api("/?rma=lista&emp=dutech"), api("/?rma=lista&emp=lumia")]);
+  if (!d || !l) return false;
+  const ruim = [d, l].find(j => j.erro);
+  if (ruim) { tela.innerHTML = `<div class="erro">${esc(ruim.erro)}</div>`; return false; }
+  OP = d.opcoes || l.opcoes; listas = {dutech: d.linhas, lumia: l.linhas};
+  return true;
 }
 async function trocar(k){
   aba = k; try { sessionStorage.devAba = k; } catch {}
-  desenhaAbas();
+  for (const n of ["iniciar", "planilha"]) $("n-" + n).className = aba === n ? "on" : "";
   if (!(localStorage.usuario && localStorage.senha)) return telaLogin();
-  if (k === "iniciar") return telaIniciar();
-  tela.innerHTML = `<div class="cx">carregando...</div>`;
-  const j = await api(`/?rma=lista&emp=${k}`);
-  if (!j) return;
-  if (j.erro) return tela.innerHTML = `<div class="cx erro">${esc(j.erro)}</div>`;
-  OP = j.opcoes; listas[k] = j.linhas;
-  desenhaLista(k);
+  if (k === "planilha") return telaPlanilha();
+  return telaIniciar();
 }
 
-// --- iniciar devolucao ---
-function telaIniciar(aviso, ok){
-  tela.innerHTML = `<h1>Iniciar devolução</h1>${aviso ? `<p class="erro">${esc(aviso)}</p>` : ""}${ok ? `<p class="ok">${esc(ok)}</p>` : ""}
-    <div class="busca"><input id="venda" inputmode="numeric" placeholder="Nº da venda (Mercado Livre / Shopee)" onkeydown="if(event.key==='Enter')buscar()">
-    <button onclick="buscar()">Buscar</button></div><div id="res"></div>`;
+// --- INICIAR DEVOLUCAO: busca + as duas listas embaixo ---
+async function telaIniciar(msg, erro){
+  tela.innerHTML = `<div class="topo"><h1>Iniciar devolução</h1>
+      <div class="form"><input id="venda" inputmode="numeric" placeholder="Nº da venda (Mercado Livre / Shopee)" onkeydown="if(event.key==='Enter')buscar()">
+      <button onclick="buscar()">Buscar</button>
+      <select id="filtro" onchange="filtro=this.value;desenhaListas()"><option value="">Todos os status</option></select></div></div>
+    ${msg ? `<div class="ok">${esc(msg)}</div>` : ""}${erro ? `<div class="erro">${esc(erro)}</div>` : ""}
+    <div id="res"></div><div id="listas"><div class="caixa">carregando...</div></div>`;
   $("venda").focus();
+  if (!await carregarListas()) return;
+  $("filtro").innerHTML = opts(OP.status, filtro, "Todos os status");
+  desenhaListas();
 }
-let V = null;
+function desenhaListas(){
+  $("listas").innerHTML = ["dutech", "lumia"].map(k => {
+    const l = listas[k].slice().reverse().filter(r => !filtro || r.status === filtro);
+    return `<div class="caixa lista"><div class="lista-topo"><h3>Lista de RMAs – ${k.toUpperCase()}</h3><small>${l.length} item(ns)</small></div>
+    <div class="rolagem"><table><tr><th>RMA</th><th>Status</th><th></th><th>Pedido</th><th>Plataforma</th><th>Cliente</th><th>SKU / Produto</th>
+      <th>Valor venda</th><th>Custo dev.</th><th>Status ML</th></tr>
+    ${l.map(r => { const v = limpa(r.num_venda), ml = r.plataforma === "Mercado Livre", analise = r.status === "Em análise" && ml;
+      return `<tr><td><span class="rma">${esc(r.rma)}</span></td>
+      <td><span class="selo ${String(r.status || "").toLowerCase().replace(/\s/g, "-").replace("á", "a")}">${esc(r.status || "-")}</span></td>
+      <td>${ml ? `<a class="ver-ml" target="_blank" rel="noopener" href="https://vendedores.mercadolivre.com.br/vendas/${esc(v)}/detalhe">Ver no ML</a>` : ""}</td>
+      <td><a class="venda" onclick="editar('${k}', ${r.n})">${esc(v)}</a><button class="copiar" title="Copiar" onclick="copiar(this, '${esc(v)}')">${COPIA}</button></td>
+      <td><span class="ponto ${r.plataforma === "Shopee" ? "shopee" : ""}"></span>${esc(r.plataforma)}</td>
+      <td>${esc(r.cliente)}</td><td>${esc(r.sku)}<br><small class="cinza">${esc(String(r.produto || "").slice(0, 26))}${String(r.produto || "").length > 26 ? "..." : ""}</small></td>
+      <td class="num">${reais(r.valor_venda)}</td><td class="num">${reais(r.custo_devolucao)}</td>
+      <td class="status-ml" ${analise ? `data-venda="${esc(v)}">...` : ">"}</td></tr>`; }).join("")}
+    </table></div></div>`; }).join("");
+  statusML();
+}
+async function statusML(){
+  for (const td of document.querySelectorAll("td[data-venda]")) {     // um por vez, so os "Em analise"
+    const m = await api(`/meli/logistica/ml-venda?numero=${td.dataset.venda}`);
+    if (!td.isConnected) return;
+    td.textContent = m && m.ml ? m.ml.situacao : "não consegui consultar";
+  }
+}
+function copiar(b, t){ navigator.clipboard.writeText(t); b.style.color = "green"; setTimeout(() => b.style.color = "", 1000); }
+
 async function buscar(){
   const n = $("venda").value.replace(/\D/g, "");
   if (!n) return;
-  $("res").innerHTML = `<div class="cx">procurando nas duas Olists e no Mercado Livre...</div>`;
+  $("res").innerHTML = `<div class="caixa">procurando nas duas Olists e no Mercado Livre...</div>`;
   const [j, m] = await Promise.all([api(`/?rma=venda&n=${n}`), api(`/meli/logistica/ml-venda?numero=${n}`)]);
   if (!j) return;
-  if (j.erro) return $("res").innerHTML = `<div class="cx erro">${esc(j.erro)}</div>`;
+  if (j.erro) return $("res").innerHTML = `<div class="erro">${esc(j.erro)}</div>`;
   OP = j.opcoes; V = j.venda;
   const ml = m && !m.erro ? m.ml : null, L = j.lancadas, f = L[0] || {};
-  const qtdDe = (it, i) => { const l = L.find(x => x.sku === it.sku); return l ? l.itens_problema : (V.itens.length === 1 ? it.quantidade : 0); };
+  const qtdDe = it => { const l = L.find(x => x.sku === it.sku); return l ? l.itens_problema : (V.itens.length === 1 ? it.quantidade : 0); };
   const motivo = f.motivo || (ml && ml.motivo) || "";
-  $("res").innerHTML = `${L.length ? `<div class="aviso">Essa venda já está lançada (RMA ${L.map(x => x.rma).join(", ")}). Os campos vêm de lá e o botão atualiza essas mesmas linhas.</div>` : ""}
+  $("res").innerHTML = `${L.length ? `<div class="aviso">Essa venda já está na planilha (RMA ${L.map(x => x.rma).join(", ")}). Os campos abaixo vêm de lá, e o botão atualiza essa mesma linha.</div>` : ""}
   <div class="grade"><div>
-    <div class="cx"><b>Venda · ${esc(V.empresa.toUpperCase())}</b><table>
-      <tr><td class="t">Recebimento</td><td class="t">${L.length ? dataBR(f.data_recebimento) : "hoje"}</td></tr>
-      <tr><td class="t">Plataforma</td><td class="t">${esc(V.plataforma)}</td></tr>
-      <tr><td class="t">Cliente</td><td class="t">${esc(V.cliente)}</td></tr>
-      <tr><td class="t">NF de origem</td><td class="t">${esc(V.nf_origem)}${V.chave_origem ? `<div class="mini">Chave: ${esc(V.chave_origem)}</div>` : ""}</td></tr>
-      <tr><td class="t">Operador</td><td class="t">${esc(L.length ? f.operador : localStorage.usuario)}</td></tr></table></div>
-    ${ml ? `<div class="cx"><b>Mercado Livre (${esc(ml.conta)})</b><table>${ml.reclamacao ? `
-      <tr><td class="t">Motivo do cliente</td><td class="t">${esc(ml.motivo_texto || "-")}</td></tr>
-      <tr><td class="t">Reclamação</td><td class="t">${ml.encerrada ? `encerrada em ${esc(ml.encerrada_em)}, a favor do ${esc(ml.a_favor)}${ml.cobertura ? " (com cobertura do ML)" : ""}` : "em aberto"} · ${esc(ml.situacao)}</td></tr>
-      ${ml.retorno ? `<tr><td class="t">Produto</td><td class="t">${esc(ml.retorno)}</td></tr>` : ""}
-      ${ml.dinheiro ? `<tr><td class="t">Dinheiro</td><td class="t">${esc(ml.dinheiro)}</td></tr>` : ""}`
-      : `<tr><td class="t">Reclamação</td><td class="t">nenhuma no Mercado Livre (pedido: ${esc(ml.pedido)})</td></tr>`}</table></div>`
+    <div class="caixa"><h3>Venda · ${esc(V.empresa.toUpperCase())}</h3><table class="auto">
+      <tr><td>Recebimento</td><td>${L.length ? dataBR(f.data_recebimento) : "hoje"}</td></tr>
+      <tr><td>Plataforma</td><td>${esc(V.plataforma)}</td></tr>
+      <tr><td>Cliente</td><td>${esc(V.cliente)}</td></tr>
+      <tr><td>NF de origem</td><td>${esc(V.nf_origem || "sem nota")}${V.chave_origem ? `<br><small>Chave: ${esc(V.chave_origem)}</small>` : ""}</td></tr>
+      <tr><td>Operador</td><td>${esc(L.length ? f.operador : localStorage.usuario)}</td></tr></table></div>
+    ${ml ? `<div class="caixa"><h3>Mercado Livre (${esc(ml.conta)})</h3><table class="auto">${ml.reclamacao ? `
+      <tr><td>Motivo do cliente</td><td>${esc(ml.motivo_texto || "-")}</td></tr>
+      <tr><td>Reclamação</td><td>${ml.encerrada ? `encerrada em ${esc(ml.encerrada_em)}, a favor do ${esc(ml.a_favor)}${ml.cobertura ? " (com cobertura do ML)" : ""}` : "em aberto"}</td></tr>
+      ${ml.retorno ? `<tr><td>Produto</td><td>${esc(ml.retorno)}</td></tr>` : ""}
+      ${ml.dinheiro ? `<tr><td>Dinheiro</td><td>${esc(ml.dinheiro)}</td></tr>` : ""}`
+      : `<tr><td>Reclamação</td><td>nenhuma no Mercado Livre (pedido: ${esc(ml.pedido)})</td></tr>`}</table></div>`
       : V.plataforma === "Mercado Livre" ? `<div class="aviso">Não consegui buscar essa venda no Mercado Livre.</div>` : ""}
-    ${V.plataforma === "Mercado Livre" ? `<div class="cx"><b>Mensagem para o Mercado Livre</b>
+    ${V.plataforma === "Mercado Livre" ? `<div class="caixa"><h3>Mensagem para o Mercado Livre</h3>
       <select id="problema" onchange="montar()">${Object.keys(PROB).map(p => `<option>${esc(p)}</option>`).join("")}</select>
-      <textarea id="msg" rows="5" maxlength="${LIM}" oninput="contar()" style="margin-top:8px"></textarea>
-      <div class="mini"><span id="conta"></span> <button class="sec" style="padding:4px 10px;margin:4px 0 0 8px" onclick="navigator.clipboard.writeText($('msg').value)">Copiar</button></div></div>` : ""}
+      <textarea id="msg" rows="5" maxlength="${LIM}" oninput="contar()"></textarea>
+      <div class="linha-msg"><span id="conta"></span><button type="button" onclick="navigator.clipboard.writeText($('msg').value)">Copiar</button></div></div>` : ""}
   </div>
-  <div class="cx"><b>Itens com problema</b>
-    <table>${V.itens.map((it, i) => `<tr><td class="t">${esc(it.sku)}<div class="mini">${esc(it.descricao)} · vendido ${it.quantidade} · ${reais(it.valor)}</div></td>
-      <td class="t num"><input class="q" type="number" min="0" max="${it.quantidade}" id="q${i}" value="${qtdDe(it, i)}" onchange="montar()"></td></tr>`).join("")}</table>
+  <div class="caixa"><h3>Itens com problema</h3>
+    <table><tr><th>SKU</th><th>Produto</th><th>Vendido</th><th>Valor</th><th>Com problema</th><th></th></tr>
+    ${V.itens.map((it, i) => `<tr><td>${esc(it.sku)}</td><td>${esc(it.descricao)}</td><td>${it.quantidade}</td><td>${reais(it.valor)}</td>
+      <td><input class="qtd" type="number" min="0" max="${it.quantidade}" id="q${i}" value="${qtdDe(it)}" onchange="montar()"></td>
+      <td><button type="button" class="lixo" title="Remover da devolução" onclick="remover(this, ${i})">🗑</button></td></tr>`).join("")}</table>
     <div class="campos">
-      <div><label>Status</label><select id="f_status">${opts(OP.status, f.status || OP.status[0])}</select></div>
-      <div><label>Motivo da devolução</label><select id="f_motivo" onchange="montar()">${opts(OP.motivos, motivo, "")}</select></div>
-      <div><label>Destino do produto</label><select id="f_destino">${opts(OP.destinos, f.destino, "(ainda não)")}</select></div>
-      <div><label>Resolução</label><select id="f_resolucao">${opts(OP.resolucoes, f.resolucao, "(ainda não)")}</select></div>
-      <div><label>Custo da devolução (R$)</label><input id="f_custo_devolucao" value="${esc(String(f.custo_devolucao ?? 0).replace(".", ","))}"></div>
-      <div><label>NF de devolução</label><input id="f_nf_devolucao" value="${esc(f.nf_devolucao || "")}" placeholder="vazio se ainda não tem"></div>
-      <div><label>Data da conclusão</label><input type="date" id="f_data_conclusao" value="${esc(f.data_conclusao || "")}"></div>
+      <label>Status<select id="f_status">${opts(OP.status, f.status || OP.status[0])}</select></label>
+      <label>Motivo da devolução<select id="f_motivo" onchange="montar()">${opts(OP.motivos, motivo, "")}</select></label>
+      <label>Destino do produto<select id="f_destino">${opts(OP.destinos, f.destino, "(ainda não)")}</select></label>
+      <label>Resolução<select id="f_resolucao">${opts(OP.resolucoes, f.resolucao, "(ainda não)")}</select></label>
+      <label>Custo da devolução (R$)<input id="f_custo_devolucao" value="${esc(String(f.custo_devolucao ?? 0).replace(".", ","))}"></label>
+      <label>NF de devolução<input id="f_nf_devolucao" value="${esc(f.nf_devolucao || "")}" placeholder="vazio se ainda não tem"></label>
+      <label>Data da conclusão<input type="date" id="f_data_conclusao" value="${esc(f.data_conclusao || (ml && ml.data_conclusao) || "")}"></label>
     </div>
-    <button onclick="lancar()">${L.length ? "Atualizar devolução" : "Lançar devolução"}</button></div></div>`;
+    <button onclick="lancar()">${L.length ? "Atualizar na planilha" : "Lançar na planilha"}</button></div></div>`;
   montar();
 }
+function remover(b, i){ $("q" + i).value = 0; b.closest("tr").style.display = "none"; montar(); }
 function contar(){ const m = $("msg"); if (m) $("conta").textContent = m.value.length + "/" + LIM; }
 function montar(){
   const m = $("msg"); if (!m) return;
@@ -201,57 +273,63 @@ async function lancar(){
   const j = await api("/?rma=lancar", {numero: V.numero, qtds, form});
   if (!j) return;
   if (j.erro) return alert(j.erro);
-  telaIniciar(null, `Lançado: RMA ${j.rmas.join(", ")} (${V.empresa.toUpperCase()})`);
+  telaIniciar(`Lançado: RMA ${j.rmas.join(", ")} (${V.empresa.toUpperCase()})`);
 }
 
-// --- lista e edicao ---
-function desenhaLista(k){
-  const l = listas[k].slice().reverse().filter(r => !filtro || r.status === filtro);
-  tela.innerHTML = `<h1>Devoluções ${k === "lumia" ? "Lumia" : "Dutech"}</h1><div class="cx"><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
-      <b>Lista de RMAs – ${k.toUpperCase()}</b><span class="mini" style="margin:0">${l.length} item(ns)</span>
-      <select style="width:auto" onchange="filtro=this.value;desenhaLista('${k}')">${opts(OP.status, filtro, "Todos os status")}</select></div>
-    <div class="rol"><table class="l"><tr><th>RMA</th><th>Status</th><th>Pedido</th><th>Plataforma</th><th>Cliente</th><th>SKU / Produto</th>
-      <th class="num">Valor venda</th><th class="num">Custo dev.</th><th>NF dev.</th><th>Status ML</th></tr>
-    ${l.map(r => `<tr><td><a class="rma" onclick="editar('${k}', ${r.n})">${r.rma}</a><div class="mini">${dataBR(r.data_recebimento)}</div></td>
-      <td><span class="selo ${String(r.status || "").toLowerCase().replace(/\s/g, "-").replace("á", "a")}">${esc(r.status || "-")}</span></td>
-      <td>${esc(r.num_venda)}${r.plataforma === "Mercado Livre" ? `<div><a class="mini" style="margin-top:4px" target="_blank" rel="noopener" href="https://vendedores.mercadolivre.com.br/vendas/${esc(r.num_venda)}/detalhe">ver no ML</a></div>` : ""}</td>
-      <td>${esc(r.plataforma)}</td><td>${esc(r.cliente)}</td><td>${esc(r.sku)}<div class="mini">${esc(String(r.produto || "").slice(0, 34))}</div></td>
-      <td class="num">${reais(r.valor_venda)}</td><td class="num">${reais(r.custo_devolucao)}</td><td>${esc(r.nf_devolucao || "")}</td>
-      <td class="mini" ${r.status === "Em análise" && r.plataforma === "Mercado Livre" ? `data-venda="${esc(r.num_venda)}">...` : ">"}</td></tr>`).join("")}
-    </table></div></div>`;
-  statusML();
+// --- DEVOLUCOES: abrir uma venda ja lancada e editar ---
+function telaPlanilha(erro, venda){
+  tela.innerHTML = `<div class="ed"><div class="topo"><h1>Devoluções</h1>
+      <div class="form" style="max-width:520px"><input id="vp" value="${esc(venda || "")}" placeholder="Nº da venda já lançada" onkeydown="if(event.key==='Enter')abrir()">
+      <button onclick="abrir()">Abrir</button></div></div>${erro ? `<div class="erro">${esc(erro)}</div>` : ""}<div id="escolha"></div></div>`;
+  $("vp").focus();
 }
-async function statusML(){
-  for (const td of document.querySelectorAll("td[data-venda]")) {     // um por vez, so os "Em analise"
-    const m = await api(`/meli/logistica/ml-venda?numero=${td.dataset.venda}`);
-    if (!td.isConnected) return;
-    td.textContent = m && m.ml ? m.ml.situacao : "não consegui consultar";
-  }
+async function abrir(){
+  const n = $("vp").value.replace(/\D/g, "");
+  if (!n) return;
+  $("escolha").innerHTML = `<div class="caixa">procurando...</div>`;
+  if (!await carregarListas()) return;
+  const achou = [];
+  for (const k of ["dutech", "lumia"]) for (const r of listas[k]) if (limpa(r.num_venda).replace(/\D/g, "") === n) achou.push([k, r]);
+  if (!achou.length) return telaPlanilha("Essa venda não está lançada nas devoluções.", n);
+  if (achou.length === 1) return editar(achou[0][0], achou[0][1].n);
+  $("escolha").innerHTML = `<div class="caixa escolha"><h3>Essa venda tem ${achou.length} linhas. Qual abrir?</h3>
+    ${achou.map(([k, r]) => `<button onclick="editar('${k}', ${r.n})">RMA ${esc(r.rma)} · ${esc(r.sku)}</button>`).join("")}</div>`;
 }
 function editar(k, n){
+  aba = "planilha"; try { sessionStorage.devAba = "planilha"; } catch {}
+  for (const x of ["iniciar", "planilha"]) $("n-" + x).className = aba === x ? "on" : "";
   const r = listas[k].find(x => x.n === n);
   const sel = {status: OP.status, plataforma: OP.plataformas, motivo: OP.motivos, resolucao: OP.resolucoes, destino: OP.destinos};
-  tela.innerHTML = `<div class="cx"><b>RMA ${r.rma} · ${k.toUpperCase()}</b>
-    <div class="campos">${Object.entries(NOMES).map(([c, t]) => `<div><label>${t}</label>${sel[c]
-      ? `<select id="e_${c}">${opts(sel[c], r[c], "")}</select>`
-      : `<input id="e_${c}" ${c.startsWith("data_") ? 'type="date"' : ""} value="${esc(c.startsWith("data_") && !/^\d{4}-/.test(r[c] || "") ? "" : (r[c] ?? ""))}">
-         ${c.startsWith("data_") && r[c] && !/^\d{4}-/.test(r[c]) ? `<div class="erro mini">estava escrito "${esc(r[c])}" na planilha: corrija</div>` : ""}`}</div>`).join("")}</div>
-    <p class="mini">${r.atualizado_por ? `última alteração: ${esc(r.atualizado_por)}${r.atualizado_em ? " em " + new Date(r.atualizado_em).toLocaleString("pt-BR") : ""}` : ""}</p>
-    <button onclick="salvar('${k}', ${n})">Salvar</button><button class="sec" onclick="desenhaLista('${k}')">Voltar à lista</button></div>`;
+  const campo = (c, t) => {
+    const data = c.startsWith("data_"), v = r[c];
+    const ruim = data && v && !/^\d{4}-/.test(v);
+    return `<label class="${LARGO.includes(c) ? "largo" : ""}">${t}${sel[c]
+      ? `<select data-c="${c}">${opts(sel[c] || [], v || "", "")}</select>`
+      : `<input data-c="${c}" ${data ? 'type="date"' : ""} value="${esc(ruim ? "" : NUMEROS.includes(c) && v != null ? String(v).replace(".", ",") : limpa(v))}">`}
+      ${ruim ? `<span class="erro" style="padding:2px 6px;margin:0">estava escrito "${esc(v)}" na planilha: corrija</span>` : ""}</label>`;
+  };
+  tela.innerHTML = `<div class="ed"><div class="barra"><span class="rma-b">RMA ${esc(r.rma)}</span><span class="selo">${k.toUpperCase()}</span>
+      <button class="botao" onclick="trocar('iniciar')">VOLTAR</button><button onclick="salvar('${k}', ${n})">SALVAR</button></div>
+    ${GRUPOS.map(([g, cs]) => `<div class="caixa"><h3>${g}</h3><div class="campos">${Object.entries(cs).map(([c, t]) => campo(c, t)).join("")}</div></div>`).join("")}
+    <p class="mini">${r.atualizado_por ? `última alteração: ${esc(r.atualizado_por)}${r.atualizado_em ? " em " + new Date(r.atualizado_em).toLocaleString("pt-BR") : ""}` : ""}</p></div>`;
+  tela.querySelectorAll("[data-c]").forEach(i => i.addEventListener("change", () => i.classList.add("mudou")));
+  window.scrollTo(0, 0);
 }
 async function salvar(k, n){
-  const r = listas[k].find(x => x.n === n), campos = {};
-  for (const c of Object.keys(NOMES)) {
-    const v = $("e_" + c).value, antes = r[c] ?? "";
-    if (String(v) !== String(antes) && !(c.startsWith("data_") && v === "" && !/^\d{4}-/.test(antes))) campos[c] = v;
-  }
-  if (!Object.keys(campos).length) return desenhaLista(k);
+  const campos = {};
+  tela.querySelectorAll("[data-c].mudou").forEach(i => {
+    let v = i.value;
+    if (NUMEROS.includes(i.dataset.c) && v.includes(",")) v = v.replace(/\./g, "").replace(",", ".");
+    campos[i.dataset.c] = v;
+  });
+  if (!Object.keys(campos).length) return trocar("iniciar");
   const j = await api("/?rma=editar", {emp: k, n, campos});
   if (!j) return;
   if (j.erro) return alert(j.erro);
-  trocar(k);
+  telaIniciar("Salvo.");
+  aba = "iniciar"; try { sessionStorage.devAba = "iniciar"; } catch {}
+  for (const x of ["iniciar", "planilha"]) $("n-" + x).className = aba === x ? "on" : "";
 }
-desenhaAbas(); trocar(aba);
-
+trocar(aba);
 </script>
 </body></html>

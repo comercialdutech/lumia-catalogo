@@ -13,12 +13,12 @@
  nav { width: 190px; background: #000; color: #fff; padding: 20px 0; flex-shrink: 0; position: sticky; top: 0; height: 100vh; }
  nav .marca { font-size: 24px; font-weight: bold; letter-spacing: 4px; color: #FFD100; padding: 0 20px 20px; border-bottom: 1px solid #222; margin-bottom: 10px; }
  nav a { display: block; color: #ddd; text-decoration: none; padding: 10px 20px; font-size: 14px; }
- nav a.on, nav a:hover { background: #FFD100; color: #000; font-weight: bold; }
+ nav a.ativo, nav a:hover { background: #FFD100; color: #000; font-weight: bold; }
  nav .volta { color: #888; font-size: 12px; margin-top: 14px; border-top: 1px solid #222; padding-top: 14px; }
  main { flex: 1; padding: 18px 24px; min-width: 0; }
  .topo { display: flex; align-items: center; gap: 16px; margin-bottom: 14px; flex-wrap: wrap; }
  .topo h1 { margin: 0; font-size: 22px; }
- .topo small { color: #777; }
+ .topo small { font-size: 12px; }
  .topo .botoes { margin-left: auto; display: flex; gap: 8px; }
  button { background: #FFD100; color: #000; font-weight: bold; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; }
  button:hover { background: #000; color: #FFD100; }
@@ -52,11 +52,10 @@
 <nav>
   <div class="marca">LUMIA</div>
   <a href="./" onclick="try{sessionStorage.devAba='iniciar'}catch{}">INICIAR DEVOLUÇÃO</a>
-  <a href="./" onclick="try{sessionStorage.devAba='dutech'}catch{}">DEVOLUÇÕES Dutech</a>
-  <a href="./" onclick="try{sessionStorage.devAba='lumia'}catch{}">DEVOLUÇÕES Lumia</a>
-  <a href="nf.html" class="on">NF DE DEVOLUÇÃO</a>
-  <a href="painel.html">PAINEL</a>
-  <a class="volta" href="../ecommerce/">‹ E-commerce</a>
+  <a href="./" onclick="try{sessionStorage.devAba='planilha'}catch{}">DEVOLUÇÕES</a>
+  <a href="nf.html" class="ativo">NF DE DEVOLUÇÃO</a>
+  <a href="painel.html?emp=dutech" id="nav-dutech">DASH Dutech</a>
+  <a href="painel.html?emp=lumia" id="nav-lumia">DASH Lumia</a>
 </nav>
 
 <main id="tela"></main>
@@ -118,15 +117,14 @@ async function carregar(){
   const rodando = vivo(rv) || vivo(rt);
   // log: o da ultima execucao (de verdade ou teste)
   const ult = Number((rv.situacao || {}).pedido_em || 0) >= Number((rt.situacao || {}).pedido_em || 0) ? [rv, "de verdade"] : [rt, "teste"];
-  const s = ult[0].situacao || {};
+  const s = (rodando ? (vivo(rv) ? rv : rt) : ult[0]).situacao || {};
   tela.innerHTML = `<div class="topo"><h1>NF de devolução</h1><small>${p.length} venda(s) sem nota</small>
-      <div class="botoes"><button class="sec" ${rodando ? "disabled" : ""} onclick="pedir('${TESTE}')">TESTAR (não emite)</button>
-      <button ${!p.length || rodando ? "disabled" : ""} onclick="pedir('${ROBO}')">${rodando ? "GERANDO..." : "GERAR NOTAS DE DEVOLUÇÃO"}</button></div></div>
+      <div class="botoes"><button ${!p.length || rodando ? "disabled" : ""} onclick="pedir('${ROBO}')">${rodando ? "GERANDO..." : "GERAR NOTAS DE DEVOLUÇÃO"}</button></div></div>
     <div class="caixa">${p.length ? `<table><tr><th>Empresa</th><th>Venda</th><th>Cliente</th><th>NF de origem</th><th>Status</th><th>Produtos</th></tr>
       ${p.map(x => `<tr><td><span class="selo">${esc(x.empresa)}</span></td><td>${esc(x.venda)}</td><td>${esc(x.cliente)}</td>
         <td>${esc(x.nf_origem)}</td><td>${esc(x.status || "")}</td><td>${esc(x.produtos.join(", "))}</td></tr>`).join("")}</table>`
       : `<div class="vazio">Nenhuma devolução com NF em branco.</div>`}</div>
-    <div class="log-titulo">LOG<span>${s.estado ? `${ult[1]} · ${s.pedido_por ? "pedido por " + esc(s.pedido_por) + " · " : ""}${estado(ult[0])}` : ""}</span></div>
+    <div class="log-titulo">LOG</div>
     <pre class="andamento" id="andamento">${esc(s.log || "Aguardando...")}</pre>`;
   const a = $("andamento"); a.scrollTop = a.scrollHeight;
   timer = setTimeout(carregar, rodando ? 4000 : 60000);
