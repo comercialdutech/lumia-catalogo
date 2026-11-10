@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NF de devolução</title>
+<meta name="theme-color" content="#000000">
+<script src="../tema.js"></script>
+<link rel="apple-touch-icon" href="../app/icone-192.png">
+<meta name="robots" content="noindex">
+<style>
+ /* visual da tela NF de devolucao que rodava no PC do Gabriel */
+ * { box-sizing: border-box; }
+ body { font-family: Arial, sans-serif; margin: 0; background: #f7f6f3; color: #222; display: flex; min-height: 100vh; }
+ nav { width: 190px; background: #000; color: #fff; padding: 20px 0; flex-shrink: 0; position: sticky; top: 0; height: 100vh; }
+ nav .marca { font-size: 24px; font-weight: bold; letter-spacing: 4px; color: #FFD100; padding: 0 20px 20px; border-bottom: 1px solid #222; margin-bottom: 10px; }
+ nav a { display: block; color: #ddd; text-decoration: none; padding: 10px 20px; font-size: 14px; }
+ nav a.on, nav a:hover { background: #FFD100; color: #000; font-weight: bold; }
+ nav .volta { color: #888; font-size: 12px; margin-top: 14px; border-top: 1px solid #222; padding-top: 14px; }
+ main { flex: 1; padding: 18px 24px; min-width: 0; }
+ .topo { display: flex; align-items: center; gap: 16px; margin-bottom: 14px; flex-wrap: wrap; }
+ .topo h1 { margin: 0; font-size: 22px; }
+ .topo small { color: #777; }
+ .topo .botoes { margin-left: auto; display: flex; gap: 8px; }
+ button { background: #FFD100; color: #000; font-weight: bold; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+ button:hover { background: #000; color: #FFD100; }
+ button.sec { background: #e6e6e6; }
+ button[disabled] { opacity: .5; cursor: default; } button[disabled]:hover { background: #FFD100; color: #000; }
+ .caixa { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; overflow: auto; }
+ table { border-collapse: collapse; width: 100%; }
+ th, td { border-bottom: 1px solid #eee; padding: 8px 12px; text-align: left; font-size: 13px; vertical-align: top; }
+ th { background: #fff6cc; text-transform: uppercase; font-size: 11px; color: #555; }
+ .selo { border-radius: 10px; padding: 2px 10px; font-size: 12px; font-weight: bold; background: #FFD100; }
+ .vazio { padding: 14px; color: #777; }
+ .aviso { background: #fff4e5; border: 1px solid #f0c36d; padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; font-size: 13px; }
+ .log-titulo { margin: 18px 0 6px; font-size: 12px; font-weight: bold; letter-spacing: 1px; color: #777; }
+ .log-titulo span { font-weight: normal; letter-spacing: 0; margin-left: 8px; }
+ .andamento { background: #000; color: #FFD100; padding: 12px 14px; border-radius: 8px; margin: 0; font: 13px Consolas, monospace; white-space: pre-wrap; min-height: 300px; max-height: 55vh; overflow: auto; }
+ .login { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 14px; max-width: 360px; }
+ .login label { display: block; margin: 10px 0 3px; color: #555; font-size: 12px; }
+ .login input { width: 100%; padding: 6px 8px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; }
+ .login button { margin-top: 12px; }
+ .erro { color: #9a4b00; }
+ @media (max-width: 760px) {
+   body { display: block; }
+   nav { width: auto; height: auto; position: static; display: flex; flex-wrap: wrap; padding: 8px; }
+   nav .marca { border: 0; padding: 6px 12px; margin: 0; font-size: 18px; }
+   nav a, nav .volta { padding: 8px 10px; margin: 0; border: 0; }
+   main { padding: 14px 12px; }
+   .topo .botoes { margin-left: 0; }
+ }
+</style></head><body>
+
+<nav>
+  <div class="marca">LUMIA</div>
+  <a href="./" onclick="try{sessionStorage.devAba='iniciar'}catch{}">INICIAR DEVOLUÇÃO</a>
+  <a href="./" onclick="try{sessionStorage.devAba='dutech'}catch{}">DEVOLUÇÕES Dutech</a>
+  <a href="./" onclick="try{sessionStorage.devAba='lumia'}catch{}">DEVOLUÇÕES Lumia</a>
+  <a href="nf.html" class="on">NF DE DEVOLUÇÃO</a>
+  <a href="painel.html">PAINEL</a>
+  <a class="volta" href="../ecommerce/">‹ E-commerce</a>
+</nav>
+
+<main id="tela"></main>
+
+<script>
+const PROXY = "https://estoque-olist.dutech.workers.dev";
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+const cab = () => ({authorization: `Bearer ${localStorage.usuario || ""}:${localStorage.senha || ""}`});
+const $ = id => document.getElementById(id);
+const tela = $("tela");
+const hora = ms => ms ? new Date(Number(ms)).toLocaleString("pt-BR", {dateStyle: "short", timeStyle: "short"}) : "";
+const ROBO = "nf_devolucao", TESTE = "nf_devolucao_teste";
+let timer;
+
+function telaLogin(aviso){
+  tela.innerHTML = `<div class="topo"><h1>NF de devolução</h1></div><div class="login">${aviso ? `<p class="erro">${esc(aviso)}</p>` : ""}
+    <label>Usuário</label><input id="u" autocapitalize="none"><label>Senha</label><input id="s" type="password">
+    <button onclick="entrar()">Entrar</button></div>`;
+}
+function entrar(){ localStorage.usuario = $("u").value.trim(); localStorage.senha = $("s").value; carregar(); }
+async function api(q, post){
+  let r;
+  try { r = await fetch(PROXY + q, {method: post ? "POST" : "GET", headers: cab(), cache: "no-store"}); }
+  catch { return {erro: "sem conexão"}; }
+  if (r.status === 401) { telaLogin("usuário ou senha inválidos"); return null; }
+  if (r.status === 403) { tela.innerHTML = `<div class="aviso">Seu usuário não abre esta tela.</div>`; return null; }
+  return r.json().catch(() => ({erro: "resposta inválida do servidor"}));
+}
+const vivo = (j) => { const s = j.situacao || {}; return ["pedido", "rodando"].includes(s.estado) && (j.agora || Date.now()) - Number(s.atualizado || 0) < (j.morto_ms || 5400e3); };
+function estado(j){
+  const s = j.situacao || {};
+  if (vivo(j)) return s.estado === "pedido" ? "na fila: o servidor começa em até 1 minuto" : `rodando desde ${hora(s.inicio)}...`;
+  if (s.estado === "ok") return `terminou ${hora(s.fim)}`;
+  if (s.estado === "erro") return `deu erro ${hora(s.fim)}`;
+  if (["pedido", "rodando"].includes(s.estado)) return "sem notícia do servidor há muito tempo — pode pedir de novo";
+  return "nunca rodou";
+}
+
+// pendentes = RMA sem NF de devolucao e com NF de origem (mesma regra do robo), agrupado por venda
+function pendentes(emp, linhas){
+  const m = new Map();
+  for (const r of linhas || []) {
+    if (r.nf_devolucao || !r.nf_origem || !r.data_recebimento) continue;
+    const k = emp + "|" + r.num_venda;
+    if (!m.has(k)) m.set(k, {empresa: emp.toUpperCase(), venda: r.num_venda, cliente: r.cliente, nf_origem: r.nf_origem, status: r.status, produtos: []});
+    m.get(k).produtos.push(r.sku);
+  }
+  return [...m.values()];
+}
+
+async function carregar(){
+  clearTimeout(timer);
+  if (!(localStorage.usuario && localStorage.senha)) return telaLogin();
+  const [d, l, rv, rt] = await Promise.all([api("/?rma=lista&emp=dutech"), api("/?rma=lista&emp=lumia"), api(`/?robo=${ROBO}`), api(`/?robo=${TESTE}`)]);
+  if (!d || !l || !rv || !rt) return;
+  const ruim = [d, l, rv, rt].find(j => j.erro);
+  if (ruim) return tela.innerHTML = `<div class="aviso">${esc(ruim.erro)}</div>`;
+  const p = [...pendentes("dutech", d.linhas), ...pendentes("lumia", l.linhas)];
+  const rodando = vivo(rv) || vivo(rt);
+  // log: o da ultima execucao (de verdade ou teste)
+  const ult = Number((rv.situacao || {}).pedido_em || 0) >= Number((rt.situacao || {}).pedido_em || 0) ? [rv, "de verdade"] : [rt, "teste"];
+  const s = ult[0].situacao || {};
+  tela.innerHTML = `<div class="topo"><h1>NF de devolução</h1><small>${p.length} venda(s) sem nota</small>
+      <div class="botoes"><button class="sec" ${rodando ? "disabled" : ""} onclick="pedir('${TESTE}')">TESTAR (não emite)</button>
+      <button ${!p.length || rodando ? "disabled" : ""} onclick="pedir('${ROBO}')">${rodando ? "GERANDO..." : "GERAR NOTAS DE DEVOLUÇÃO"}</button></div></div>
+    <div class="caixa">${p.length ? `<table><tr><th>Empresa</th><th>Venda</th><th>Cliente</th><th>NF de origem</th><th>Status</th><th>Produtos</th></tr>
+      ${p.map(x => `<tr><td><span class="selo">${esc(x.empresa)}</span></td><td>${esc(x.venda)}</td><td>${esc(x.cliente)}</td>
+        <td>${esc(x.nf_origem)}</td><td>${esc(x.status || "")}</td><td>${esc(x.produtos.join(", "))}</td></tr>`).join("")}</table>`
+      : `<div class="vazio">Nenhuma devolução com NF em branco.</div>`}</div>
+    <div class="log-titulo">LOG<span>${s.estado ? `${ult[1]} · ${s.pedido_por ? "pedido por " + esc(s.pedido_por) + " · " : ""}${estado(ult[0])}` : ""}</span></div>
+    <pre class="andamento" id="andamento">${esc(s.log || "Aguardando...")}</pre>`;
+  const a = $("andamento"); a.scrollTop = a.scrollHeight;
+  timer = setTimeout(carregar, rodando ? 4000 : 60000);
+}
+async function pedir(nome){
+  if (nome === ROBO && !confirm("Criar as devoluções na Olist e AUTORIZAR as NF de devolução das vendas pendentes?")) return;
+  const j = await api(`/?robo=${nome}`, true);
+  if (!j) return;
+  if (j.erro) alert(j.erro);
+  carregar();
+}
+document.addEventListener("visibilitychange", () => { if (!document.hidden) carregar(); });
+carregar();
+</script>
+</body></html>
