@@ -74,6 +74,7 @@ const GRUPOS = {
     robos: [["nf_devolucao", "De verdade", "Emitir as NF de devolução", "Criar as devoluções na Olist e AUTORIZAR as NF de devolução das vendas pendentes?"],
             ["nf_devolucao_teste", "Teste (não emite nada)", "Ver as pendentes"]]},
 };
+if (new URLSearchParams(location.search).get("g") === "faturar") location.replace("faturar.html");   // Faturar tem tela propria
 const G = GRUPOS[new URLSearchParams(location.search).get("g")] || GRUPOS.sincronizar;
 document.title = G.titulo; $("titulo").textContent = G.titulo; $("sub").textContent = G.sub;
 
