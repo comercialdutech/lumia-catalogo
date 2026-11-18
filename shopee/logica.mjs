@@ -3,7 +3,8 @@
 // sem custo operacional, sem lucro) e a equipe digita o "Preço mínimo" de cada SKU. Sem preço salvo, nada muda.
 // O worker e a tela usam o MESMO arquivo (site/shopee/logica.mjs é cópia; o testa_worker confere).
 export const REGRA_PADRAO = {
-  imposto: 7, frete: 0, desconto: 5,   // 18/11/2026: era 30; dono quer o menor desconto (cliente paga o preço mínimo)
+  // desconto: só usado quando o preço mínimo passa do cheio atual (aí o cheio sobe para mínimo ÷ (1 − desconto))
+  imposto: 7, frete: 0, desconto: 5,
   // frete 0: o frete grátis da Shopee já está dentro da comissão (decisão do dono, 15/10)
   faixas: [{ate: 79.99, com: 20, fixa: 4.5}, {ate: 99.99, com: 14, fixa: 16},
            {ate: 199.99, com: 14, fixa: 20}, {ate: null, com: 14, fixa: 26}],
@@ -41,11 +42,13 @@ export function minimoVenda(custo, regra) {
   return null;
 }
 
-// preço mínimo salvo -> o que vai para a Shopee: campanha = preço salvo, cheio = preço / (1 − desconto); desconto padrão 5%
+// preço mínimo salvo -> o que vai para a Shopee (dono, 18/11/2026): a campanha = preço salvo e o CHEIO NÃO MUDA;
+// o desconto é o que der. Mexer no cheio esbarra no preço de atacado (a Shopee recusa cheio abaixo das faixas) e
+// exige tirar do desconto e repor. Só quando o mínimo >= cheio (não há desconto possível) o cheio sobe.
 export function alvoDe(anuncio, regra, salvo) {
   if (!(salvo > 0)) return null;
   const min = minimoVenda(anuncio.custo, regra);
-  return {...conta(salvo, anuncio.custo, regra), venda: salvo, cheio: sobe(salvo / (1 - regra.desconto / 100)),
+  return {...conta(salvo, anuncio.custo, regra), venda: salvo, cheio: anuncio.cheio > salvo ? anuncio.cheio : sobe(salvo / (1 - regra.desconto / 100)),
           minimo: min ? min.venda : null};
 }
 

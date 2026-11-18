@@ -122,7 +122,9 @@
 </div>
 <script type="module">
 // Modelo do Meli Promos (15/10/2026): Mín. p/ venda = lucro zero (taxas Shopee + imposto + frete, SEM operacional);
-// a equipe digita o Preço mínimo de cada SKU; Rodar coloca a campanha nesse preço (cheio = preço ÷ (1 − desconto), padrão 5% desde 18/11/2026).
+// a equipe digita o Preço mínimo de cada SKU; Rodar coloca a campanha nesse preço e NÃO mexe no cheio (dono, 18/11/2026):
+// o desconto é o que der. Só se o mínimo for >= cheio o cheio sobe (mínimo ÷ (1 − desconto da aba Taxas)).
+const cheioTxt = p => p ? `${brl(p.cheio)}<br><small>−${brl(Math.round((1 - p.venda / p.cheio) * 1000) / 10)}%</small>` : "—";
 import {REGRA_PADRAO, alvoDe, minimoVenda, situacao} from "./logica.mjs";
 const PROXY = "https://estoque-olist.dutech.workers.dev/shopee";
 const $ = id => document.getElementById(id);
@@ -245,7 +247,7 @@ function simular() {
 async function rodar(L, oque) {
   if (!L.length) return;
   const neg = L.filter(l => l.alvo.margem < 0);
-  if (!confirm(`Mudar o preço de ${L.length} anúncio(s) NA SHOPEE (${oque})?\n\nCampanha = preço mínimo salvo; cheio = preço ÷ ${brl(1 - regra().desconto / 100)}.\nQuem está fora da campanha entra nela. Quem está em desconto e muda o cheio sai e volta (alguns segundos sem desconto).`)) return;
+  if (!confirm(`Mudar o preço de ${L.length} anúncio(s) NA SHOPEE (${oque})?\n\nCampanha = preço mínimo salvo. O preço cheio NÃO muda: o desconto é o que der.\nQuem está fora da campanha entra nela.`)) return;
   let aceito = false;
   if (neg.length) aceito = confirm(`${neg.length} anúncio(s) estão ABAIXO do mínimo p/ venda (prejuízo): ${neg.map(l => l.sku).join(", ")}.\n\nOK = aplicar mesmo assim · Cancelar = pular esses`);
   const itens = L.filter(l => aceito || !(l.alvo.margem < 0)).map(l => ({item_id: l.item_id, cheio: l.alvo.cheio, venda: l.alvo.venda, aceito_prejuizo: l.alvo.margem < 0}));
@@ -297,7 +299,7 @@ function produtos() {
       <button class="btn danger" id="limpar">Limpar preço dos selecionados (${marcadosP.size})</button>
       <span class="saved" id="salvo">Salvo ✓</span></div>
     <div class="twrap"><table><thead><tr><th><input type="checkbox" id="todosP"></th>${th("sku", "SKU")}${th("titulo", "Título")}${th("custo", "Custo", "n")}
-      ${th("campanha", "Campanha hoje", "n")}${th("min", "Mín. p/ venda", "n")}${th("salvo", "Preço mínimo", "n")}<th class="n">Cheio (−${R.desconto}%)</th>
+      ${th("campanha", "Campanha hoje", "n")}${th("min", "Mín. p/ venda", "n")}${th("salvo", "Preço mínimo", "n")}<th class="n">Cheio · desconto</th>
       ${th("margem", "Margem contrib.", "n")}${th("sit", "Situação")}</tr></thead><tbody>
       ${L.map(l => { const txt = sujo[l.sku] ?? (l.salvo != null ? brl(l.salvo) : ""), prev = sujo[l.sku] != null ? alvoDe(l, R, num(sujo[l.sku])) : l.alvo;
         const neg = prev?.margem != null && prev.margem < 0;
@@ -307,7 +309,7 @@ function produtos() {
         <td class="n">${l.custo > 0 ? brl(l.custo) : `<span class="tag t-sem_custo">sem custo</span>`}</td><td class="n">${brl(l.campanha)}</td>
         <td class="n" title="${esc(contaMin(l, R))}"><b>${l.min ? brl(l.min.venda) : "—"}</b></td>
         <td class="n"><input class="price ${neg ? "abaixo" : ""} ${sujo[l.sku] != null ? "dirty" : ""}" data-v="${esc(l.sku)}" value="${esc(txt)}" placeholder="—"></td>
-        <td class="n c-cheio">${prev ? brl(prev.cheio) : "—"}</td>
+        <td class="n c-cheio">${cheioTxt(prev)}</td>
         <td class="n c-margem ${neg ? "neg" : ""}" title="${esc(contaMargem(prev))}">${prev?.margem != null ? `${brl(prev.margem)}<br><small>${brl(prev.margem_pct)}%</small>` : "—"}</td>
         <td>${tagSit(l)}</td></tr>`; }).join("")}
     </tbody></table></div></div>`;
@@ -339,7 +341,7 @@ function atualizaLinha(sku) {
   const neg = prev?.margem != null && prev.margem < 0, inp = tr.querySelector("[data-v]");
   tr.className = neg ? "prej" : "";
   inp.classList.toggle("abaixo", neg); inp.classList.add("dirty");
-  tr.querySelector(".c-cheio").textContent = prev ? brl(prev.cheio) : "—";
+  tr.querySelector(".c-cheio").innerHTML = cheioTxt(prev);
   const m = tr.querySelector(".c-margem");
   m.className = "n c-margem" + (neg ? " neg" : ""); m.title = contaMargem(prev);
   m.innerHTML = prev?.margem != null ? `${brl(prev.margem)}<br><small>${brl(prev.margem_pct)}%</small>` : "—";
@@ -375,7 +377,7 @@ function telaRegra() {
     <div class="grid">
      <div class="field"><label>Imposto %</label><input id="g_imp" value="${R.imposto}"></div>
      <div class="field"><label>Frete por pedido (R$)</label><input id="g_fre" value="${R.frete || 0}"><span class="hint">0: o frete grátis da Shopee já está dentro da comissão</span></div>
-     <div class="field"><label>Desconto da campanha %</label><input id="g_des" value="${R.desconto}"><span class="hint">preço cheio = preço mínimo ÷ (1 − desconto)</span></div></div>
+     <div class="field"><label>Desconto se o mínimo passar do cheio %</label><input id="g_des" value="${R.desconto}"><span class="hint">só quando o preço mínimo é maior ou igual ao cheio: aí o cheio sobe para mínimo ÷ (1 − desconto)</span></div></div>
     <h2 style="margin-top:8px">Faixas da Shopee</h2><div class="sub">Comissão e taxa fixa por faixa do preço de venda (o que o cliente paga). Deixe "até" vazio na última.</div>
     <div class="twrap" style="max-width:460px"><table><thead><tr><th>Até (R$)</th><th>Comissão %</th><th>Fixa R$</th></tr></thead><tbody>
     ${R.faixas.map((f, i) => `<tr><td><input class="price" id="f_ate${i}" value="${f.ate ?? ""}" placeholder="sem teto"></td><td><input class="price" id="f_com${i}" value="${f.com}"></td><td><input class="price" id="f_fix${i}" value="${f.fixa}"></td></tr>`).join("")}
@@ -398,11 +400,12 @@ function ajuda() {
    <div class="card ajuda"><h2>A conta</h2><ul>
     <li><b>Mín. p/ venda</b> = (custo + taxa fixa da Shopee + frete) ÷ (1 − comissão − imposto). É a margem de contribuição zero: <b>não</b> inclui custo operacional (aluguel, folha…) nem lucro.</li>
     <li><b>Margem de contribuição</b> = preço − comissão − taxa fixa − imposto − frete − custo. Passe o mouse nos valores para ver a conta.</li>
-    <li><b>Preço cheio</b> = preço mínimo ÷ (1 − desconto). O desconto padrão é <b>5%</b> (aba Taxas): o cliente paga exatamente o preço mínimo, com o menor desconto. Ex.: mínimo R$ 69,99 → cheio R$ 73,68.</li>
+    <li><b>Preço cheio não muda.</b> O anúncio entra na campanha pelo preço mínimo e o desconto é o que der (ex.: cheio R$ 85,70, mínimo R$ 59,99 → −30%). A coluna <b>Cheio · desconto</b> mostra quanto fica.</li>
+    <li>Só se o preço mínimo for maior ou igual ao cheio (não dá para dar desconto) o cheio sobe para mínimo ÷ (1 − desconto da aba Taxas, 5%).</li>
     <li>A comissão depende da faixa do preço: até R$ 79,99 = 20% + R$ 4,50; acima disso 14% + taxa fixa maior (aba Taxas).</li></ul></div>
    <div class="card ajuda"><h2>Como a Shopee funciona aqui</h2><ul>
     <li>A Shopee não deixa mudar o preço cheio de anúncio em desconto. Por isso o anúncio sai do desconto, muda e volta (fica uns segundos sem desconto; o tempo aparece no log e no Histórico). Se algo falhar no meio, ele volta com o preço antigo.</li>
-    <li>Se a Shopee recusar o preço cheio, confira o <b>preço de atacado</b> do anúncio: as faixas de atacado precisam ficar abaixo do cheio novo.</li>
+    <li>Não mexer no cheio evita o bloqueio do <b>preço de atacado</b> (a Shopee recusa cheio abaixo das faixas de atacado). Se o cheio precisar subir e falhar, confira o atacado do anúncio.</li>
     <li>Os anúncios são relidos da Shopee a cada 15 minutos; <b>Sincronizar da Shopee</b> relê na hora.</li></ul></div>`;
 }
 
