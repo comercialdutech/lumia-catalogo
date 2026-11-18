@@ -3,7 +3,7 @@
 // sem custo operacional, sem lucro) e a equipe digita o "Preço mínimo" de cada SKU. Sem preço salvo, nada muda.
 // O worker e a tela usam o MESMO arquivo (site/shopee/logica.mjs é cópia; o testa_worker confere).
 export const REGRA_PADRAO = {
-  imposto: 7, frete: 0, desconto: 30,
+  imposto: 7, frete: 0, desconto: 5,   // 18/11/2026: era 30; dono quer o menor desconto (cliente paga o preço mínimo)
   // frete 0: o frete grátis da Shopee já está dentro da comissão (decisão do dono, 15/10)
   faixas: [{ate: 79.99, com: 20, fixa: 4.5}, {ate: 99.99, com: 14, fixa: 16},
            {ate: 199.99, com: 14, fixa: 20}, {ate: null, com: 14, fixa: 26}],
@@ -41,7 +41,7 @@ export function minimoVenda(custo, regra) {
   return null;
 }
 
-// preço mínimo salvo -> o que vai para a Shopee: campanha = preço salvo, cheio = preço / (1 − desconto)
+// preço mínimo salvo -> o que vai para a Shopee: campanha = preço salvo, cheio = preço / (1 − desconto); desconto padrão 5%
 export function alvoDe(anuncio, regra, salvo) {
   if (!(salvo > 0)) return null;
   const min = minimoVenda(anuncio.custo, regra);

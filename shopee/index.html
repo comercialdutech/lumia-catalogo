@@ -122,7 +122,7 @@
 </div>
 <script type="module">
 // Modelo do Meli Promos (15/10/2026): Mín. p/ venda = lucro zero (taxas Shopee + imposto + frete, SEM operacional);
-// a equipe digita o Preço mínimo de cada SKU; Rodar coloca a campanha nesse preço (cheio = preço ÷ 0,70).
+// a equipe digita o Preço mínimo de cada SKU; Rodar coloca a campanha nesse preço (cheio = preço ÷ (1 − desconto), padrão 5% desde 18/11/2026).
 import {REGRA_PADRAO, alvoDe, minimoVenda, situacao} from "./logica.mjs";
 const PROXY = "https://estoque-olist.dutech.workers.dev/shopee";
 const $ = id => document.getElementById(id);
@@ -163,8 +163,8 @@ async function carregar() {
 const regra = () => ({...REGRA_PADRAO, ...D.regra});
 const igual = (a, b) => a != null && b != null && Math.abs(a - b) < 0.005;
 // pendente = o que o Rodar mudaria de fato (mesma conta do aplicarItem do worker): o cheio, ou a campanha de quem está nela.
-// Quem foi tirado da campanha com o cheio já certo não conta: o Rodar não põe de volta.
-const muda = (a, alvo) => !!alvo && (!igual(a.cheio, alvo.cheio) || (a.discount_id != null && !igual(a.campanha, alvo.venda)));
+// Fora da campanha também conta: desde 18/11/2026 o Rodar põe de volta no desconto ativo da loja.
+const muda = (a, alvo) => !!alvo && (!igual(a.cheio, alvo.cheio) || a.discount_id == null || !igual(a.campanha, alvo.venda));
 function linhas() {
   const R = regra();
   return D.anuncios.map(a => {
@@ -245,7 +245,7 @@ function simular() {
 async function rodar(L, oque) {
   if (!L.length) return;
   const neg = L.filter(l => l.alvo.margem < 0);
-  if (!confirm(`Mudar o preço de ${L.length} anúncio(s) NA SHOPEE (${oque})?\n\nCampanha = preço mínimo salvo; cheio = preço ÷ ${brl(1 - regra().desconto / 100)}.\nQuem está em desconto sai e volta (alguns segundos sem desconto).`)) return;
+  if (!confirm(`Mudar o preço de ${L.length} anúncio(s) NA SHOPEE (${oque})?\n\nCampanha = preço mínimo salvo; cheio = preço ÷ ${brl(1 - regra().desconto / 100)}.\nQuem está fora da campanha entra nela. Quem está em desconto e muda o cheio sai e volta (alguns segundos sem desconto).`)) return;
   let aceito = false;
   if (neg.length) aceito = confirm(`${neg.length} anúncio(s) estão ABAIXO do mínimo p/ venda (prejuízo): ${neg.map(l => l.sku).join(", ")}.\n\nOK = aplicar mesmo assim · Cancelar = pular esses`);
   const itens = L.filter(l => aceito || !(l.alvo.margem < 0)).map(l => ({item_id: l.item_id, cheio: l.alvo.cheio, venda: l.alvo.venda, aceito_prejuizo: l.alvo.margem < 0}));
@@ -253,7 +253,7 @@ async function rodar(L, oque) {
 }
 async function retirar(L, oque) {
   if (!L.length) return;
-  if (!confirm(`Tirar ${L.length} anúncio(s) da campanha NA SHOPEE (${oque})?\n\nEles ficam SEM desconto: o cliente passa a pagar o preço cheio.\nO Rodar agora não põe de volta.`)) return;
+  if (!confirm(`Tirar ${L.length} anúncio(s) da campanha NA SHOPEE (${oque})?\n\nEles ficam SEM desconto: o cliente passa a pagar o preço cheio.\nAtenção: o próximo Rodar coloca de volta na campanha.`)) return;
   await emLotes("/retirar", L.map(l => ({item_id: l.item_id})), "TIRANDO DA CAMPANHA", "tirando da campanha…");
 }
 const RES = {aplicado: ["ok", "✅"], igual: ["skip", "="], divergente: ["err", "⚠️ gravou diferente"], falhou: ["err", "❌"], fora_do_desconto: ["err", "🚨 FORA DO DESCONTO"],
@@ -392,16 +392,17 @@ function ajuda() {
   $("main").innerHTML = `<div class="card ajuda"><h2>Como usar</h2><ol>
     <li><b>Produtos</b>: veja o <b>Mín. p/ venda</b> de cada anúncio (o menor preço sem prejuízo) e digite o <b>Preço mínimo</b>, que é o preço da campanha. Clique em <b>Salvar preços</b>. Salvar não mexe na Shopee.</li>
     <li><b>Painel → Simular</b>: mostra no log o que mudaria, sem enviar nada.</li>
-    <li><b>Painel → Rodar agora</b>: coloca na campanha, pelo preço mínimo salvo, todos os anúncios que estão diferentes. Anúncio sem preço mínimo não é mexido. Ou marque alguns e use <b>Aplicar selecionados</b>.</li>
-    <li><b>Painel → Tirar todos da campanha</b>: tira do desconto todos os anúncios que estão em campanha. Para tirar só alguns, marque e use <b>Tirar selecionados da campanha</b>. Eles passam a vender pelo preço cheio, e o Rodar agora não põe de volta.</li>
+    <li><b>Painel → Rodar agora</b>: coloca na campanha, pelo preço mínimo salvo, todos os anúncios que estão diferentes ou fora da campanha (entram na campanha de desconto ativa da loja). Anúncio sem preço mínimo não é mexido. Ou marque alguns e use <b>Aplicar selecionados</b>.</li>
+    <li><b>Painel → Tirar todos da campanha</b>: tira do desconto todos os anúncios que estão em campanha. Para tirar só alguns, marque e use <b>Tirar selecionados da campanha</b>. Eles passam a vender pelo preço cheio, mas o próximo <b>Rodar</b> coloca de volta na campanha.</li>
     <li><b>Parar</b> interrompe depois do lote atual (5 anúncios); o que já foi feito fica.</li></ol></div>
    <div class="card ajuda"><h2>A conta</h2><ul>
     <li><b>Mín. p/ venda</b> = (custo + taxa fixa da Shopee + frete) ÷ (1 − comissão − imposto). É a margem de contribuição zero: <b>não</b> inclui custo operacional (aluguel, folha…) nem lucro.</li>
     <li><b>Margem de contribuição</b> = preço − comissão − taxa fixa − imposto − frete − custo. Passe o mouse nos valores para ver a conta.</li>
-    <li><b>Preço cheio</b> = preço mínimo ÷ 0,70, para que os 30% de desconto da campanha caiam exatamente no preço mínimo.</li>
+    <li><b>Preço cheio</b> = preço mínimo ÷ (1 − desconto). O desconto padrão é <b>5%</b> (aba Taxas): o cliente paga exatamente o preço mínimo, com o menor desconto. Ex.: mínimo R$ 69,99 → cheio R$ 73,68.</li>
     <li>A comissão depende da faixa do preço: até R$ 79,99 = 20% + R$ 4,50; acima disso 14% + taxa fixa maior (aba Taxas).</li></ul></div>
    <div class="card ajuda"><h2>Como a Shopee funciona aqui</h2><ul>
     <li>A Shopee não deixa mudar o preço cheio de anúncio em desconto. Por isso o anúncio sai do desconto, muda e volta (fica uns segundos sem desconto; o tempo aparece no log e no Histórico). Se algo falhar no meio, ele volta com o preço antigo.</li>
+    <li>Se a Shopee recusar o preço cheio, confira o <b>preço de atacado</b> do anúncio: as faixas de atacado precisam ficar abaixo do cheio novo.</li>
     <li>Os anúncios são relidos da Shopee a cada 15 minutos; <b>Sincronizar da Shopee</b> relê na hora.</li></ul></div>`;
 }
 
