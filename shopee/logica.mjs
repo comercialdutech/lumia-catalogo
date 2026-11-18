@@ -61,3 +61,26 @@ export function situacao(a, alvo) {
   if (a.custo_aplicado != null && a.custo > 0 && !igual(a.custo_aplicado, a.custo)) return "custo_mudou";
   return "ok";
 }
+
+// Aba Saúde (dono, 18/11/2026): o que faz perder venda sem ninguém ver. a = linha de anuncios; alvo = alvoDe(...) ou null
+const real = n => brl(Math.round(n * 100) / 100);
+export function alertas(a, alvo) {
+  const out = [], ativo = a.status === "NORMAL";
+  if (a.deboost) out.push({tipo: "rebaixado", grave: true,
+    texto: "Rebaixado pela Shopee: confira a categoria (peça vai em 101986 \"Impressoras e Scanners > Outros\", nunca em \"Impressoras 3D\")"});
+  if (ativo && a.estoque === 0) out.push({tipo: "sem_estoque", grave: a.campanha != null,
+    texto: a.campanha != null ? "Sem estoque e na campanha: o desconto não vende nada" : "Sem estoque"});
+  if (ativo && a.atacado_min != null) {
+    if (alvo && a.atacado_min < alvo.venda) out.push({tipo: "atacado_prejuizo", grave: true,
+      texto: `Atacado a R$ ${real(a.atacado_min)}, abaixo do preço mínimo R$ ${real(alvo.venda)}: suba ou apague as faixas`});
+    else if (a.campanha != null && a.atacado_min >= a.campanha) out.push({tipo: "atacado_inutil", grave: false,
+      texto: `Atacado a partir de R$ ${real(a.atacado_min)}, acima da campanha R$ ${real(a.campanha)}: as faixas não fazem efeito`});
+  }
+  return out;
+}
+// dias até a campanha acabar, só quando faltam ≤ 15 (0 = acaba hoje ou já acabou)
+export function campanhaVence(fimMs, agoraMs) {
+  if (!fimMs) return null;
+  const d = Math.max(0, Math.ceil((fimMs - agoraMs) / 864e5));
+  return d <= 15 ? d : null;
+}

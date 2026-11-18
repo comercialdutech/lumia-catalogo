@@ -108,6 +108,7 @@
   <nav class="side-nav">
    <button class="nav-item active" data-tab="painel"><svg viewBox="0 0 24 24"><path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z"/></svg>Painel</button>
    <button class="nav-item" data-tab="produtos"><svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>Produtos</button>
+   <button class="nav-item" data-tab="saude"><svg viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>Saúde</button>
    <button class="nav-item" data-tab="historico"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>Histórico</button>
    <button class="nav-item" data-tab="regra"><svg viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>Taxas</button>
    <button class="nav-item" data-tab="ajuda"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Instruções</button>
@@ -125,7 +126,7 @@
 // a equipe digita o Preço mínimo de cada SKU; Rodar coloca a campanha nesse preço e NÃO mexe no cheio (dono, 18/11/2026):
 // o desconto é o que der. Só se o mínimo for >= cheio o cheio sobe (mínimo ÷ (1 − desconto da aba Taxas)).
 const cheioTxt = p => p ? `${brl(p.cheio)}<br><small>−${brl(Math.round((1 - p.venda / p.cheio) * 1000) / 10)}%</small>` : "—";
-import {REGRA_PADRAO, alvoDe, minimoVenda, situacao} from "./logica.mjs";
+import {REGRA_PADRAO, alvoDe, minimoVenda, situacao, alertas, campanhaVence} from "./logica.mjs";
 const PROXY = "https://estoque-olist.dutech.workers.dev/shopee";
 const $ = id => document.getElementById(id);
 const cab = () => ({authorization: `Bearer ${localStorage.usuario || ""}:${localStorage.senha || ""}`, "content-type": "application/json"});
@@ -133,7 +134,7 @@ const brl = v => v == null || isNaN(v) ? "—" : Number(v).toLocaleString("pt-BR
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
 const num = s => { const t = String(s ?? "").trim(); const v = Number((t.includes(",") ? t.replace(/\./g, "") : t).replace(",", ".")); return v > 0 ? v : null; };
 const NOME = {ok: "OK", pendente: "A aplicar", prejuizo: "Prejuízo", custo_mudou: "Custo mudou", sem_preco: "Sem preço mínimo", sem_custo: "Sem custo", fora_campanha: "Fora de campanha", pausado: "Pausado"};
-const TITULOS = {painel: "Painel", produtos: "Produtos e preços mínimos", historico: "Histórico", regra: "Taxas e imposto", ajuda: "Instruções"};
+const TITULOS = {painel: "Painel", produtos: "Produtos e preços mínimos", saude: "Saúde dos anúncios", historico: "Histórico", regra: "Taxas e imposto", ajuda: "Instruções"};
 let D = null, aba = localStorage.shAba || "painel", rodando = false, parar = false;
 let busca = "", fSit = "", ord = ["sit", 1], buscaP = "";
 const sujo = {}, marcados = new Set(), marcadosP = new Set();
@@ -172,7 +173,7 @@ function linhas() {
   return D.anuncios.map(a => {
     const salvo = D.manuais[a.sku], alvo = alvoDe(a, R, salvo), min = minimoVenda(a.custo, R);
     const sit = a.status !== "NORMAL" ? "pausado" : situacao(a, alvo);
-    return {...a, salvo, alvo, min, sit, pendente: a.status === "NORMAL" && ["pendente", "prejuizo", "fora_campanha"].includes(sit) && muda(a, alvo)};
+    return {...a, salvo, alvo, min, sit, al: alertas(a, alvo), pendente: a.status === "NORMAL" && ["pendente", "prejuizo", "fora_campanha"].includes(sit) && muda(a, alvo)};
   });
 }
 const tagSit = l => `<span class="tag t-${l.sit}">${NOME[l.sit]}</span>`;
@@ -184,7 +185,7 @@ const contaMargem = c => !c || c.margem == null ? "" :
 function desenhar() {
   document.querySelectorAll(".nav-item").forEach(b => b.classList.toggle("active", b.dataset.tab === aba));
   $("titulo").textContent = TITULOS[aba];
-  ({painel, produtos, historico, regra: telaRegra, ajuda})[aba]();
+  ({painel, produtos, saude, historico, regra: telaRegra, ajuda})[aba]();
 }
 
 // ---------------- PAINEL ----------------
@@ -193,13 +194,14 @@ function painel() {
   const emCamp = L.filter(l => l.discount_id != null);   // "todos" inclui os pausados que estão no desconto
   const V = at.filter(l => !busca || (l.sku + " " + l.titulo).toLowerCase().includes(busca.toLowerCase()));
   const marcavel = l => !!l.alvo || l.discount_id != null;
-  $("main").innerHTML = `
+  $("main").innerHTML = avisoCampanha() + `
    <div class="card"><div class="runbar">
      <div class="stat"><b>${at.length}</b><span>anúncios ativos</span></div>
      <div class="stat green"><b>${at.filter(l => l.alvo).length}</b><span>com preço mínimo</span></div>
      <div class="stat warn"><b>${pend.length}</b><span>a aplicar</span></div>
      <div class="stat red"><b>${n("prejuizo")}</b><span>em prejuízo</span></div>
      <div class="stat"><b>${n("sem_preco") + n("sem_custo")}</b><span>sem preço mínimo</span></div>
+     <div class="stat ${L.some(l => l.al.some(x => x.grave)) ? "red" : ""}" id="irSaude" style="cursor:pointer" title="abrir a aba Saúde"><b>${L.filter(l => l.al.length).length}</b><span>com alerta${L.some(l => l.al.some(x => x.grave)) ? ` (${L.filter(l => l.al.some(x => x.grave)).length} graves)` : ""}</span></div>
      <div class="spacer"></div>
      <button class="btn" id="simular" ${rodando ? "disabled" : ""}>Simular</button>
      <button class="btn primary" id="rodar" ${rodando || !pend.length ? "disabled" : ""}>Rodar agora (${pend.length})</button>
@@ -219,6 +221,7 @@ function painel() {
          <td class="n ${l.alvo?.margem < 0 ? "neg" : ""}" title="${esc(contaMargem(l.alvo))}">${l.alvo?.margem != null ? brl(l.alvo.margem) : "—"}</td><td>${tagSit(l)}</td></tr>`).join("")}
      </tbody></table></div></div>`;
   $("simular").onclick = simular;
+  $("irSaude").onclick = () => { aba = "saude"; try { localStorage.shAba = aba; } catch {} desenhar(); };
   $("rodar").onclick = () => rodar(linhas().filter(l => l.pendente), "todos com preço mínimo diferente da loja");
   $("parar").onclick = () => { parar = true; log("sys", "parando depois do lote atual…"); };
   $("tirarTodos").onclick = () => retirar(linhas().filter(l => l.discount_id != null), "TODOS os que estão em campanha");
@@ -281,7 +284,7 @@ async function emLotes(rota, itens, titulo, aviso) {
 // ---------------- PRODUTOS ----------------
 function produtos() {
   const R = regra(), rolagem = [document.querySelector("#main .twrap")?.scrollTop || 0, window.scrollY];   // redesenho mantém o lugar
-  const L = linhas().filter(l => (!fSit || l.sit === fSit) && (!buscaP || (l.sku + " " + l.titulo).toLowerCase().includes(buscaP.toLowerCase())));
+  const L = linhas().filter(l => (!fSit || l.sit === fSit || (fSit === "_alerta" && l.al.length)) && (!buscaP || (l.sku + " " + l.titulo).toLowerCase().includes(buscaP.toLowerCase())));
   const ORD = {sku: l => l.sku, titulo: l => l.titulo, custo: l => l.custo ?? -1, campanha: l => l.campanha ?? -1, min: l => l.min?.venda ?? -1,
     salvo: l => l.salvo ?? -1, margem: l => l.alvo?.margem ?? -999, sit: l => ["prejuizo", "pendente", "custo_mudou", "fora_campanha", "sem_preco", "sem_custo", "pausado", "ok"].indexOf(l.sit)};
   L.sort((a, b) => { const x = ORD[ord[0]](a), y = ORD[ord[0]](b); return (x > y ? 1 : x < y ? -1 : 0) * ord[1]; });
@@ -292,7 +295,7 @@ function produtos() {
       Digite o <b>preço mínimo</b> de cada anúncio (o preço da campanha) e clique em <b>Salvar preços</b>. Em <span class="neg">vermelho</span>: abaixo do mínimo = prejuízo.
       Salvar não muda nada na Shopee: para isso use <b>Rodar agora</b> no Painel.</div>
     <div class="toolbar"><input class="search" id="buscaP" placeholder="Buscar por SKU ou título…" value="${esc(buscaP)}">
-      <select class="search" id="fsit"><option value="">todas as situações</option>${Object.entries(NOME).map(([k, v]) => `<option value="${k}" ${fSit === k ? "selected" : ""}>${v}</option>`).join("")}</select>
+      <select class="search" id="fsit"><option value="">todas as situações</option><option value="_alerta" ${fSit === "_alerta" ? "selected" : ""}>⚠ com alerta</option>${Object.entries(NOME).map(([k, v]) => `<option value="${k}" ${fSit === k ? "selected" : ""}>${v}</option>`).join("")}</select>
       <span class="pill"><span class="dot"></span><span>${L.length} itens</span></span>
       <button class="btn primary" id="salvar" ${nSujo ? "" : "disabled"}>Salvar preços${nSujo ? ` (${nSujo})` : ""}</button>
       <button class="btn" id="sinc">Sincronizar da Shopee</button>
@@ -305,7 +308,7 @@ function produtos() {
         const neg = prev?.margem != null && prev.margem < 0;
         return `<tr class="${neg ? "prej" : ""}" data-row="${esc(l.sku)}">
         <td><input type="checkbox" data-p="${esc(l.sku)}" ${marcadosP.has(l.sku) ? "checked" : ""}></td>
-        <td class="sku"><b>${esc(l.sku)}</b></td><td class="tit-full">${esc(l.titulo)}</td>
+        <td class="sku"><b>${esc(l.sku)}</b> ${icones(l)}</td><td class="tit-full">${esc(l.titulo)}</td>
         <td class="n">${l.custo > 0 ? brl(l.custo) : `<span class="tag t-sem_custo">sem custo</span>`}</td><td class="n">${brl(l.campanha)}</td>
         <td class="n" title="${esc(contaMin(l, R))}"><b>${l.min ? brl(l.min.venda) : "—"}</b></td>
         <td class="n"><input class="price ${neg ? "abaixo" : ""} ${sujo[l.sku] != null ? "dirty" : ""}" data-v="${esc(l.sku)}" value="${esc(txt)}" placeholder="—"></td>
@@ -362,6 +365,24 @@ async function salvarPrecos() {
 }
 
 // ---------------- HISTÓRICO / TAXAS / AJUDA ----------------
+// ---------------- SAÚDE (18/11/2026) ----------------
+// o que faz perder venda sem ninguém ver: rebaixado, sem estoque, atacado abaixo do mínimo ou sem efeito, campanha vencendo
+const ALERTA = {rebaixado: ["🔻", "Rebaixados pela Shopee"], sem_estoque: ["📦", "Sem estoque"],
+  atacado_prejuizo: ["🚨", "Atacado abaixo do preço mínimo"], atacado_inutil: ["ℹ️", "Atacado sem efeito (acima da campanha)"]};
+const icones = l => l.al.map(x => `<span title="${esc(x.texto)}">${ALERTA[x.tipo][0]}</span>`).join("");
+const avisoCampanha = () => { const d = campanhaVence(D.campanha_fim, Date.now());
+  return d == null ? "" : `<div class="card" style="border-left:4px solid var(--danger)"><b>⏰ A campanha de desconto ${d ? `acaba em ${d} dia(s)` : "acabou"}</b>
+    <div class="sub">Quando ela acaba, todos os anúncios saem do desconto de uma vez. Crie a próxima campanha no painel da Shopee antes disso; o Rodar coloca os anúncios nela.</div></div>`; };
+function saude() {
+  const L = linhas(), grupos = Object.keys(ALERTA).map(t => [t, L.filter(l => l.al.some(x => x.tipo === t))]);
+  $("main").innerHTML = avisoCampanha() + `<div class="card"><h2>Saúde dos anúncios</h2>
+    <div class="sub">Conferido a cada leitura da Shopee (15 min). Passe o mouse nos ícones da aba Produtos para ver o detalhe.</div></div>` +
+    grupos.map(([t, G]) => `<div class="card"><h2>${ALERTA[t][0]} ${ALERTA[t][1]} (${G.length})</h2>
+      ${G.length ? `<div class="twrap"><table><thead><tr><th>SKU</th><th>Anúncio</th><th>O que fazer</th></tr></thead><tbody>
+      ${G.sort((a, b) => (b.al.find(x => x.tipo === t).grave) - (a.al.find(x => x.tipo === t).grave)).map(l => { const x = l.al.find(y => y.tipo === t);
+        return `<tr><td class="sku"><b>${esc(l.sku)}</b></td><td class="tit-full">${esc(l.titulo)}</td><td class="${x.grave ? "neg" : ""}">${esc(x.texto)}</td></tr>`; }).join("")}
+      </tbody></table></div>` : `<div class="sub">Nenhum. ✅</div>`}</div>`).join("");
+}
 function historico() {
   const dt = t => new Date(t).toLocaleString("pt-BR", {day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"});
   $("main").innerHTML = `<div class="card"><h2>Últimas 50 aplicações</h2><div class="sub">Quem aplicou, o antes e o depois de cada anúncio.</div>
@@ -396,6 +417,7 @@ function ajuda() {
     <li><b>Painel → Simular</b>: mostra no log o que mudaria, sem enviar nada.</li>
     <li><b>Painel → Rodar agora</b>: coloca na campanha, pelo preço mínimo salvo, todos os anúncios que estão diferentes ou fora da campanha (entram na campanha de desconto ativa da loja). Anúncio sem preço mínimo não é mexido. Ou marque alguns e use <b>Aplicar selecionados</b>.</li>
     <li><b>Painel → Tirar todos da campanha</b>: tira do desconto todos os anúncios que estão em campanha. Para tirar só alguns, marque e use <b>Tirar selecionados da campanha</b>. Eles passam a vender pelo preço cheio, mas o próximo <b>Rodar</b> coloca de volta na campanha.</li>
+    <li><b>Saúde</b>: lista o que faz perder venda sem ninguém ver: anúncio rebaixado pela Shopee, sem estoque, atacado abaixo do preço mínimo (prejuízo), atacado sem efeito e a campanha perto de acabar. Os ícones aparecem também ao lado do SKU na aba Produtos.</li>
     <li><b>Parar</b> interrompe depois do lote atual (5 anúncios); o que já foi feito fica.</li></ol></div>
    <div class="card ajuda"><h2>A conta</h2><ul>
     <li><b>Mín. p/ venda</b> = (custo + taxa fixa da Shopee + frete) ÷ (1 − comissão − imposto). É a margem de contribuição zero: <b>não</b> inclui custo operacional (aluguel, folha…) nem lucro.</li>
