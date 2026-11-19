@@ -174,7 +174,7 @@ footer{color:var(--t3);font-size:12px;margin-top:28px;text-align:center}
   .dir{min-height:0;display:flex;flex-direction:column}
   .dir .ferr{margin:0 0 8px;flex:none}
   .dir .qtd{flex:none}
-  @media (max-height:760px){.esq .painel .mini:not(:has(.leg-in)){display:none}.esq .painel h2{margin-bottom:10px}}
+  @media (max-height:760px){.esq .painel .mini:not(:has(.leg-in)){display:none}.esq .painel{padding:10px 16px}.esq .duo{gap:8px}.esq .painel .mini{margin-bottom:6px}.esq .barras{gap:4px 10px}.esq .painel h2{margin-bottom:10px}}
   #lista{flex:1;min-height:0;overflow:auto;padding-right:4px;scrollbar-width:thin}
 }
 </style></head><body>
@@ -206,13 +206,18 @@ footer{color:var(--t3);font-size:12px;margin-top:28px;text-align:center}
   <div class="duo">
     <div class="painel">
       <h2>Mais vendidos</h2>
-      <p class="mini">Unidades por produto, top 8 · clique numa barra para ver os pedidos</p>
+      <p class="mini">Unidades por produto, top <span id="top-n">8</span> · clique numa barra para ver os pedidos</p>
       <div class="barras" id="barras"></div>
     </div>
     <div class="painel">
       <h2>Pedidos por canal</h2>
       <p class="mini">Clique num canal para filtrar · <span class="leg-in"><i class="sw" style="background:var(--dut)"></i>DUTECH <i class="sw" style="background:var(--lum);margin-left:8px"></i>LUMIA</span></p>
       <div class="barras canais" id="canais"></div>
+    </div>
+    <div class="painel">
+      <h2>Pedidos por empresa</h2>
+      <p class="mini">Clique para filtrar · em qual Olist o pedido está</p>
+      <div class="barras canais" id="empresas"></div>
     </div>
   </div>
 </section>
@@ -299,14 +304,15 @@ const pedaco = (x, tot) => ["dutech", "lumia"].filter(c => x[c] > 0)
 let prodF = "", prodNome = "";   // produto aberto na lista (chave = SKU, ou nome se nao tiver SKU)
 const chaveItem = i => i[0] || i[1];
 function cartoes() {            // seguem o canal clicado (canalF) e o produto aberto (prodF)
-  const sel = dados.pedidos.filter(p => (!canalF || canalDe(p) === canalF) && (!prodF || p.itens.some(i => chaveItem(i) === prodF)));
-  const filtro = [canalF, prodNome].filter(Boolean).join(" · ");
-  document.querySelectorAll(".cards .card").forEach(c => c.classList.toggle("filtrado", !!filtro));
-  $("filtro-ativo").innerHTML = filtro ? `<button class="filtro-c" id="limpa-tudo" title="Limpar filtro">Mostrando: ${esc(filtro)} ✕</button>` : "";
-  if (filtro) $("limpa-tudo").onclick = () => {
-    canalF = ""; prodF = ""; prodNome = "";
+  const sel = dados.pedidos.filter(p => (!filtro || p.conta === filtro) && (!canalF || canalDe(p) === canalF)
+                                     && (!prodF || p.itens.some(i => chaveItem(i) === prodF)));
+  const rotulo = [filtro && NOME[filtro], canalF, prodNome].filter(Boolean).join(" · ");
+  document.querySelectorAll(".cards .card").forEach(c => c.classList.toggle("filtrado", !!rotulo));
+  $("filtro-ativo").innerHTML = rotulo ? `<button class="filtro-c" id="limpa-tudo" title="Limpar filtro">Mostrando: ${esc(rotulo)} ✕</button>` : "";
+  if (rotulo) $("limpa-tudo").onclick = () => {
+    canalF = ""; prodF = ""; prodNome = ""; marcaConta("");
     document.querySelectorAll("details.prod[open]").forEach(d => { d.ontoggle = null; d.open = false; });
-    cartoes(); grafico(); canais(); lista();
+    tudo();
   };
   const ped = c => sel.filter(p => p.conta === c).length;
   const d = ped("dutech"), l = ped("lumia");
@@ -329,13 +335,15 @@ function cartoes() {            // seguem o canal clicado (canalF) e o produto a
     const est = dados.estoque?.[prodF];
     $("k-prod").innerHTML = `${est == null ? "estoque –" : `${fmt(est)} em estoque`}<br>${est != null && est <= 5 ? "⚠ estoque baixo" : "&nbsp;"}`;
   } else {
-    const prods = produtos("", true), baixos = prods.filter(x => x.est != null && x.est <= 5).length;
+    const prods = produtos(filtro, true), baixos = prods.filter(x => x.est != null && x.est <= 5).length;
     $("k-prod").innerHTML = `${prods.length} produtos<br>${baixos ? `${baixos} estoque baixo` : "nenhum estoque baixo"}`;
   }
 }
 
 function grafico() {
-  const top = produtos(filtro).slice(0, 8), max = top[0]?.tot || 1;
+  const n = innerWidth >= 1000 && innerHeight < 760 ? 5 : 8;   // tela baixa: top 5 para os 3 quadros caberem sem rolar
+  $("top-n").textContent = n;
+  const top = produtos(filtro).slice(0, n), max = top[0]?.tot || 1;
   $("barras").innerHTML = top.length ? top.map((x, i) => `
     <div class="bn" data-i="${i}" title="${esc(x.nome)}">${esc(curto(x.nome))}</div>
     <div class="btr" data-i="${i}">${pedaco(x, max)}</div>
@@ -362,9 +370,24 @@ function canais() {
     <div class="bv${cls(c)}" data-c="${esc(c)}">${v.tot}</div>`).join("");
   $("canais").querySelectorAll("[data-c]").forEach(el => el.onclick = () => escolheCanal(el.dataset.c));
 }
+function empresas() {          // DUTECH x LUMIA (respeita o canal clicado); clicar = mesmo que os botoes Todas/DUTECH/LUMIA
+  const n = {dutech: 0, lumia: 0};
+  for (const p of dados.pedidos) if (!canalF || canalDe(p) === canalF) n[p.conta]++;
+  const max = Math.max(n.dutech, n.lumia, 1);
+  const cls = c => filtro ? (c === filtro ? " sel" : " apaga") : "";
+  $("empresas").innerHTML = ["dutech", "lumia"].map(c => `<div class="bn${cls(c)}" data-e="${c}">${NOME[c]}</div>
+    <div class="btr${cls(c)}" data-e="${c}"><div style="flex:${n[c]};background:${COR[c]}"></div><div style="flex:${max - n[c]};background:none"></div></div>
+    <div class="bv${cls(c)}" data-e="${c}">${n[c]}</div>`).join("");
+  $("empresas").querySelectorAll("[data-e]").forEach(el => el.onclick = () => { marcaConta(filtro === el.dataset.e ? "" : el.dataset.e); tudo(); });
+}
+function marcaConta(c) {
+  filtro = c;
+  document.querySelectorAll(".chip").forEach(b => b.classList.toggle("on", b.dataset.f === c));
+}
+function tudo() { cartoes(); grafico(); canais(); empresas(); lista(); $("lista").scrollTop = 0; }
 function escolheCanal(c) {
   canalF = canalF === c ? "" : c;
-  cartoes(); grafico(); canais(); lista(); $("lista").scrollTop = 0;
+  tudo();
 }
 function dica(e, html) {
   const d = $("dica"); d.innerHTML = html; d.style.opacity = 1;
@@ -427,7 +450,7 @@ async function carrega() {
     dados = j.dados; pedidoEm = j.pedido_em || 0; prog = j.progresso || null;
     $("erro").innerHTML = "";
     status();
-    if (mudou) { cartoes(); grafico(); canais(); lista(); }
+    if (mudou) { cartoes(); grafico(); canais(); empresas(); lista(); }
     if (sincronizando() && Date.now() - pedidoEm > 5 * 60000)
       $("erro").innerHTML = `<div class="erro">A sincronização não terminou em 5 min. Tente de novo mais tarde.</div>`;
   } catch (e) {
@@ -444,11 +467,10 @@ $("sinc").onclick = async () => {
   carrega();
 };
 $("busca").oninput = lista;
+let redim = 0; addEventListener("resize", () => { clearTimeout(redim); redim = setTimeout(() => dados && grafico(), 200); });
 $("chips").onclick = e => {
   const b = e.target.closest(".chip"); if (!b) return;
-  filtro = b.dataset.f;
-  document.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c === b));
-  grafico(); canais(); lista();
+  marcaConta(b.dataset.f); tudo();
 };
 carrega();
 </script>
