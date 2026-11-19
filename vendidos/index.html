@@ -63,6 +63,7 @@ h1{font-size:26px;font-weight:600;letter-spacing:-.02em;margin:0}
 .card.filtrado{border-color:var(--am-forte);box-shadow:0 0 0 1px var(--am-forte)}
 .rot .qual{color:var(--am-txt);font-weight:600}
 .cab .rot{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#filtro-ativo .filtro-c{margin:6px 0 0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .filtro-c{font:inherit;font-size:12px;font-weight:600;color:var(--t1);background:var(--am-suave);border:0;border-radius:999px;
   padding:2px 10px;margin-left:8px;cursor:pointer}
 .painel h2{font-size:15px;font-weight:600;margin:0 0 2px}
@@ -181,17 +182,17 @@ footer{color:var(--t3);font-size:12px;margin-top:28px;text-align:center}
 
 <header class="cab">
   <div><a class="volta" href="../ecommerce/">‹ E-commerce</a>
-    <h1>Vendidos</h1><p class="sub" title="Multiempresa conta só pela LUMIA">Em aberto e aprovados na Olist</p></div>
+    <h1>Vendidos</h1><p class="sub" title="Multiempresa conta só pela LUMIA">Em aberto e aprovados na Olist</p><div id="filtro-ativo"></div></div>
   <div class="cards">
     <div class="card">
-      <div class="rot">Pedidos<span class="qual"></span></div>
+      <div class="rot">Pedidos</div>
       <div class="big esq-c" id="k-ped">000</div>
       <div class="split" id="k-split"></div>
       <div class="leg" id="k-leg"></div>
     </div>
-    <div class="card"><div class="rot">Unidades<span class="qual"></span></div><div class="big esq-c" id="k-un">000</div><div class="mini" id="k-prod">&nbsp;</div></div>
-    <div class="card"><div class="rot">Em aberto<span class="qual"></span></div><div class="big esq-c" id="k-ab">000</div><div class="leg" id="k-ab-c">&nbsp;</div></div>
-    <div class="card"><div class="rot">Aprovados<span class="qual"></span></div><div class="big esq-c" id="k-ap">000</div><div class="leg" id="k-ap-c">&nbsp;</div></div>
+    <div class="card"><div class="rot">Unidades</div><div class="big esq-c" id="k-un">000</div><div class="mini" id="k-prod">&nbsp;</div></div>
+    <div class="card"><div class="rot">Em aberto</div><div class="big esq-c" id="k-ab">000</div><div class="leg" id="k-ab-c">&nbsp;</div></div>
+    <div class="card"><div class="rot">Aprovados</div><div class="big esq-c" id="k-ap">000</div><div class="leg" id="k-ap-c">&nbsp;</div></div>
   </div>
   <div class="sinc-box">
     <button class="bt" id="sinc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span>Sincronizar</span></button>
@@ -296,28 +297,42 @@ function produtos(conta, porCanal = true) {
 const pedaco = (x, tot) => ["dutech", "lumia"].filter(c => x[c] > 0)
   .map(c => `<div style="flex:${x[c]};background:${COR[c]}"></div>`).join("") + (tot > x.tot ? `<div style="flex:${tot - x.tot}"></div>` : "");
 
-function cartoes() {            // seguem o canal clicado em "Pedidos por canal" (canalF)
-  const lista = dados.pedidos.filter(p => !canalF || canalDe(p) === canalF);
-  document.querySelectorAll(".cards .card").forEach(c => c.classList.toggle("filtrado", !!canalF));
-  document.querySelectorAll(".cards .rot .qual").forEach(e => e.textContent = canalF ? " · " + canalF : "");
-  const ped = c => lista.filter(p => p.conta === c).length;
-  const d = ped("dutech"), l = ped("lumia"), un = lista.reduce((s, p) => s + p.itens.reduce((t, i) => t + (Number(i[2]) || 0), 0), 0);
-  const ab = lista.filter(p => p.situacao === "aberto").length, pdv = lista.filter(p => p.pdv).length;
+let prodF = "", prodNome = "";   // produto aberto na lista (chave = SKU, ou nome se nao tiver SKU)
+const chaveItem = i => i[0] || i[1];
+function cartoes() {            // seguem o canal clicado (canalF) e o produto aberto (prodF)
+  const sel = dados.pedidos.filter(p => (!canalF || canalDe(p) === canalF) && (!prodF || p.itens.some(i => chaveItem(i) === prodF)));
+  const filtro = [canalF, prodNome].filter(Boolean).join(" · ");
+  document.querySelectorAll(".cards .card").forEach(c => c.classList.toggle("filtrado", !!filtro));
+  $("filtro-ativo").innerHTML = filtro ? `<button class="filtro-c" id="limpa-tudo" title="Limpar filtro">Mostrando: ${esc(filtro)} ✕</button>` : "";
+  if (filtro) $("limpa-tudo").onclick = () => {
+    canalF = ""; prodF = ""; prodNome = "";
+    document.querySelectorAll("details.prod[open]").forEach(d => { d.ontoggle = null; d.open = false; });
+    cartoes(); grafico(); canais(); lista();
+  };
+  const ped = c => sel.filter(p => p.conta === c).length;
+  const d = ped("dutech"), l = ped("lumia");
+  const un = sel.reduce((s, p) => s + p.itens.filter(i => !prodF || chaveItem(i) === prodF).reduce((t, i) => t + (Number(i[2]) || 0), 0), 0);
+  const ab = sel.filter(p => p.situacao === "aberto").length, pdv = sel.filter(p => p.pdv).length;
   for (const id of ["k-ped", "k-un", "k-ab", "k-ap"]) $(id).classList.remove("esq-c");
   $("k-ped").textContent = fmt(d + l);
   $("k-split").innerHTML = pedaco({dutech: d, lumia: l, tot: d + l}, d + l);
   $("k-leg").innerHTML = `<span><i class="sw" style="background:var(--dut)"></i><b>${d}</b> DUTECH</span>
                           <span><i class="sw" style="background:var(--lum)"></i><b>${l}</b> LUMIA</span>`;
   $("k-un").textContent = fmt(un);
-  const sit = (st, c) => lista.filter(p => p.situacao === st && p.conta === c).length;
+  const sit = (st, c) => sel.filter(p => p.situacao === st && p.conta === c).length;
   const contas = st => `<span><i class="sw" style="background:var(--dut)"></i><b>${sit(st, "dutech")}</b> DUTECH</span>
                         <span><i class="sw" style="background:var(--lum)"></i><b>${sit(st, "lumia")}</b> LUMIA</span>`;
   $("k-ab").textContent = fmt(ab);
   $("k-ab-c").innerHTML = contas("aberto") + (pdv ? `<span>${pdv} Espera PDV</span>` : "");
   $("k-ap").textContent = fmt(d + l - ab);
   $("k-ap-c").innerHTML = contas("aprovado");
-  const prods = produtos("", true), baixos = prods.filter(x => x.est != null && x.est <= 5).length;
-  $("k-prod").innerHTML = `${prods.length} produtos<br>${baixos ? `${baixos} estoque baixo` : "nenhum estoque baixo"}`;
+  if (prodF) {
+    const est = dados.estoque?.[prodF];
+    $("k-prod").innerHTML = `${est == null ? "estoque –" : `${fmt(est)} em estoque`}<br>${est != null && est <= 5 ? "⚠ estoque baixo" : "&nbsp;"}`;
+  } else {
+    const prods = produtos("", true), baixos = prods.filter(x => x.est != null && x.est <= 5).length;
+    $("k-prod").innerHTML = `${prods.length} produtos<br>${baixos ? `${baixos} estoque baixo` : "nenhum estoque baixo"}`;
+  }
 }
 
 function grafico() {
@@ -373,13 +388,23 @@ function lista() {
         <span>${esc(p.numero)}</span><span class="cn" title="${esc(p.mkt || "")}">${esc(p.canal || "")}${p.mkt ? ` <i class="mk">${esc(p.mkt)}</i>` : ""}</span>
         <span class="sit${p.situacao === "aprovado" ? " apr" : ""}">${p.situacao}${p.pdv ? " · PDV" : ""}</span>
         <span class="d">${dataBr(p.data)}</span><span class="q">${fmt(p.q)}</span></div>`).join("");
-    return `<details class="prod"${achados.length === 1 ? " open" : ""}><summary>
+    const k = x.sku || x.desc;
+    return `<details class="prod" data-k="${esc(k)}" data-n="${esc(curto(x.nome))}"${achados.length === 1 || k === prodF ? " open" : ""}><summary>
         <div><div class="sku">${esc(x.sku || "sem SKU")}</div><div class="nome">${esc(x.nome)}</div>
           <div class="mbar">${pedaco(x, max)}</div><div class="tags">${tags}</div></div>
         <div class="tot"><div><div class="n">${fmt(x.tot)}</div><div class="r">vendidos · ${x.ped.length} ped.</div></div>
           <div class="est${x.est != null && x.est <= 5 ? " baixo" : ""}"><div class="n">${x.est == null ? "–" : fmt(x.est)}</div><div class="r">em estoque</div></div></div>
       </summary><div class="peds">${peds}</div></details>`;
   }).join("") : `<div class="vazio">Nenhum pedido em aberto ou aprovado com “${esc($("busca").value.trim())}”.</div>`;
+  // produto aberto manda nos quadros do topo; fechou -> vale o ultimo que ainda estiver aberto, ou nenhum
+  const abertos = () => [...document.querySelectorAll("details.prod[open]")];
+  document.querySelectorAll("details.prod").forEach(el => el.ontoggle = () => {
+    const ult = el.open ? el : abertos().pop();
+    const novo = ult ? ult.dataset.k : "";
+    if (novo !== prodF) { prodF = novo; prodNome = ult ? ult.dataset.n : ""; cartoes(); }
+  });
+  const ult = abertos().pop(), novo = ult ? ult.dataset.k : "";
+  if (novo !== prodF) { prodF = novo; prodNome = ult ? ult.dataset.n : ""; cartoes(); }
 }
 
 function status() {
