@@ -36,6 +36,8 @@ h1{font-size:26px;font-weight:600;letter-spacing:-.02em;margin:0}
 .bt:disabled{opacity:.6;cursor:default}
 .bt svg{width:16px;height:16px}
 .bt.rodando svg{animation:roda 1s linear infinite}
+.bt.rodando{opacity:1;min-width:190px;justify-content:center;transition:none;
+  background:linear-gradient(90deg,var(--am) var(--pct,0%),color-mix(in srgb,var(--am) 30%,var(--cx)) var(--pct,0%))}
 @keyframes roda{to{transform:rotate(360deg)}}
 
 .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:12px;width:100%}
@@ -93,7 +95,8 @@ summary::-webkit-details-marker{display:none}
 .tot{display:flex;gap:18px;text-align:right}
 .tot .n{font-size:22px;font-weight:600;letter-spacing:-.02em;line-height:1}
 .tot .r{font-size:11.5px;color:var(--t3);margin-top:3px;white-space:nowrap}
-.tot .est{padding-left:18px;border-left:1px solid var(--linha)}
+.tot>div{min-width:96px}
+.tot .est{padding-left:18px;border-left:1px solid var(--linha);min-width:110px}
 .tot .est.baixo .n{color:var(--alerta)}
 .tag.baixo{background:color-mix(in srgb,var(--alerta) 12%,transparent);color:var(--alerta);border-color:transparent;font-weight:600}
 .peds{border-top:1px solid var(--linha);padding:4px 16px 10px}
@@ -133,26 +136,29 @@ footer{color:var(--t3);font-size:12px;margin-top:28px;text-align:center}
 /* COMPUTADOR: tudo numa tela so. Esquerda fixa (numeros + graficos), direita a lista rola por dentro. */
 @media (min-width:1000px){
   html,body{height:100%}
-  .cab{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:20px}
-  .cab .cards{margin:0;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;max-width:900px;justify-self:center;width:100%}
-  .cab .card{padding:9px 14px;display:grid;grid-template-columns:auto 1fr;column-gap:12px;align-items:center;box-shadow:none}
-  .cab .card .rot{grid-column:1/-1;font-size:11.5px}
-  .cab .big{font-size:22px;margin:0}
-  .cab .mini,.cab .leg{font-size:11.5px;margin:0;line-height:1.35}
-  .cab .leg{gap:0 8px}
-  .cab .split{grid-column:1/-1;margin:5px 0 0;height:5px;order:9}
-  .cab .sub{max-width:300px;font-size:12.5px}
-  .cab .sinc-box{display:grid;grid-template-columns:auto auto;gap:6px 6px;justify-items:end;align-items:center}
-  .cab .status{grid-column:1/-1}
   body{max-width:1480px;height:100vh;overflow:hidden;display:flex;flex-direction:column;padding:14px 22px 16px}
-  .cab{flex:none;margin-bottom:12px;align-items:center}
+  /* grade unica: cabecalho usa as MESMAS colunas da area de baixo (esquerda 34% | direita), com o mesmo vao */
+  .cab{display:grid;grid-template-columns:minmax(380px,34%) minmax(0,1fr) auto;column-gap:14px;align-items:stretch}
+  .cab{flex:none;margin-bottom:12px}
+  .cab>div:first-child{align-self:center}
+  .cab .cards{margin:0;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;width:100%}
+  .cab .card{padding:10px 14px;box-shadow:none;display:flex;flex-direction:column;gap:5px}
+  .cab .card .rot{font-size:11.5px}
+  .cab .big{font-size:24px;margin:0;line-height:1}
+  .cab .leg span,.cab .mini{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cab .mini,.cab .leg{font-size:11.5px;margin:0;line-height:1.4;color:var(--t2)}
+  .cab .leg{display:flex;flex-direction:column;gap:0}
+  .cab .split{display:none}
+  .cab .sub{font-size:12.5px}
+  .cab .sinc-box{display:grid;grid-template-columns:auto auto;gap:6px;justify-items:end;align-content:center}
+  .cab .status{grid-column:1/-1}
   .cab .volta{display:block;margin:0 0 2px}
   .cab h1{display:inline;font-size:22px}
   .cab .sub{margin-top:2px}
   #erro{flex:none}
   .app{flex:1;min-height:0;display:grid;grid-template-columns:minmax(380px,34%) minmax(0,1fr);gap:14px}
   .esq{min-height:0;overflow:auto;display:flex;flex-direction:column;gap:12px;scrollbar-width:thin}
-  .esq .duo{grid-template-columns:1fr;margin:0;gap:12px}
+  .esq .duo{grid-template-columns:1fr;grid-template-rows:auto 1fr;margin:0;gap:12px;flex:1}
   .esq .painel{padding:14px 16px}
   .esq .painel .mini{margin-bottom:10px}
   .esq .barras{gap:6px 10px}
@@ -226,7 +232,7 @@ const hora = ms => new Date(ms).toLocaleTimeString("pt-BR", {hour: "2-digit", mi
 const dataBr = s => s ? s.slice(8, 10) + "/" + s.slice(5, 7) : "";
 const COR = {dutech: "var(--dut)", lumia: "var(--lum)"};
 const NOME = {dutech: "DUTECH", lumia: "LUMIA"};
-let dados = null, pedidoEm = 0, timer = 0, filtro = "";
+let dados = null, pedidoEm = 0, prog = null, timer = 0, filtro = "", mostra = 0, tique = 0;
 
 // Nome da Olist vem TODO EM MAIUSCULA: deixa so siglas/modelos em maiuscula, medidas em minuscula.
 const SIGLAS = new Set("PLA PETG ABS TPU ASA PA PC CF HIPS PVA ML SH LED USB UV 3D RGB HD LCD FDM SLA SSD AMS ACE CFS PEI II III IV".split(" "));
@@ -245,7 +251,22 @@ function proxima(ms) {            // cron do servidor: :07 :22 :37 :52
   const d = new Date(ms);
   for (const m of [7, 22, 37, 52, 67]) if (d.getMinutes() < m) { d.setMinutes(m, 0, 0); return d.getTime(); }
 }
-const sincronizando = () => pedidoEm > (dados?.inicio || 0);
+// Sincronizar: o servidor manda o andamento (pedido, pct 0-100, etapa). Sem andamento deste pedido ainda = esperando o servidor
+// pegar (ele olha a cada minuto). Se a rodada automatica de 15 min atender antes, ela nao manda andamento: vale o "inicio".
+const meuProg = () => prog && prog.pedido === pedidoEm ? prog : null;
+const sincronizando = () => {
+  if (!pedidoEm) return false;
+  const p = meuProg();
+  if (p) return p.pct < 100 && Date.now() - p.em < 5 * 60000;
+  return pedidoEm > (dados?.inicio || 0) && Date.now() - pedidoEm < 6 * 60000;
+};
+function pct() {                  // anda suave entre um aviso e outro do servidor, sem passar da proxima etapa
+  const p = meuProg(), agora = Date.now();
+  const alvo = p ? Math.min(p.pct < 30 ? 29 : Math.min(99, p.pct + 10), p.pct + (agora - p.em) / 1000 * 0.8)
+                 : Math.min(4, (agora - pedidoEm) / 60000 * 5);
+  mostra = Math.max(mostra, alvo);
+  return Math.floor(mostra);
+}
 
 function produtos(conta) {
   const mapa = new Map();
@@ -282,7 +303,7 @@ function cartoes() {
   $("k-ap").textContent = fmt(d + l - ab);
   $("k-ap-c").innerHTML = contas("aprovado");
   const baixos = produtos().filter(x => x.est != null && x.est <= 5).length;
-  $("k-prod").textContent = `${produtos().length} produtos${baixos ? ` · ${baixos} com estoque baixo` : ""}`;
+  $("k-prod").innerHTML = `${produtos().length} produtos<br>${baixos ? `${baixos} estoque baixo` : "nenhum estoque baixo"}`;
 }
 
 function grafico() {
@@ -339,19 +360,21 @@ function lista() {
 }
 
 function status() {
-  const s = sincronizando();
-  $("sinc").disabled = s; $("sinc").classList.toggle("rodando", s);
-  $("sinc").querySelector("span").textContent = s ? "Sincronizando…" : "Sincronizar";
+  const s = sincronizando(), b = $("sinc");
+  b.disabled = s; b.classList.toggle("rodando", s);
+  if (s) { const n = pct(); b.style.setProperty("--pct", n + "%"); b.querySelector("span").textContent = `Sincronizando ${n}%`; }
+  else { mostra = 0; b.querySelector("span").textContent = "Sincronizar"; }
   $("ponto").classList.toggle("gira", s);
-  $("quando").textContent = s ? "Buscando na Olist… 1–2 min"
-    : dados ? `Atualizado às ${hora(dados.atualizado)} · próxima ${hora(proxima(dados.atualizado))}` : "Ainda sem dados";
+  clearInterval(tique); if (s) tique = setInterval(status, 250);
+  $("quando").textContent = s ? (meuProg()?.etapa || "Esperando o servidor (até 1 min)")
+    : dados ? `Atualizado ${hora(dados.atualizado)} · próxima ${hora(proxima(dados.atualizado))}` : "Ainda sem dados";
 }
 
 async function carrega() {
   try {
     const j = await (await fetch(MOTOR + "/dados", {cache: "no-store"})).json();
     const mudou = j.dados && (!dados || j.dados.atualizado !== dados.atualizado);
-    dados = j.dados; pedidoEm = j.pedido_em || 0;
+    dados = j.dados; pedidoEm = j.pedido_em || 0; prog = j.progresso || null;
     $("erro").innerHTML = "";
     status();
     if (mudou) { cartoes(); grafico(); canais(); lista(); }
@@ -361,11 +384,12 @@ async function carrega() {
     $("erro").innerHTML = `<div class="erro">Não consegui ler os dados agora (${esc(e.message)}).</div>`;
   }
   clearTimeout(timer);
-  timer = setTimeout(carrega, sincronizando() ? 5000 : 60000);
+  timer = setTimeout(carrega, sincronizando() ? 3000 : 60000);
 }
 
 $("sinc").onclick = async () => {
   $("sinc").disabled = true;
+  mostra = 0;
   try { await fetch(MOTOR + "/sincronizar", {method: "POST"}); } catch {}
   carrega();
 };
