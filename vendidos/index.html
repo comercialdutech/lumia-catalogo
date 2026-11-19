@@ -46,7 +46,7 @@
  .tot .v{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
  .tot .r{font-size:11px;color:var(--suave)}
  table{width:100%;border-collapse:collapse;font-size:13px}
- td,th{padding:7px 14px;border-top:1px solid var(--linha);text-align:left;font-variant-numeric:tabular-nums}
+ td,th{padding:7px 10px;border-top:1px solid var(--linha);text-align:left;font-variant-numeric:tabular-nums}
  th{font-size:11px;color:var(--suave);font-weight:600}
  td.q,th.q{text-align:right}
  .vazio{text-align:center;color:var(--suave);font-size:14px;padding:30px 10px}
@@ -117,13 +117,13 @@ function desenha() {
                  .filter(Boolean).map(t => `<span class="tag">${t}</span>`).join("")
                + (x.pdv ? `<span class="tag pdv">Espera PDV ${fmt(x.pdv)}</span>` : "");
     const linhas = x.ped.sort((a, b) => (b.data || "").localeCompare(a.data || "")).map(p =>
-      `<tr><td>${p.conta.toUpperCase()}</td><td>${esc(p.numero)}</td><td>${p.situacao}${p.pdv ? " · Espera PDV" : ""}</td>
+      `<tr><td>${p.conta.toUpperCase()}</td><td>${esc(p.numero)}</td><td>${esc(p.canal || "")}</td><td>${p.situacao}${p.pdv ? " · Espera PDV" : ""}</td>
        <td>${dataBr(p.data)}</td><td class="q">${fmt(p.q)}</td></tr>`).join("");
     return `<details class="prod"><summary>
         <div class="info"><div class="sku">${esc(x.sku || "sem SKU")}</div><div class="desc">${esc(x.desc)}</div>
           <div class="tags">${tags}</div></div>
         <div class="tot"><div class="v">${fmt(x.tot)}</div><div class="r">un · ${x.ped.length} ped.</div></div>
-      </summary><table><tr><th>Conta</th><th>Pedido</th><th>Situação</th><th>Data</th><th class="q">Qtd</th></tr>${linhas}</table></details>`;
+      </summary><table><tr><th>Conta</th><th>Pedido</th><th>Canal</th><th>Situação</th><th>Data</th><th class="q">Qtd</th></tr>${linhas}</table></details>`;
   }).join("") : `<div class="vazio">Nenhum pedido em aberto/aprovado com “${esc($("busca").value.trim())}”.</div>`;
 }
 
