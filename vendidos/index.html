@@ -60,6 +60,9 @@ h1{font-size:26px;font-weight:600;letter-spacing:-.02em;margin:0}
 .canais .sel{font-weight:600}
 .canais .apaga{opacity:.35}
 .canais .bn:hover,.canais .bn:hover+.btr{opacity:1}
+.card.filtrado{border-color:var(--am-forte);box-shadow:0 0 0 1px var(--am-forte)}
+.rot .qual{color:var(--am-txt);font-weight:600}
+.cab .rot{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .filtro-c{font:inherit;font-size:12px;font-weight:600;color:var(--t1);background:var(--am-suave);border:0;border-radius:999px;
   padding:2px 10px;margin-left:8px;cursor:pointer}
 .painel h2{font-size:15px;font-weight:600;margin:0 0 2px}
@@ -181,14 +184,14 @@ footer{color:var(--t3);font-size:12px;margin-top:28px;text-align:center}
     <h1>Vendidos</h1><p class="sub" title="Multiempresa conta só pela LUMIA">Em aberto e aprovados na Olist</p></div>
   <div class="cards">
     <div class="card">
-      <div class="rot">Pedidos</div>
+      <div class="rot">Pedidos<span class="qual"></span></div>
       <div class="big esq-c" id="k-ped">000</div>
       <div class="split" id="k-split"></div>
       <div class="leg" id="k-leg"></div>
     </div>
-    <div class="card"><div class="rot">Unidades</div><div class="big esq-c" id="k-un">000</div><div class="mini" id="k-prod">&nbsp;</div></div>
-    <div class="card"><div class="rot">Em aberto</div><div class="big esq-c" id="k-ab">000</div><div class="leg" id="k-ab-c">&nbsp;</div></div>
-    <div class="card"><div class="rot">Aprovados</div><div class="big esq-c" id="k-ap">000</div><div class="leg" id="k-ap-c">&nbsp;</div></div>
+    <div class="card"><div class="rot">Unidades<span class="qual"></span></div><div class="big esq-c" id="k-un">000</div><div class="mini" id="k-prod">&nbsp;</div></div>
+    <div class="card"><div class="rot">Em aberto<span class="qual"></span></div><div class="big esq-c" id="k-ab">000</div><div class="leg" id="k-ab-c">&nbsp;</div></div>
+    <div class="card"><div class="rot">Aprovados<span class="qual"></span></div><div class="big esq-c" id="k-ap">000</div><div class="leg" id="k-ap-c">&nbsp;</div></div>
   </div>
   <div class="sinc-box">
     <button class="bt" id="sinc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span>Sincronizar</span></button>
@@ -293,25 +296,28 @@ function produtos(conta, porCanal = true) {
 const pedaco = (x, tot) => ["dutech", "lumia"].filter(c => x[c] > 0)
   .map(c => `<div style="flex:${x[c]};background:${COR[c]}"></div>`).join("") + (tot > x.tot ? `<div style="flex:${tot - x.tot}"></div>` : "");
 
-function cartoes() {
-  const ped = c => dados.pedidos.filter(p => p.conta === c).length;
-  const d = ped("dutech"), l = ped("lumia"), un = dados.pedidos.reduce((s, p) => s + p.itens.reduce((t, i) => t + (Number(i[2]) || 0), 0), 0);
-  const ab = dados.pedidos.filter(p => p.situacao === "aberto").length, pdv = dados.pedidos.filter(p => p.pdv).length;
+function cartoes() {            // seguem o canal clicado em "Pedidos por canal" (canalF)
+  const lista = dados.pedidos.filter(p => !canalF || canalDe(p) === canalF);
+  document.querySelectorAll(".cards .card").forEach(c => c.classList.toggle("filtrado", !!canalF));
+  document.querySelectorAll(".cards .rot .qual").forEach(e => e.textContent = canalF ? " · " + canalF : "");
+  const ped = c => lista.filter(p => p.conta === c).length;
+  const d = ped("dutech"), l = ped("lumia"), un = lista.reduce((s, p) => s + p.itens.reduce((t, i) => t + (Number(i[2]) || 0), 0), 0);
+  const ab = lista.filter(p => p.situacao === "aberto").length, pdv = lista.filter(p => p.pdv).length;
   for (const id of ["k-ped", "k-un", "k-ab", "k-ap"]) $(id).classList.remove("esq-c");
   $("k-ped").textContent = fmt(d + l);
   $("k-split").innerHTML = pedaco({dutech: d, lumia: l, tot: d + l}, d + l);
   $("k-leg").innerHTML = `<span><i class="sw" style="background:var(--dut)"></i><b>${d}</b> DUTECH</span>
                           <span><i class="sw" style="background:var(--lum)"></i><b>${l}</b> LUMIA</span>`;
   $("k-un").textContent = fmt(un);
-  const sit = (st, c) => dados.pedidos.filter(p => p.situacao === st && p.conta === c).length;
+  const sit = (st, c) => lista.filter(p => p.situacao === st && p.conta === c).length;
   const contas = st => `<span><i class="sw" style="background:var(--dut)"></i><b>${sit(st, "dutech")}</b> DUTECH</span>
                         <span><i class="sw" style="background:var(--lum)"></i><b>${sit(st, "lumia")}</b> LUMIA</span>`;
   $("k-ab").textContent = fmt(ab);
   $("k-ab-c").innerHTML = contas("aberto") + (pdv ? `<span>${pdv} Espera PDV</span>` : "");
   $("k-ap").textContent = fmt(d + l - ab);
   $("k-ap-c").innerHTML = contas("aprovado");
-  const baixos = produtos("", false).filter(x => x.est != null && x.est <= 5).length;
-  $("k-prod").innerHTML = `${produtos("", false).length} produtos<br>${baixos ? `${baixos} estoque baixo` : "nenhum estoque baixo"}`;
+  const prods = produtos("", true), baixos = prods.filter(x => x.est != null && x.est <= 5).length;
+  $("k-prod").innerHTML = `${prods.length} produtos<br>${baixos ? `${baixos} estoque baixo` : "nenhum estoque baixo"}`;
 }
 
 function grafico() {
@@ -341,7 +347,7 @@ function canais() {
 }
 function escolheCanal(c) {
   canalF = canalF === c ? "" : c;
-  grafico(); canais(); lista(); $("lista").scrollTop = 0;
+  cartoes(); grafico(); canais(); lista(); $("lista").scrollTop = 0;
 }
 function dica(e, html) {
   const d = $("dica"); d.innerHTML = html; d.style.opacity = 1;
