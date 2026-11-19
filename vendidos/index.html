@@ -55,8 +55,13 @@ h1{font-size:26px;font-weight:600;letter-spacing:-.02em;margin:0}
 .duo{display:grid;grid-template-columns:1.6fr 1fr;gap:12px;margin-bottom:12px}
 .duo .painel{margin:0}
 .canais .btr div{background:var(--am-forte)}
-.canais .bn{cursor:default}
+.canais .bn,.canais .btr,.canais .bv{cursor:pointer;transition:opacity .15s}
 .canais .bn:hover{text-decoration:none}
+.canais .sel{font-weight:600}
+.canais .apaga{opacity:.35}
+.canais .bn:hover,.canais .bn:hover+.btr{opacity:1}
+.filtro-c{font:inherit;font-size:12px;font-weight:600;color:var(--t1);background:var(--am-suave);border:0;border-radius:999px;
+  padding:2px 10px;margin-left:8px;cursor:pointer}
 .painel h2{font-size:15px;font-weight:600;margin:0 0 2px}
 .painel .mini{margin:0 0 14px}
 .barras{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) 40px;gap:9px 12px;align-items:center}
@@ -181,7 +186,7 @@ footer{color:var(--t3);font-size:12px;margin-top:28px;text-align:center}
       <div class="split" id="k-split"></div>
       <div class="leg" id="k-leg"></div>
     </div>
-    <div class="card"><div class="rot">Unidades vendidas</div><div class="big esq-c" id="k-un">000</div><div class="mini" id="k-prod">&nbsp;</div></div>
+    <div class="card"><div class="rot">Unidades</div><div class="big esq-c" id="k-un">000</div><div class="mini" id="k-prod">&nbsp;</div></div>
     <div class="card"><div class="rot">Em aberto</div><div class="big esq-c" id="k-ab">000</div><div class="leg" id="k-ab-c">&nbsp;</div></div>
     <div class="card"><div class="rot">Aprovados</div><div class="big esq-c" id="k-ap">000</div><div class="leg" id="k-ap-c">&nbsp;</div></div>
   </div>
@@ -203,7 +208,7 @@ footer{color:var(--t3);font-size:12px;margin-top:28px;text-align:center}
     </div>
     <div class="painel">
       <h2>Pedidos por canal</h2>
-      <p class="mini">De onde vieram os pedidos em aberto e aprovados</p>
+      <p class="mini">De onde vieram os pedidos · clique num canal para filtrar</p>
       <div class="barras canais" id="canais"></div>
     </div>
   </div>
@@ -268,10 +273,13 @@ function pct() {                  // anda suave entre um aviso e outro do servid
   return Math.floor(mostra);
 }
 
-function produtos(conta) {
+const canalDe = p => p.canal || "sem nº de marketplace";
+let canalF = "";   // canal clicado em "Pedidos por canal" (vazio = todos)
+function produtos(conta, porCanal = true) {
   const mapa = new Map();
   for (const p of dados.pedidos) {
     if (conta && p.conta !== conta) continue;
+    if (porCanal && canalF && canalDe(p) !== canalF) continue;
     for (const [sku, desc, qtd] of p.itens) {
       const k = sku || desc;
       if (!mapa.has(k)) mapa.set(k, {sku, desc, nome: nomeBonito(desc), tot: 0, dutech: 0, lumia: 0, aberto: 0, aprovado: 0, pdv: 0, ped: []});
@@ -302,8 +310,8 @@ function cartoes() {
   $("k-ab-c").innerHTML = contas("aberto") + (pdv ? `<span>${pdv} Espera PDV</span>` : "");
   $("k-ap").textContent = fmt(d + l - ab);
   $("k-ap-c").innerHTML = contas("aprovado");
-  const baixos = produtos().filter(x => x.est != null && x.est <= 5).length;
-  $("k-prod").innerHTML = `${produtos().length} produtos<br>${baixos ? `${baixos} estoque baixo` : "nenhum estoque baixo"}`;
+  const baixos = produtos("", false).filter(x => x.est != null && x.est <= 5).length;
+  $("k-prod").innerHTML = `${produtos("", false).length} produtos<br>${baixos ? `${baixos} estoque baixo` : "nenhum estoque baixo"}`;
 }
 
 function grafico() {
@@ -323,10 +331,17 @@ function grafico() {
 }
 function canais() {
   const n = {};
-  for (const p of dados.pedidos) if (!filtro || p.conta === filtro) n[p.canal || "sem nº de marketplace"] = (n[p.canal || "sem nº de marketplace"] || 0) + 1;
+  for (const p of dados.pedidos) if (!filtro || p.conta === filtro) n[canalDe(p)] = (n[canalDe(p)] || 0) + 1;
   const l = Object.entries(n).sort((a, b) => b[1] - a[1]), max = l[0]?.[1] || 1;
-  $("canais").innerHTML = l.map(([c, v]) => `<div class="bn">${esc(c)}</div>
-    <div class="btr"><div style="flex:${v}"></div><div style="flex:${max - v};background:none"></div></div><div class="bv">${v}</div>`).join("");
+  const cls = c => canalF ? (c === canalF ? " sel" : " apaga") : "";
+  $("canais").innerHTML = l.map(([c, v]) => `<div class="bn${cls(c)}" data-c="${esc(c)}">${esc(c)}</div>
+    <div class="btr${cls(c)}" data-c="${esc(c)}"><div style="flex:${v}"></div><div style="flex:${max - v};background:none"></div></div>
+    <div class="bv${cls(c)}" data-c="${esc(c)}">${v}</div>`).join("");
+  $("canais").querySelectorAll("[data-c]").forEach(el => el.onclick = () => escolheCanal(el.dataset.c));
+}
+function escolheCanal(c) {
+  canalF = canalF === c ? "" : c;
+  grafico(); canais(); lista(); $("lista").scrollTop = 0;
 }
 function dica(e, html) {
   const d = $("dica"); d.innerHTML = html; d.style.opacity = 1;
@@ -338,7 +353,9 @@ function lista() {
   const todos = produtos(filtro), max = todos[0]?.tot || 1;
   const achados = todos.filter(x => termos.every(t => x.desc.includes(t) || (x.sku || "").toUpperCase().startsWith(t)
     || x.ped.some(p => String(p.numero) === t || (p.mkt || "").toUpperCase() === t)));
-  $("qtd").textContent = termos.length ? `${achados.length} de ${todos.length} produtos` : `${todos.length} produtos`;
+  $("qtd").innerHTML = (termos.length ? `${achados.length} de ${todos.length} produtos` : `${todos.length} produtos`)
+    + (canalF ? ` <button class="filtro-c" id="limpa-c">canal: ${esc(canalF)} ✕</button>` : "");
+  if (canalF) $("limpa-c").onclick = () => escolheCanal(canalF);
   $("lista").innerHTML = achados.length ? achados.map(x => {
     const tags = [x.aberto && `aberto ${fmt(x.aberto)}`, x.aprovado && `aprovado ${fmt(x.aprovado)}`]
                  .filter(Boolean).map(t => `<span class="tag">${t}</span>`).join("")
