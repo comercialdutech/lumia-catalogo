@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TikTok Promo</title>
+<meta name="theme-color" content="#F4F4F5">
+<link rel="stylesheet" href="../tema.css">
+<script src="../tema.js"></script>
+<meta name="robots" content="noindex">
+<link rel="apple-touch-icon" href="../app/icone-192.png">
+<style>
+ @font-face{font-family:"Buvera";font-weight:400;font-display:swap;src:url(../marca/Buvera-Regular.ttf)}
+ @font-face{font-family:"Buvera";font-weight:700 800;font-display:swap;src:url(../marca/Buvera-ExtraBold.ttf)}
+ :root{--bg:#F4F4F5;--surface:#fff;--ink:#0A0A0B;--muted:#6B6B70;--line:#E4E4E7;--brand:#0A0A0B;--brand-soft:#FFF0B3;
+   --accent:#10b981;--accent-ink:#0a8f66;--danger:#e5484d;--warn:#d9930d;--azul:#3b5bdb;--console:#0f172a;
+   --shadow:0 1px 2px rgba(16,24,40,.04),0 6px 20px rgba(16,24,40,.05);--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--hover:#f5f6fa;--soft:#f8fafc;--topo:rgba(255,255,255,.85)}
+ *{box-sizing:border-box}
+ body{margin:0;background:var(--bg);color:var(--ink);font-family:"Buvera",system-ui,"Segoe UI",Roboto,sans-serif;font-size:14px;line-height:1.55}
+ input[type=checkbox]{accent-color:var(--brand)}
+ .shell{display:flex;min-height:100vh}
+ .sidebar{width:225px;flex:none;background:var(--surface);border-right:1px solid var(--line);padding:18px 14px;display:flex;flex-direction:column;gap:22px;position:sticky;top:0;height:100vh}
+ .brand{display:flex;align-items:center;gap:10px;padding:4px 8px}
+ .brand img{height:30px;width:auto;border-radius:6px}
+ .brand-sub{color:var(--muted);font-weight:700;font-size:12px;line-height:1.3}
+ .side-nav{display:flex;flex-direction:column;gap:4px}
+ .nav-item{display:flex;align-items:center;gap:11px;width:100%;text-align:left;border:none;background:none;padding:10px 12px;border-radius:10px;font:inherit;font-weight:700;color:var(--muted);cursor:pointer}
+ .nav-item:hover{background:var(--hover);color:var(--ink)} .nav-item.active{background:var(--brand-soft);color:var(--ink)}
+ .nav-item svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+ .t-acima_cheio{background:#fde2e6;color:#9f1239}.t-outra_campanha{background:#eceef4;color:#555}.t-pendente{background:#fff3c4;color:#854d0e}.t-prejuizo{background:#fde2e6;color:#9f1239}.t-sem_preco{background:#eceef4;color:#555}
+ input.price.abaixo{border-color:var(--danger);color:var(--danger);font-weight:800}
+ .volta{color:var(--muted);text-decoration:none;font-size:13px;padding:0 12px;margin-top:auto}
+ .maincol{flex:1;min-width:0;display:flex;flex-direction:column}
+ .topbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 28px;background:var(--topo);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+ .topbar h1{margin:0;font-size:17px;font-weight:800}
+ .spacer{flex:1}
+ main{padding:26px 28px 70px;max-width:1560px;width:100%}
+ .pill{display:inline-flex;align-items:center;gap:7px;padding:6px 13px;border-radius:999px;font-size:12.5px;font-weight:700;border:1px solid var(--line);background:var(--surface);color:var(--muted);white-space:nowrap}
+ .dot{width:8px;height:8px;border-radius:50%;background:#c3c9d6}
+ .pill.ok .dot{background:var(--accent)} .pill.off{color:var(--danger)} .pill.off .dot{background:var(--danger)}
+ .pill.run{color:var(--warn)} .pill.run .dot{background:var(--warn);animation:pulse 1s infinite}
+ @keyframes pulse{50%{opacity:.25}}
+ .chave{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:13px;cursor:pointer}
+ .btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:9px 16px;border-radius:10px;font:inherit;font-weight:700;font-size:13.5px;cursor:pointer;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+ .btn:hover{border-color:#c9d0de} .btn:disabled{opacity:.5;cursor:not-allowed}
+ .btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+ .btn.danger{color:var(--danger);border-color:#f3d2d3}
+ .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px;margin-bottom:20px;box-shadow:var(--shadow)}
+ .card h2{margin:0 0 4px;font-size:15px;font-weight:800}
+ .card .sub{color:var(--muted);font-size:13px;margin-bottom:16px}
+ .hide{display:none!important}
+ .runbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+ .stat{display:flex;flex-direction:column;gap:2px;padding:12px 18px 12px 15px;border-radius:12px;background:var(--soft);border:1px solid var(--line);border-left:3px solid #c3c9d6;min-width:122px}
+ .stat b{font-size:24px;font-variant-numeric:tabular-nums} .stat span{font-size:12px;color:var(--muted);font-weight:700}
+ .stat.red{border-left-color:var(--danger);background:#fef5f5} .stat.red b{color:var(--danger)}
+ .stat.warn{border-left-color:var(--warn);background:#fffaf0} .stat.warn b{color:var(--warn)}
+ .stat.azul{border-left-color:var(--azul);background:#f3f6ff} .stat.azul b{color:var(--azul)}
+ .stat.green{border-left-color:var(--accent);background:#f2fdf8} .stat.green b{color:var(--accent-ink)}
+ .console{margin-top:16px;background:var(--console);border-radius:12px;padding:15px 17px;font-family:var(--mono);font-size:12.5px;line-height:1.65;color:#cbd5e1;height:380px;overflow-y:auto;white-space:pre-wrap;word-break:break-word}
+ .console .ok{color:#4ade80}.console .err{color:#f87171}.console .skip{color:#64748b}.console .head{color:#fbbf77;font-weight:700}.console .sys{color:#7dd3fc}
+ .toolbar{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+ .search{flex:1;min-width:200px;padding:10px 13px;border:1px solid var(--line);border-radius:10px;font:inherit;background:var(--surface)}
+ select.search{flex:0 0 auto;min-width:0}
+ table{width:100%;border-collapse:collapse;font-size:13px}
+ th{text-align:left;color:var(--muted);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.6px;padding:9px 8px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface);z-index:1;line-height:1.3}
+ th.sort{cursor:pointer;user-select:none} th.n,td.n{text-align:right}
+ td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+ td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
+ tbody tr:hover td{background:var(--soft)}
+ tr.prej td{background:#fef5f5} tr.baixa td{background:#fffaf0}
+ .twrap{max-height:560px;overflow:auto;border:1px solid var(--line);border-radius:12px}
+ td.sku,td.nw{white-space:nowrap}
+ td.tit-full{min-width:280px;max-width:460px;color:var(--muted);line-height:1.35}   /* Produtos: título inteiro (pedido do dono) */
+ .titulo{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}
+ input.price{width:92px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;font-family:var(--mono);font-size:13px;text-align:right}
+ input.price.man{font-weight:800;border-color:var(--ink)} input.price.dirty{border-color:var(--brand);background:var(--brand-soft)}
+ .tag{display:inline-block;border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:700;white-space:nowrap}
+ .t-ok{background:#dcfce7;color:#166534}.t-abaixo{background:#fde2e6;color:#9f1239}.t-acima{background:#fff3c4;color:#854d0e}
+ .t-custo_mudou{background:#e0e7ff;color:#3730a3}.t-sem_custo,.t-fora_campanha,.t-pausado{background:#eceef4;color:#555}
+ .neg{color:var(--danger);font-weight:800} .alerta{color:var(--warn);font-weight:800}
+ .saved{color:var(--accent-ink);font-size:13px;font-weight:700;opacity:0;transition:.2s} .saved.show{opacity:1}
+ .field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px} .field label{font-weight:700;font-size:13px}
+ .field .hint{color:var(--muted);font-size:12px}
+ .field input,.field select{padding:9px 11px;border:1px solid var(--line);border-radius:10px;font:inherit;background:var(--surface);max-width:220px}
+ .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:4px 22px}
+ .ajuda li{margin-bottom:6px}
+ .login{max-width:360px;margin:60px auto}
+ .login input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;margin-bottom:10px}
+ @media (max-width:820px){
+  .shell{flex-direction:column}
+  .sidebar{width:auto;height:auto;position:static;flex-direction:row;align-items:center;gap:10px;padding:10px 12px;overflow-x:auto;scrollbar-width:none;border-right:0;border-bottom:1px solid var(--line)}
+  .brand-sub,.volta{display:none} .side-nav{flex-direction:row} .nav-item{width:auto;padding:8px 10px;white-space:nowrap} .nav-item svg{display:none}
+  .topbar{padding:10px 16px;position:static} main{padding:16px 16px 60px}
+  .stat{min-width:0;flex:1 1 40%} .card{padding:16px}
+ }
+
+ /* ---- tema escuro (escolha no hub, via tema.js) ---- */
+ :root[data-theme=escuro]{color-scheme:dark;--bg:#111;--surface:#1a1a1a;--ink:#eee;--muted:#9a9aa5;--line:#2a2a2a;
+   --brand:#FFD100;--brand-soft:#3a3210;--hover:#222;--soft:#202020;--topo:rgba(17,17,17,.85)}
+ :root[data-theme=escuro] .btn.primary{color:#0A0A0B}
+ :root[data-theme=escuro] .btn.danger{border-color:#5a2a2a}
+ :root[data-theme=escuro] .stat.red,:root[data-theme=escuro] .stat.warn,:root[data-theme=escuro] .stat.azul,
+ :root[data-theme=escuro] .stat.green{background:var(--soft)}
+ :root[data-theme=escuro] .stat.azul{--azul:#8ea2ff}
+ :root[data-theme=escuro] tr.prej td{background:#2e1418}:root[data-theme=escuro] tr.baixa td{background:#2e2610}
+</style></head><body>
+<div class="shell">
+ <aside class="sidebar">
+  <div class="brand"><img class="so-claro" src="../marca/logo-escuro.png" alt="Lumia"><img class="so-escuro" src="../marca/logo.png" alt="Lumia"><div class="brand-sub">TikTok<br>Promo</div></div>
+  <nav class="side-nav">
+   <button class="nav-item active" data-tab="painel"><svg viewBox="0 0 24 24"><path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z"/></svg>Painel</button>
+   <button class="nav-item" data-tab="produtos"><svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>Produtos</button>
+   <button class="nav-item" data-tab="saude"><svg viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>Saúde</button>
+   <button class="nav-item" data-tab="historico"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>Histórico</button>
+   <button class="nav-item" data-tab="regra"><svg viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>Taxas</button>
+   <button class="nav-item" data-tab="ajuda"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Instruções</button>
+  </nav>
+  <a class="volta" href="../ecommerce/">‹ voltar ao E-commerce</a>
+ </aside>
+ <div class="maincol">
+  <div class="topbar"><h1 id="titulo">Painel</h1><div class="spacer"></div>
+   <span class="pill" id="estado"><span class="dot"></span><span>carregando…</span></span></div>
+  <main id="main"></main>
+ </div>
+</div>
+<script type="module">
+// TikTok Promo (19/11/2026), modelo do Shopee Promo: Mín. p/ venda = lucro zero (taxa do TikTok + comissão + imposto + frete,
+// SEM operacional); a equipe digita o Preço mínimo de cada SKU. A campanha do TikTok é "desconto direto" em % INTEIRO
+// (medido): o cheio não muda e o Rodar põe o MAIOR desconto inteiro que deixa o cliente pagando >= o preço mínimo.
+import {REGRA_PADRAO, alvoDe, minimoVenda, situacao, alertas, campanhaVence} from "./logica.mjs";
+const PROXY = "https://estoque-olist.dutech.workers.dev/tiktok";
+const $ = id => document.getElementById(id);
+const cab = () => ({authorization: `Bearer ${localStorage.usuario || ""}:${localStorage.senha || ""}`, "content-type": "application/json"});
+const brl = v => v == null || isNaN(v) ? "—" : Number(v).toLocaleString("pt-BR", {minimumFractionDigits: 2, maximumFractionDigits: 2});
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+const num = s => { const t = String(s ?? "").trim(); const v = Number((t.includes(",") ? t.replace(/\./g, "") : t).replace(",", ".")); return v > 0 ? v : null; };
+const NOME = {ok: "OK", pendente: "A aplicar", prejuizo: "Prejuízo", custo_mudou: "Custo mudou", sem_preco: "Sem preço mínimo", sem_custo: "Sem custo",
+  fora_campanha: "Fora de campanha", outra_campanha: "Outra campanha", acima_cheio: "Mín. acima do cheio", pausado: "Pausado"};
+const TITULOS = {painel: "Painel", produtos: "Produtos e preços mínimos", saude: "Saúde dos anúncios", historico: "Histórico", regra: "Taxas e imposto", ajuda: "Instruções"};
+let D = null, aba = localStorage.ttAba || "painel", rodando = false, parar = false;
+let busca = "", fSit = "", ord = ["sit", 1], buscaP = "";
+const sujo = {}, marcados = new Set(), marcadosP = new Set();
+let logHtml = `<span class="skip">O log aparece aqui quando você clicar em "Simular" ou "Rodar agora".</span>`;
+const campTxt = (preco, d) => d == null ? "—" : `${brl(preco)}<br><small>−${d}%</small>`;
+const alvoTxt = p => !p ? "—" : p.desconto < 1 ? `<span class="neg">sem desconto</span>` : `${brl(p.cheio)}<br><small>−${p.desconto}% → ${brl(p.venda)}</small>`;
+
+async function api(rota, corpo) {
+  const r = await fetch(PROXY + rota, corpo ? {method: "POST", headers: cab(), body: JSON.stringify(corpo)} : {headers: cab()});
+  if (r.status === 401) { telaLogin(localStorage.usuario ? "Usuário ou senha errados (precisa ser da equipe)." : ""); throw new Error("login"); }
+  const j = await r.json().catch(() => ({erro: `resposta inválida (${r.status})`}));
+  if (!r.ok) throw new Error(j.erro || r.status);
+  return j;
+}
+function estado(txt, cls = "") { $("estado").className = "pill " + cls; $("estado").innerHTML = `<span class="dot"></span><span>${esc(txt)}</span>`; }
+function telaLogin(msg) {
+  estado("sem login", "off");
+  $("main").innerHTML = `<div class="card login"><h2>Entrar</h2><div class="sub">Mesmo usuário e senha do hub (equipe).</div>
+    ${msg ? `<div class="neg" style="margin-bottom:10px">${esc(msg)}</div>` : ""}
+    <input id="u" placeholder="usuário" autocomplete="username"><input id="s" type="password" placeholder="senha" autocomplete="current-password">
+    <button class="btn primary" id="entrar">Entrar</button></div>`;
+  $("entrar").onclick = () => { localStorage.usuario = $("u").value.trim(); localStorage.senha = $("s").value; carregar(); };
+}
+async function carregar() {
+  try { D = await api("/dados"); }
+  catch (e) { if (e.message !== "login") estado("erro: " + e.message, "off"); return; }
+  const lido = D.lido_em ? new Date(D.lido_em).toLocaleString("pt-BR", {day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"}) : "nunca";
+  estado(`loja Dutech · TikTok lido em ${lido}`, "ok");
+  desenhar();
+}
+const regra = () => ({...REGRA_PADRAO, ...D.regra});
+// pendente = o que o Rodar mudaria de fato (mesma conta do worker): o % de quem está na campanha ou a entrada de quem está fora
+const muda = (a, alvo) => !!alvo && alvo.desconto >= 1 && !a.outra_campanha && a.desconto !== alvo.desconto;
+function linhas() {
+  const R = regra();
+  return D.anuncios.map(a => {
+    const salvo = D.manuais[a.sku], alvo = alvoDe(a, R, salvo), min = minimoVenda(a.custo, R);
+    const sit = a.status !== "ACTIVATE" ? "pausado" : situacao(a, alvo);
+    return {...a, salvo, alvo, min, sit, al: alertas(a, alvo), pendente: a.status === "ACTIVATE" && ["pendente", "prejuizo", "fora_campanha"].includes(sit) && muda(a, alvo)};
+  });
+}
+const tagSit = l => `<span class="tag t-${l.sit}" ${l.outra_campanha ? `title="${esc(l.outra_campanha)}"` : ""}>${NOME[l.sit]}</span>`;
+const contaMin = (l, R) => !l.min ? "sem custo no Tiny" :
+  `Mínimo ${brl(l.min.venda)} = (custo ${brl(l.custo)} + taxa fixa ${brl(l.min.fixa)}${R.frete ? " + frete " + brl(R.frete) : ""}) ÷ (1 − taxa ${l.min.faixa.split("%")[0]}%${R.comissao ? ` − comissão ${R.comissao}%` : ""} − imposto ${R.imposto}%)`;
+const contaMargem = c => !c || c.margem == null ? "" :
+  `Venda ${brl(c.preco)} − taxa ${brl(c.taxa)}${c.comissao ? " − comissão " + brl(c.comissao) : ""} − taxa fixa ${brl(c.fixa)} − imposto ${brl(c.imposto)}${c.frete ? " − frete " + brl(c.frete) : ""} − custo ${brl(c.custo)} = ${brl(c.margem)}`;
+
+function desenhar() {
+  document.querySelectorAll(".nav-item").forEach(b => b.classList.toggle("active", b.dataset.tab === aba));
+  $("titulo").textContent = TITULOS[aba];
+  ({painel, produtos, saude, historico, regra: telaRegra, ajuda})[aba]();
+}
+
+// ---------------- PAINEL ----------------
+function painel() {
+  const L = linhas(), at = L.filter(l => l.status === "ACTIVATE"), n = s => at.filter(l => l.sit === s).length, pend = L.filter(l => l.pendente);
+  const emCamp = L.filter(l => l.activity_id != null);
+  const V = at.filter(l => !busca || (l.sku + " " + l.titulo).toLowerCase().includes(busca.toLowerCase()));
+  const marcavel = l => (!!l.alvo && l.alvo.desconto >= 1) || l.activity_id != null;
+  const graves = L.filter(l => l.al.some(x => x.grave)).length;
+  $("main").innerHTML = avisoCampanha() + `
+   <div class="card"><div class="runbar">
+     <div class="stat"><b>${at.length}</b><span>anúncios ativos</span></div>
+     <div class="stat green"><b>${at.filter(l => l.alvo).length}</b><span>com preço mínimo</span></div>
+     <div class="stat warn"><b>${pend.length}</b><span>a aplicar</span></div>
+     <div class="stat red"><b>${n("prejuizo")}</b><span>em prejuízo</span></div>
+     <div class="stat"><b>${n("sem_preco") + n("sem_custo")}</b><span>sem preço mínimo</span></div>
+     <div class="stat ${graves ? "red" : ""}" id="irSaude" style="cursor:pointer" title="abrir a aba Saúde"><b>${L.filter(l => l.al.length).length}</b><span>com alerta${graves ? ` (${graves} graves)` : ""}</span></div>
+     <div class="spacer"></div>
+     <button class="btn" id="simular" ${rodando ? "disabled" : ""}>Simular</button>
+     <button class="btn primary" id="rodar" ${rodando || !pend.length ? "disabled" : ""}>Rodar agora (${pend.length})</button>
+     <button class="btn danger" id="tirarTodos" ${rodando || !emCamp.length ? "disabled" : ""}>Tirar todos da campanha (${emCamp.length})</button>
+     <button class="btn danger ${rodando ? "" : "hide"}" id="parar">Parar</button></div>
+     <div class="console" id="console">${logHtml}</div></div>
+   <div class="card"><h2>Mexer só em alguns anúncios</h2>
+     <div class="sub">Marque os anúncios e coloque na campanha só eles, pelo preço mínimo salvo na aba Produtos, ou tire só eles da campanha.</div>
+     <div class="toolbar"><input class="search" id="busca" placeholder="Buscar por SKU ou título…" value="${esc(busca)}">
+       <button class="btn primary" id="aplicarSel" ${rodando ? "disabled" : ""}></button>
+       <button class="btn danger" id="tirarSel" ${rodando ? "disabled" : ""}></button></div>
+     <div class="twrap" style="max-height:360px"><table><thead><tr><th><input type="checkbox" id="todos"></th><th>SKU</th><th>Título</th>
+       <th class="n">Campanha hoje</th><th class="n">Preço mínimo</th><th class="n">Vai ficar</th><th class="n">Margem contrib.</th><th>Situação</th></tr></thead><tbody>
+       ${V.map(l => `<tr><td><input type="checkbox" data-m="${esc(l.product_id)}" ${marcados.has(l.product_id) ? "checked" : ""} ${marcavel(l) ? "" : "disabled"}></td>
+         <td class="sku"><b>${esc(l.sku)}</b></td><td><div class="titulo">${esc(l.titulo)}</div></td><td class="n">${campTxt(l.campanha, l.desconto)}</td>
+         <td class="n">${l.salvo != null ? brl(l.salvo) : "—"}</td><td class="n">${alvoTxt(l.alvo)}</td>
+         <td class="n ${l.alvo?.margem < 0 ? "neg" : ""}" title="${esc(contaMargem(l.alvo))}">${l.alvo?.margem != null ? brl(l.alvo.margem) : "—"}</td><td>${tagSit(l)}</td></tr>`).join("")}
+     </tbody></table></div></div>`;
+  $("simular").onclick = simular;
+  $("irSaude").onclick = () => { aba = "saude"; try { localStorage.ttAba = aba; } catch {} desenhar(); };
+  $("rodar").onclick = () => rodar(linhas().filter(l => l.pendente), "todos com preço mínimo diferente da loja");
+  $("parar").onclick = () => { parar = true; log("sys", "parando depois do lote atual…"); };
+  $("tirarTodos").onclick = () => retirar(linhas().filter(l => l.activity_id != null), "TODOS os que estão em campanha");
+  const selAplicar = () => linhas().filter(l => marcados.has(l.product_id) && l.alvo && l.alvo.desconto >= 1), selTirar = () => linhas().filter(l => marcados.has(l.product_id) && l.activity_id != null);
+  const contaSel = () => { $("aplicarSel").textContent = `Aplicar selecionados (${selAplicar().length})`; $("tirarSel").textContent = `Tirar selecionados da campanha (${selTirar().length})`; };
+  contaSel();
+  $("aplicarSel").onclick = () => rodar(selAplicar(), "selecionados");
+  $("tirarSel").onclick = () => retirar(selTirar(), "selecionados");
+  $("busca").oninput = e => { busca = e.target.value; painel(); $("busca").focus(); $("busca").setSelectionRange(busca.length, busca.length); };
+  $("todos").onchange = e => { V.filter(marcavel).forEach(l => e.target.checked ? marcados.add(l.product_id) : marcados.delete(l.product_id)); painel(); };
+  document.querySelectorAll("[data-m]").forEach(c => c.onchange = () => { const id = c.dataset.m; c.checked ? marcados.add(id) : marcados.delete(id); contaSel(); });
+  const cons = $("console"); cons.scrollTop = cons.scrollHeight;
+}
+function log(cls, txt) {
+  logHtml = (logHtml.includes("O log aparece") ? "" : logHtml) + `<span class="${cls}">${esc(txt)}</span>\n`;
+  const c = $("console"); if (c) { c.innerHTML = logHtml; c.scrollTop = c.scrollHeight; }
+}
+const hora = () => new Date().toLocaleTimeString("pt-BR");
+const pct = d => d == null ? "fora" : d + "%";
+function simular() {
+  logHtml = "";
+  const P = linhas().filter(l => l.pendente), sem = linhas().filter(l => l.status === "ACTIVATE" && !l.alvo).length;
+  log("head", `[${hora()}] SIMULAÇÃO — ${P.length} anúncio(s) mudariam. Nada foi enviado ao TikTok.`);
+  for (const l of P) log(l.alvo.margem < 0 ? "err" : "ok", `${l.sku.padEnd(10)} desconto ${pct(l.desconto)} → ${l.alvo.desconto}% · cliente paga ${brl(l.campanha ?? l.cheio)} → ${brl(l.alvo.venda)} (mínimo ${brl(l.salvo)}) · margem ${brl(l.alvo.margem)}${l.alvo.margem < 0 ? ` · PREJUÍZO (mín. p/ venda ${brl(l.alvo.minimo)})` : ""}`);
+  const acima = linhas().filter(l => l.sit === "acima_cheio").length, outra = linhas().filter(l => l.sit === "outra_campanha").length;
+  if (acima) log("skip", `${acima} anúncio(s) com preço mínimo acima do cheio (não dá desconto) ficam como estão.`);
+  if (outra) log("skip", `${outra} anúncio(s) em outra campanha ficam como estão.`);
+  if (sem) log("skip", `${sem} anúncio(s) sem preço mínimo salvo ficam como estão.`);
+}
+async function rodar(L, oque) {
+  if (!L.length) return;
+  const neg = L.filter(l => l.alvo.margem < 0);
+  if (!confirm(`Mudar o desconto de ${L.length} anúncio(s) NO TIKTOK (${oque})?\n\nO preço cheio NÃO muda. Cada anúncio recebe o maior desconto inteiro que deixa o cliente pagando pelo menos o preço mínimo.\nQuem está fora da campanha entra nela.`)) return;
+  let aceito = false;
+  if (neg.length) aceito = confirm(`${neg.length} anúncio(s) estão ABAIXO do mínimo p/ venda (prejuízo): ${neg.map(l => l.sku).join(", ")}.\n\nOK = aplicar mesmo assim · Cancelar = pular esses`);
+  const itens = L.filter(l => aceito || !(l.alvo.margem < 0)).map(l => ({product_id: l.product_id, desconto: l.alvo.desconto, venda: l.alvo.venda, aceito_prejuizo: l.alvo.margem < 0}));
+  await emLotes("/aplicar", itens, "RODANDO", "aplicando no TikTok…");
+}
+async function retirar(L, oque) {
+  if (!L.length) return;
+  if (!confirm(`Tirar ${L.length} anúncio(s) da campanha NO TIKTOK (${oque})?\n\nEles ficam SEM desconto: o cliente passa a pagar o preço cheio.\nAtenção: o próximo Rodar coloca de volta na campanha.`)) return;
+  await emLotes("/retirar", L.map(l => ({product_id: l.product_id})), "TIRANDO DA CAMPANHA", "tirando da campanha…");
+}
+const RES = {aplicado: ["ok", "✅"], igual: ["skip", "="], divergente: ["err", "⚠️ gravou diferente"], falhou: ["err", "❌"],
+  desatualizado: ["skip", "↻ desatualizado"], recusado: ["skip", "⛔"], retirado: ["ok", "✅ tirado"], fora: ["skip", "= já estava fora"]};
+async function emLotes(rota, itens, titulo, aviso) {
+  rodando = true; parar = false; logHtml = ""; estado(aviso, "run"); painel();
+  log("head", `[${hora()}] ${titulo} — ${itens.length} anúncio(s)`);
+  const cont = {};
+  try {
+    for (let i = 0; i < itens.length && !parar; i += 5) {   // lotes de 5: log anda e o worker fica longe do limite de subrequests
+      const j = await api(rota, {itens: itens.slice(i, i + 5)});
+      for (const r of j.resultados) {
+        cont[r.resultado] = (cont[r.resultado] || 0) + 1;
+        const [cls, ic] = RES[r.resultado] || ["sys", r.resultado];
+        const mudou = "desconto_antes" in r ? `desconto ${pct(r.desconto_antes)} → ${pct(r.desconto_depois)} · cliente paga ${brl(r.campanha_antes)} → ${brl(r.campanha_depois)}` : "";
+        log(cls, `${ic} ${String(r.sku || r.product_id).padEnd(10)} ${mudou}${r.erro ? " — " + r.erro : ""}`);
+      }
+    }
+  } catch (e) { log("err", `ERRO: ${e.message} — confira no Seller Center antes de repetir.`); }
+  log("head", `[${hora()}] FIM${parar ? " (parado)" : ""} — ${Object.entries(cont).map(([k, v]) => `${v} ${k}`).join(" · ") || "nada"}`);
+  rodando = false; marcados.clear(); await carregar();
+}
+
+// ---------------- PRODUTOS ----------------
+function produtos() {
+  const R = regra(), rolagem = [document.querySelector("#main .twrap")?.scrollTop || 0, window.scrollY];
+  const L = linhas().filter(l => (!fSit || l.sit === fSit || (fSit === "_alerta" && l.al.length)) && (!buscaP || (l.sku + " " + l.titulo).toLowerCase().includes(buscaP.toLowerCase())));
+  const ORD = {sku: l => l.sku, titulo: l => l.titulo, custo: l => l.custo ?? -1, campanha: l => l.campanha ?? -1, min: l => l.min?.venda ?? -1,
+    salvo: l => l.salvo ?? -1, margem: l => l.alvo?.margem ?? -999,
+    sit: l => ["prejuizo", "pendente", "acima_cheio", "custo_mudou", "fora_campanha", "outra_campanha", "sem_preco", "sem_custo", "pausado", "ok"].indexOf(l.sit)};
+  L.sort((a, b) => { const x = ORD[ord[0]](a), y = ORD[ord[0]](b); return (x > y ? 1 : x < y ? -1 : 0) * ord[1]; });
+  const th = (k, t, n = "") => `<th class="sort ${n}" data-ord="${k}">${t}${ord[0] === k ? (ord[1] > 0 ? " ▲" : " ▼") : ""}</th>`;
+  const nSujo = Object.keys(sujo).length;
+  $("main").innerHTML = `<div class="card"><h2>Produtos e preços mínimos</h2>
+    <div class="sub"><b>Mín. p/ venda</b> é o menor preço que não dá prejuízo (margem de contribuição zero: taxa do TikTok ${R.faixas.at(-1).com}% + taxa fixa${R.comissao ? ` + comissão ${R.comissao}%` : ""} + imposto ${R.imposto}%${R.frete ? " + frete" : ""}; sem custo operacional).
+      Digite o <b>preço mínimo</b> de cada anúncio e clique em <b>Salvar preços</b>. Como o TikTok só aceita desconto em % inteiro, o cliente paga o primeiro preço do cheio com desconto inteiro que fica <b>igual ou acima</b> do mínimo (coluna <b>Vai ficar</b>).
+      Em <span class="neg">vermelho</span>: abaixo do mínimo = prejuízo. Salvar não muda nada no TikTok: para isso use <b>Rodar agora</b> no Painel.</div>
+    <div class="toolbar"><input class="search" id="buscaP" placeholder="Buscar por SKU ou título…" value="${esc(buscaP)}">
+      <select class="search" id="fsit"><option value="">todas as situações</option><option value="_alerta" ${fSit === "_alerta" ? "selected" : ""}>⚠ com alerta</option>${Object.entries(NOME).map(([k, v]) => `<option value="${k}" ${fSit === k ? "selected" : ""}>${v}</option>`).join("")}</select>
+      <span class="pill"><span class="dot"></span><span>${L.length} itens</span></span>
+      <button class="btn primary" id="salvar" ${nSujo ? "" : "disabled"}>Salvar preços${nSujo ? ` (${nSujo})` : ""}</button>
+      <button class="btn" id="sinc">Sincronizar do TikTok</button>
+      <button class="btn danger" id="limpar">Limpar preço dos selecionados (${marcadosP.size})</button>
+      <span class="saved" id="salvo">Salvo ✓</span></div>
+    <div class="twrap"><table><thead><tr><th><input type="checkbox" id="todosP"></th>${th("sku", "SKU")}${th("titulo", "Título")}${th("custo", "Custo", "n")}
+      ${th("campanha", "Campanha hoje", "n")}${th("min", "Mín. p/ venda", "n")}${th("salvo", "Preço mínimo", "n")}<th class="n">Vai ficar</th>
+      ${th("margem", "Margem contrib.", "n")}${th("sit", "Situação")}</tr></thead><tbody>
+      ${L.map(l => { const txt = sujo[l.sku] ?? (l.salvo != null ? brl(l.salvo) : ""), prev = sujo[l.sku] != null ? alvoDe(l, R, num(sujo[l.sku])) : l.alvo;
+        const neg = prev?.margem != null && prev.margem < 0;
+        return `<tr class="${neg ? "prej" : ""}" data-row="${esc(l.sku)}">
+        <td><input type="checkbox" data-p="${esc(l.sku)}" ${marcadosP.has(l.sku) ? "checked" : ""}></td>
+        <td class="sku"><b>${esc(l.sku)}</b> ${icones(l)}</td><td class="tit-full">${esc(l.titulo)}</td>
+        <td class="n">${l.custo > 0 ? brl(l.custo) : `<span class="tag t-sem_custo">sem custo</span>`}</td><td class="n">${campTxt(l.campanha, l.desconto)}</td>
+        <td class="n" title="${esc(contaMin(l, R))}"><b>${l.min ? brl(l.min.venda) : "—"}</b></td>
+        <td class="n"><input class="price ${neg ? "abaixo" : ""} ${sujo[l.sku] != null ? "dirty" : ""}" data-v="${esc(l.sku)}" value="${esc(txt)}" placeholder="—"></td>
+        <td class="n c-cheio">${alvoTxt(prev)}</td>
+        <td class="n c-margem ${neg ? "neg" : ""}" title="${esc(contaMargem(prev))}">${prev?.margem != null ? `${brl(prev.margem)}<br><small>${brl(prev.margem_pct)}%</small>` : "—"}</td>
+        <td>${tagSit(l)}</td></tr>`; }).join("")}
+    </tbody></table></div></div>`;
+  if (document.querySelector("#main .twrap")) { document.querySelector("#main .twrap").scrollTop = rolagem[0]; window.scrollTo(0, rolagem[1]); }
+  $("buscaP").oninput = e => { buscaP = e.target.value; produtos(); $("buscaP").focus(); $("buscaP").setSelectionRange(buscaP.length, buscaP.length); };
+  $("fsit").onchange = e => { fSit = e.target.value; produtos(); };
+  document.querySelectorAll("th[data-ord]").forEach(t => t.onclick = () => { const k = t.dataset.ord; ord = [k, ord[0] === k ? -ord[1] : 1]; produtos(); });
+  document.querySelectorAll("[data-p]").forEach(c => c.onchange = () => { c.checked ? marcadosP.add(c.dataset.p) : marcadosP.delete(c.dataset.p); $("limpar").textContent = `Limpar preço dos selecionados (${marcadosP.size})`; });
+  $("todosP").onchange = e => { L.forEach(l => e.target.checked ? marcadosP.add(l.sku) : marcadosP.delete(l.sku)); produtos(); };
+  // digitar NÃO redesenha a tabela: só a própria linha e o botão Salvar se atualizam
+  document.querySelectorAll("[data-v]").forEach(i => {
+    i.oninput = () => { sujo[i.dataset.v] = i.value; atualizaLinha(i.dataset.v); };
+    i.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); const t = [...document.querySelectorAll("[data-v]")]; t[t.indexOf(i) + 1]?.focus(); } };
+  });
+  $("salvar").onclick = salvarPrecos;
+  $("sinc").onclick = async () => { $("sinc").disabled = true; $("sinc").textContent = "sincronizando…";
+    try { const j = await api("/atualizar", {}); await carregar(); estado(`sincronizado: ${j.n} anúncios`, "ok"); } catch (e) { alert(e.message); produtos(); } };
+  $("limpar").onclick = async () => {
+    const skus = [...marcadosP].filter(s => D.manuais[s] != null);
+    if (!skus.length) return alert("Nenhum dos marcados tem preço mínimo salvo.");
+    if (!confirm(`Apagar o preço mínimo de ${skus.length} SKU(s)? Eles deixam de ser mexidos pelo Rodar.`)) return;
+    try { await api("/manuais", {precos: Object.fromEntries(skus.map(s => [s, null]))}); marcadosP.clear(); await carregar(); } catch (e) { alert(e.message); }
+  };
+}
+function atualizaLinha(sku) {
+  const R = regra(), l = linhas().find(x => x.sku === sku), tr = document.querySelector(`tr[data-row="${CSS.escape(sku)}"]`);
+  if (!l || !tr) return;
+  const v = num(sujo[sku]), prev = String(sujo[sku]).trim() === "" ? null : v ? alvoDe(l, R, v) : null;
+  const neg = prev?.margem != null && prev.margem < 0, inp = tr.querySelector("[data-v]");
+  tr.className = neg ? "prej" : "";
+  inp.classList.toggle("abaixo", neg); inp.classList.add("dirty");
+  tr.querySelector(".c-cheio").innerHTML = alvoTxt(prev);
+  const m = tr.querySelector(".c-margem");
+  m.className = "n c-margem" + (neg ? " neg" : ""); m.title = contaMargem(prev);
+  m.innerHTML = prev?.margem != null ? `${brl(prev.margem)}<br><small>${brl(prev.margem_pct)}%</small>` : "—";
+  const n = Object.keys(sujo).length, b = $("salvar");
+  b.disabled = !n; b.textContent = `Salvar preços${n ? ` (${n})` : ""}`;
+}
+async function salvarPrecos() {
+  const R = regra(), precos = {};
+  for (const [sku, txt] of Object.entries(sujo)) {
+    const v = num(txt);
+    if (String(txt).trim() && !v) return alert(`Preço inválido em ${sku}: "${txt}"`);
+    precos[sku] = v;   // vazio = apaga o preço mínimo
+  }
+  const neg = Object.entries(precos).filter(([s, v]) => { const a = D.anuncios.find(x => x.sku === s); return v && a && alvoDe(a, R, v).margem < 0; });
+  if (neg.length && !confirm(`${neg.length} preço(s) estão ABAIXO do mínimo p/ venda (prejuízo): ${neg.map(([s]) => s).join(", ")}. Salvar mesmo assim?`)) return;
+  try { await api("/manuais", {precos}); for (const k in sujo) delete sujo[k]; await carregar(); $("salvo")?.classList.add("show"); setTimeout(() => $("salvo")?.classList.remove("show"), 2000); }
+  catch (e) { alert(e.message); }
+}
+
+// ---------------- SAÚDE ----------------
+const ALERTA = {auditoria: ["🔻", "Em análise ou reprovados pelo TikTok"], sem_estoque: ["📦", "Sem estoque"],
+  acima_cheio: ["🚨", "Preço mínimo acima do cheio (não dá desconto)"]};
+const icones = l => l.al.map(x => `<span title="${esc(x.texto)}">${ALERTA[x.tipo][0]}</span>`).join("");
+const avisoCampanha = () => {
+  if (!D.campanha) return `<div class="card" style="border-left:4px solid var(--danger)"><b>⏰ A loja não tem campanha de desconto direto ativa</b>
+    <div class="sub">Crie uma campanha "Desconto direto" por produto no Seller Center do TikTok; o Rodar coloca os anúncios nela.</div></div>`;
+  const d = campanhaVence(D.campanha.fim, Date.now());
+  return d == null ? "" : `<div class="card" style="border-left:4px solid var(--danger)"><b>⏰ A campanha "${esc(D.campanha.titulo)}" ${d ? `acaba em ${d} dia(s)` : "acabou"}</b>
+    <div class="sub">Quando ela acaba, todos os anúncios saem do desconto de uma vez. Crie a próxima no Seller Center antes disso; o Rodar coloca os anúncios nela.</div></div>`; };
+function saude() {
+  const L = linhas(), grupos = Object.keys(ALERTA).map(t => [t, L.filter(l => l.al.some(x => x.tipo === t))]);
+  $("main").innerHTML = avisoCampanha() + `<div class="card"><h2>Saúde dos anúncios</h2>
+    <div class="sub">Conferido a cada leitura do TikTok (15 min). Campanha alvo: <b>${esc(D.campanha?.titulo || "nenhuma")}</b>. Passe o mouse nos ícones da aba Produtos para ver o detalhe.</div></div>` +
+    grupos.map(([t, G]) => `<div class="card"><h2>${ALERTA[t][0]} ${ALERTA[t][1]} (${G.length})</h2>
+      ${G.length ? `<div class="twrap"><table><thead><tr><th>SKU</th><th>Anúncio</th><th>O que fazer</th></tr></thead><tbody>
+      ${G.sort((a, b) => (b.al.find(x => x.tipo === t).grave) - (a.al.find(x => x.tipo === t).grave)).map(l => { const x = l.al.find(y => y.tipo === t);
+        return `<tr><td class="sku"><b>${esc(l.sku)}</b></td><td class="tit-full">${esc(l.titulo)}</td><td class="${x.grave ? "neg" : ""}">${esc(x.texto)}</td></tr>`; }).join("")}
+      </tbody></table></div>` : `<div class="sub">Nenhum. ✅</div>`}</div>`).join("");
+}
+// ---------------- HISTÓRICO / TAXAS / AJUDA ----------------
+function historico() {
+  const dt = t => new Date(t).toLocaleString("pt-BR", {day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"});
+  $("main").innerHTML = `<div class="card"><h2>Últimas 50 aplicações</h2><div class="sub">Quem aplicou, o antes e o depois de cada anúncio.</div>
+    <div class="twrap"><table><thead><tr><th>Quando</th><th>Quem</th><th>SKU</th><th class="n">Desconto</th><th class="n">Cliente paga</th><th>Resultado</th></tr></thead><tbody>
+    ${D.aplicados.map(a => `<tr><td>${dt(a.quando)}</td><td>${esc(a.usuario)}</td><td class="sku"><b>${esc(a.sku)}</b></td>
+      <td class="n">${pct(a.desconto_antes)} → ${pct(a.desconto_depois)}</td><td class="n">${brl(a.campanha_antes)} → ${brl(a.campanha_depois)}</td>
+      <td><span class="${["falhou", "divergente"].includes(a.resultado) ? "neg" : ""}">${esc(a.resultado)}</span>${a.erro ? " — " + esc(a.erro) : ""}</td></tr>`).join("") || `<tr><td colspan="6">nada aplicado ainda</td></tr>`}
+    </tbody></table></div></div>`;
+}
+function telaRegra() {
+  const R = regra();
+  $("main").innerHTML = `<div class="card"><h2>Taxas e imposto</h2><div class="sub">Entram no Mín. p/ venda: (custo + taxa fixa + frete) ÷ (1 − taxa − comissão − imposto). Custo operacional não entra.</div>
+    <div class="grid">
+     <div class="field"><label>Imposto %</label><input id="g_imp" value="${R.imposto}"></div>
+     <div class="field"><label>Comissão da plataforma %</label><input id="g_com" value="${R.comissao || 0}"><span class="hint">0 durante a isenção (até R$ 17 mil vendidos na loja). Quando o alerta do WhatsApp ficar 🔴, ponha 6 (foi a comissão cobrada em 27-28/10)</span></div>
+     <div class="field"><label>Frete por pedido (R$)</label><input id="g_fre" value="${R.frete || 0}"><span class="hint">0: medido nos pedidos, o frete grátis não sai do vendedor</span></div></div>
+    <h2 style="margin-top:8px">Taxa do TikTok por faixa</h2><div class="sub">Medida em 48 pedidos reais (19/11/2026): 6% + R$ 6 por item; num item de R$ 26 a fixa foi R$ 4 (o limite exato da faixa baixa ainda não foi medido). Deixe "até" vazio na última.</div>
+    <div class="twrap" style="max-width:460px"><table><thead><tr><th>Até (R$)</th><th>Taxa %</th><th>Fixa R$</th></tr></thead><tbody>
+    ${R.faixas.map((f, i) => `<tr><td><input class="price" id="f_ate${i}" value="${f.ate ?? ""}" placeholder="sem teto"></td><td><input class="price" id="f_com${i}" value="${f.com}"></td><td><input class="price" id="f_fix${i}" value="${f.fixa}"></td></tr>`).join("")}
+    </tbody></table></div>
+    <p><button class="btn primary" id="salvarRegra">Salvar</button> <span class="saved" id="salvoR">Salvo ✓</span></p></div>`;
+  const n = id => Number(String($(id).value).replace(",", "."));
+  $("salvarRegra").onclick = async () => {
+    const r = {...D.regra, imposto: n("g_imp"), comissao: n("g_com") || 0, frete: n("g_fre") || 0,
+      faixas: R.faixas.map((_, i) => ({ate: $("f_ate" + i).value.trim() ? n("f_ate" + i) : null, com: n("f_com" + i), fixa: n("f_fix" + i)}))};
+    try { await api("/regra", {regra: r}); await carregar(); $("salvoR").classList.add("show"); } catch (e) { alert(e.message); }
+  };
+}
+function ajuda() {
+  $("main").innerHTML = `<div class="card ajuda"><h2>Como usar</h2><ol>
+    <li><b>Produtos</b>: veja o <b>Mín. p/ venda</b> de cada anúncio (o menor preço sem prejuízo) e digite o <b>Preço mínimo</b>. Clique em <b>Salvar preços</b>. Salvar não mexe no TikTok.</li>
+    <li><b>Painel → Simular</b>: mostra no log o que mudaria, sem enviar nada.</li>
+    <li><b>Painel → Rodar agora</b>: acerta o desconto de todos os anúncios com preço mínimo salvo que estão diferentes ou fora da campanha (entram na campanha de desconto direto ativa da loja). Anúncio sem preço mínimo não é mexido. Ou marque alguns e use <b>Aplicar selecionados</b>.</li>
+    <li><b>Painel → Tirar todos da campanha</b>: tira do desconto todos os anúncios. Para tirar só alguns, marque e use <b>Tirar selecionados da campanha</b>. Eles passam a vender pelo cheio, mas o próximo <b>Rodar</b> coloca de volta.</li>
+    <li><b>Saúde</b>: anúncio em análise ou reprovado, sem estoque, preço mínimo acima do cheio e campanha perto de acabar.</li>
+    <li><b>Parar</b> interrompe depois do lote atual (5 anúncios); o que já foi feito fica.</li></ol></div>
+   <div class="card ajuda"><h2>A conta</h2><ul>
+    <li><b>Mín. p/ venda</b> = (custo + taxa fixa + frete) ÷ (1 − taxa do TikTok − comissão − imposto). É a margem de contribuição zero: <b>não</b> inclui custo operacional nem lucro.</li>
+    <li><b>Margem de contribuição</b> = preço − taxa − comissão − taxa fixa − imposto − frete − custo. Passe o mouse nos valores para ver a conta.</li>
+    <li>Taxa medida nos pedidos: <b>6% + R$ 6 por item</b>. A <b>comissão</b> está em 0 pela isenção até R$ 17 mil; quando acabar, ponha 6% na aba Taxas.</li>
+    <li>Venda por <b>afiliado</b> paga a comissão do afiliado a mais (em média ~7,5% nos pedidos medidos). Ela não entra no mínimo: deixe folga nos produtos que vendem por afiliado.</li></ul></div>
+   <div class="card ajuda"><h2>Como o TikTok funciona aqui</h2><ul>
+    <li>A campanha do TikTok é <b>desconto direto em % inteiro</b> (30%, 33%…): ele não aceita 30,5%. Por isso o cliente paga o primeiro preço com desconto inteiro que fica <b>igual ou acima</b> do preço mínimo, até 1% do cheio a mais. A coluna <b>Vai ficar</b> mostra o resultado.</li>
+    <li>O <b>preço cheio não muda</b> por aqui (ele vem do Tiny). Se o preço mínimo passar do cheio, não dá desconto: suba o cheio no Tiny ou baixe o mínimo.</li>
+    <li>Anúncio que está em <b>outra campanha</b> (preço fixo, relâmpago) não é mexido.</li>
+    <li>Os anúncios são relidos do TikTok a cada 15 minutos; <b>Sincronizar do TikTok</b> relê na hora.</li></ul></div>`;
+}
+
+document.querySelectorAll(".nav-item").forEach(b => b.onclick = () => { aba = b.dataset.tab; try { localStorage.ttAba = aba; } catch {} if (D) desenhar(); });
+carregar();
+document.addEventListener("visibilitychange", () => { if (!document.hidden && !rodando && !Object.keys(sujo).length) carregar(); });
+</script></body></html>
