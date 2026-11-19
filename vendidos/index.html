@@ -174,7 +174,9 @@ footer{color:var(--t3);font-size:12px;margin-top:28px;text-align:center}
   .dir{min-height:0;display:flex;flex-direction:column}
   .dir .ferr{margin:0 0 8px;flex:none}
   .dir .qtd{flex:none}
-  @media (max-height:760px){.esq .painel .mini:not(:has(.leg-in)){display:none}.esq .painel{padding:10px 16px}.esq .duo{gap:8px}.esq .painel .mini{margin-bottom:6px}.esq .barras{gap:4px 10px}.esq .painel h2{margin-bottom:10px}}
+  body.aperta .esq .painel .mini:not(:has(.leg-in)){display:none}
+  body.aperta .esq .painel{padding:10px 16px}body.aperta .esq .duo{gap:8px}
+  body.aperta .esq .painel .mini{margin-bottom:6px}body.aperta .esq .barras{gap:4px 10px}
   #lista{flex:1;min-height:0;overflow:auto;padding-right:4px;scrollbar-width:thin}
 }
 </style></head><body>
@@ -341,7 +343,7 @@ function cartoes() {            // seguem o canal clicado (canalF) e o produto a
 }
 
 function grafico() {
-  const n = innerWidth >= 1000 && innerHeight < 760 ? 5 : 8;   // tela baixa: top 5 para os 3 quadros caberem sem rolar
+  const n = topN;
   $("top-n").textContent = n;
   const top = produtos(filtro).slice(0, n), max = top[0]?.tot || 1;
   $("barras").innerHTML = top.length ? top.map((x, i) => `
@@ -384,7 +386,16 @@ function marcaConta(c) {
   filtro = c;
   document.querySelectorAll(".chip").forEach(b => b.classList.toggle("on", b.dataset.f === c));
 }
-function tudo() { cartoes(); grafico(); canais(); empresas(); lista(); $("lista").scrollTop = 0; }
+function tudo() { cartoes(); canais(); empresas(); caber(); lista(); $("lista").scrollTop = 0; }
+// Coluna da esquerda sem barra de rolagem: se nao couber, aperta os espacos e depois tira produtos do "Mais vendidos" (minimo 3)
+let topN = 8;
+function caber() {
+  const e = document.querySelector(".esq"), sobra = () => e.scrollHeight > e.clientHeight + 1;
+  document.body.classList.remove("aperta"); topN = 8; grafico();
+  if (innerWidth < 1000) return;
+  if (sobra()) document.body.classList.add("aperta");
+  while (sobra() && topN > 3) { topN--; grafico(); }
+}
 function escolheCanal(c) {
   canalF = canalF === c ? "" : c;
   tudo();
@@ -426,10 +437,10 @@ function lista() {
   document.querySelectorAll("details.prod").forEach(el => el.ontoggle = () => {
     const ult = el.open ? el : abertos().pop();
     const novo = ult ? ult.dataset.k : "";
-    if (novo !== prodF) { prodF = novo; prodNome = ult ? ult.dataset.n : ""; cartoes(); }
+    if (novo !== prodF) { prodF = novo; prodNome = ult ? ult.dataset.n : ""; cartoes(); caber(); }
   });
   const ult = abertos().pop(), novo = ult ? ult.dataset.k : "";
-  if (novo !== prodF) { prodF = novo; prodNome = ult ? ult.dataset.n : ""; cartoes(); }
+  if (novo !== prodF) { prodF = novo; prodNome = ult ? ult.dataset.n : ""; cartoes(); caber(); }
 }
 
 function status() {
@@ -450,7 +461,7 @@ async function carrega() {
     dados = j.dados; pedidoEm = j.pedido_em || 0; prog = j.progresso || null;
     $("erro").innerHTML = "";
     status();
-    if (mudou) { cartoes(); grafico(); canais(); empresas(); lista(); }
+    if (mudou) { cartoes(); canais(); empresas(); caber(); lista(); }
     if (sincronizando() && Date.now() - pedidoEm > 5 * 60000)
       $("erro").innerHTML = `<div class="erro">A sincronização não terminou em 5 min. Tente de novo mais tarde.</div>`;
   } catch (e) {
@@ -467,7 +478,7 @@ $("sinc").onclick = async () => {
   carrega();
 };
 $("busca").oninput = lista;
-let redim = 0; addEventListener("resize", () => { clearTimeout(redim); redim = setTimeout(() => dados && grafico(), 200); });
+let redim = 0; addEventListener("resize", () => { clearTimeout(redim); redim = setTimeout(() => dados && caber(), 200); });
 $("chips").onclick = e => {
   const b = e.target.closest(".chip"); if (!b) return;
   marcaConta(b.dataset.f); tudo();
