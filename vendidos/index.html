@@ -54,7 +54,6 @@ h1{font-size:26px;font-weight:600;letter-spacing:-.02em;margin:0}
 .painel{background:var(--cx);border:1px solid var(--borda);border-radius:16px;padding:18px;box-shadow:var(--sombra);margin-bottom:12px}
 .duo{display:grid;grid-template-columns:1.6fr 1fr;gap:12px;margin-bottom:12px}
 .duo .painel{margin:0}
-.canais .btr div{background:var(--am-forte)}
 .canais .bn,.canais .btr,.canais .bv{cursor:pointer;transition:opacity .15s}
 .canais .bn:hover{text-decoration:none}
 .canais .sel{font-weight:600}
@@ -167,7 +166,7 @@ footer{color:var(--t3);font-size:12px;margin-top:28px;text-align:center}
   #erro{flex:none}
   .app{flex:1;min-height:0;display:grid;grid-template-columns:minmax(380px,34%) minmax(0,1fr);gap:14px}
   .esq{min-height:0;overflow:auto;display:flex;flex-direction:column;gap:12px;scrollbar-width:thin}
-  .esq .duo{grid-template-columns:1fr;grid-template-rows:auto 1fr;margin:0;gap:12px;flex:1}
+  .esq .duo{grid-template-columns:1fr;margin:0;gap:12px;align-content:start}
   .esq .painel{padding:14px 16px}
   .esq .painel .mini{margin-bottom:10px}
   .esq .barras{gap:6px 10px}
@@ -175,7 +174,7 @@ footer{color:var(--t3);font-size:12px;margin-top:28px;text-align:center}
   .dir{min-height:0;display:flex;flex-direction:column}
   .dir .ferr{margin:0 0 8px;flex:none}
   .dir .qtd{flex:none}
-  @media (max-height:760px){.esq .painel .mini{display:none}.esq .painel h2{margin-bottom:10px}}
+  @media (max-height:760px){.esq .painel .mini:not(:has(.leg-in)){display:none}.esq .painel h2{margin-bottom:10px}}
   #lista{flex:1;min-height:0;overflow:auto;padding-right:4px;scrollbar-width:thin}
 }
 </style></head><body>
@@ -212,7 +211,7 @@ footer{color:var(--t3);font-size:12px;margin-top:28px;text-align:center}
     </div>
     <div class="painel">
       <h2>Pedidos por canal</h2>
-      <p class="mini">De onde vieram os pedidos · clique num canal para filtrar</p>
+      <p class="mini">Clique num canal para filtrar · <span class="leg-in"><i class="sw" style="background:var(--dut)"></i>DUTECH <i class="sw" style="background:var(--lum);margin-left:8px"></i>LUMIA</span></p>
       <div class="barras canais" id="canais"></div>
     </div>
   </div>
@@ -351,13 +350,16 @@ function grafico() {
   });
 }
 function canais() {
-  const n = {};
-  for (const p of dados.pedidos) if (!filtro || p.conta === filtro) n[canalDe(p)] = (n[canalDe(p)] || 0) + 1;
-  const l = Object.entries(n).sort((a, b) => b[1] - a[1]), max = l[0]?.[1] || 1;
+  const n = {};                  // por canal: quantos pedidos de cada conta (barra azul DUTECH + laranja LUMIA)
+  for (const p of dados.pedidos) if (!filtro || p.conta === filtro) {
+    const x = n[canalDe(p)] ||= {dutech: 0, lumia: 0, tot: 0};
+    x[p.conta]++; x.tot++;
+  }
+  const l = Object.entries(n).sort((a, b) => b[1].tot - a[1].tot), max = l[0]?.[1].tot || 1;
   const cls = c => canalF ? (c === canalF ? " sel" : " apaga") : "";
   $("canais").innerHTML = l.map(([c, v]) => `<div class="bn${cls(c)}" data-c="${esc(c)}">${esc(c)}</div>
-    <div class="btr${cls(c)}" data-c="${esc(c)}"><div style="flex:${v}"></div><div style="flex:${max - v};background:none"></div></div>
-    <div class="bv${cls(c)}" data-c="${esc(c)}">${v}</div>`).join("");
+    <div class="btr${cls(c)}" data-c="${esc(c)}" title="${v.dutech} DUTECH · ${v.lumia} LUMIA">${pedaco(v, max)}</div>
+    <div class="bv${cls(c)}" data-c="${esc(c)}">${v.tot}</div>`).join("");
   $("canais").querySelectorAll("[data-c]").forEach(el => el.onclick = () => escolheCanal(el.dataset.c));
 }
 function escolheCanal(c) {
