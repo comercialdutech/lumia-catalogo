@@ -6,7 +6,8 @@
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="../tema.css">
 <script src="../tema.js"></script>
-<link rel="apple-touch-icon" href="../app/icone-192.png">
+<link rel="apple-touch-icon" href="icone-192.png">
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -484,5 +485,6 @@ $("chips").onclick = e => {
   marcaConta(b.dataset.f); tudo();
 };
 carrega();
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 </body></html>
