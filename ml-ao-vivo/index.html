@@ -102,7 +102,7 @@
  .num.alerta b{color:var(--verm)}
  .tag{font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:5px;margin-left:6px}
  .tag.Dutech{background:#fff5d6;color:#946c00}.tag.Lumia{background:#e2f0ff;color:#1d64b8}.tag.Oneway{background:#f3e8ff;color:#7e22ce}
- .tag.ML{background:#FFF0B3;color:#5c4a00}.tag.Shopee{background:#EE4D2D;color:#fff}
+ .tag.ML{background:#FFF0B3;color:#5c4a00}.tag.Shopee{background:#EE4D2D;color:#fff}.tag.TikTok{background:#111;color:#fff}
  .ped li{gap:10px}.ped .h{color:var(--mut);font-variant-numeric:tabular-nums;width:40px;flex:none}
  .ped .val{font-weight:700;font-variant-numeric:tabular-nums}
  .ped li.novo{animation:brilho 3s ease-out}
@@ -167,7 +167,7 @@
 const PROXY = "https://ml-vivo.dutech.workers.dev";
 const CONTAS = ["Dutech", "Lumia", "Oneway"];
 let contasVis = CONTAS;   // as que o login ve: o worker manda em "contas" (sem vivo_oneway, a OneWay fica de fora)
-const CANAIS = [["", "Todos"], ["ML", "Mercado Livre"], ["Shopee", "Shopee"]];
+const CANAIS = [["", "Todos"], ["ML", "Mercado Livre"], ["Shopee", "Shopee"], ["TikTok", "TikTok"]];
 const PERIODOS = [["hoje", "Hoje"], ["7d", "7d"], ["15d", "15d"], ["30d", "30d"], ["mes", "Este mês"], ["mesant", "Mês passado"], ["custom", "Personalizado"]];
 const COR = {cmv: "--cmv", tarifa: "--tarifa", imposto: "--imposto", frete: "--frete", cancel: "--cancel", ads: "--ads"};
 const ICONE = {cmv: "📦", tarifa: "🏷️", imposto: "🏛️", frete: "🚚", cancel: "⛔", ads: "📣"};
@@ -299,7 +299,7 @@ const seg = (itens, atual, k) => `<div class="seg">${itens.map(([v, t]) =>
 
 function desenhar() {
   const d = dados, p = d.painel, pr = d.periodo;
-  const rotPer = rotuloPer(pr), vs = vsPer(pr);
+  const rotPer = rotuloPer(pr), vs = vsPer(pr), semML = !!canal && canal !== "ML";   // Shopee/TikTok: sem Ads nem visitas
   $("ponto").className = "ponto on";
   $("dir").innerHTML = seg(CANAIS, canal, "canal") + seg([["", "Todas"], ...contasVis.map(c => [c, c])], conta, "conta") +
     `<span class="chip"><b>${num(d.ativos.anuncios)}</b>anúncios ativos</span><span class="chip"><b>${num(d.ativos.skus)}</b>SKUs ativos</span>`;
@@ -312,8 +312,9 @@ function desenhar() {
   if (carreg.length) av.push(`<span data-info>Carregando o histórico de 95 dias (para comparar com o período anterior): ${carreg.map(h => `${h.conta} ${h.pct}%`).join(" · ")}. Os “vs” ficam certos quando terminar.</span>`);
   if (pr.corte) av.push(`O painel guarda só os últimos 95 dias: o período foi ajustado para começar em ${dm(pr.de)}.`);
   if (d.sem_custo.length) av.push(`Sem custo/imposto cadastrado para ${d.sem_custo.join(", ")} — o CMV fica zerado até o envio das 23h.`);
-  if (p.tarifa_pendente) av.push(`<span data-info>${num(p.tarifa_pendente)} pedido(s) da Shopee com tarifa estimada — a real chega quando a Shopee libera o repasse.</span>`);
-  if (canal !== "ML" && d.shopee_lido && Date.now() - d.shopee_lido > 15 * 60e3) av.push(`Shopee: dados de ${horaDe(new Date(d.shopee_lido).toISOString())} — a coleta está atrasada.`);
+  if (p.tarifa_pendente) av.push(`<span data-info>${num(p.tarifa_pendente)} pedido(s) com tarifa estimada (Shopee/TikTok) — a real chega quando a plataforma libera o repasse.</span>`);
+  if ((!canal || canal === "Shopee") && d.shopee_lido && Date.now() - d.shopee_lido > 15 * 60e3) av.push(`Shopee: dados de ${horaDe(new Date(d.shopee_lido).toISOString())} — a coleta está atrasada.`);
+  if ((!canal || canal === "TikTok") && d.tiktok_lido && Date.now() - d.tiktok_lido > 30 * 60e3) av.push(`TikTok: dados de ${horaDe(new Date(d.tiktok_lido).toISOString())} — a coleta está atrasada.`);
   if (p.frete_pendente) av.push(`Frete de ${num(p.frete_pendente)} envio(s) ainda sendo buscado no ML — a margem pode cair um pouco.`);
   if (p.receita && p.cmv_cobertura < 95) av.push(`O custo do Tiny/Bling cobre ${num(p.cmv_cobertura, 0)}% da receita — produto sem custo cadastrado entra com CMV zero.`);
 
@@ -334,15 +335,16 @@ function desenhar() {
       <div class="comp"><div class="comp-t"><span>COMPOSIÇÃO</span><span style="font-weight:600">6 deduções + margem</span></div>
         <div class="barra">${comp.map(x => `<i title="${x.nome}: ${brl(x.v)}" style="width:${x.v / somaComp * 100}%;background:${x.cor}"></i>`).join("")}</div>
         <div class="leg">${comp.map(x => `<span style="--c:${x.cor}">${x.nome}</span>`).join("")}</div></div>
-      ${d.canais ? (() => { const ml = d.canais.ML, sh = d.canais.Shopee, tf = (ml.faturamento + sh.faturamento) || 1;
-        return `<div class="comp"><div class="comp-t"><span>ML × SHOPEE</span><span style="font-weight:600">faturamento · margem</span></div>
-          <div class="barra"><i title="ML: ${brl(ml.faturamento)}" style="width:${ml.faturamento / tf * 100}%;background:#FFD100"></i><i title="Shopee: ${brl(sh.faturamento)}" style="width:${sh.faturamento / tf * 100}%;background:#EE4D2D"></i></div>
-          <div class="leg"><span style="--c:#FFD100">ML ${brl(ml.faturamento)} · margem ${brl(ml.margem)}</span><span style="--c:#EE4D2D">Shopee ${brl(sh.faturamento)} · margem ${brl(sh.margem)}</span></div></div>`; })() : ""}
+      ${d.canais ? (() => { const cs = [["ML", "ML", "#FFD100"], ["Shopee", "Shopee", "#EE4D2D"], ["TikTok", "TikTok", "#111"]].filter(c => d.canais[c[0]]),
+          tf = cs.reduce((t, c) => t + d.canais[c[0]].faturamento, 0) || 1;
+        return `<div class="comp"><div class="comp-t"><span>POR CANAL</span><span style="font-weight:600">faturamento · margem</span></div>
+          <div class="barra">${cs.map(([k, n, cor]) => `<i title="${n}: ${brl(d.canais[k].faturamento)}" style="width:${d.canais[k].faturamento / tf * 100}%;background:${cor}"></i>`).join("")}</div>
+          <div class="leg">${cs.map(([k, n, cor]) => `<span style="--c:${cor}">${n} ${brl(d.canais[k].faturamento)} · margem ${brl(d.canais[k].margem)}</span>`).join("")}</div></div>`; })() : ""}
     </div>
     <div class="sec">DEDUÇÕES</div>
     <div class="ded">${p.deducoes.map(x => `<div class="dc" style="--c:var(${COR[x.id]})">
       <div class="dc-t"><span class="ic">${ICONE[x.id]}</span>${x.id === "cmv" ? "Custos (CMV)" : x.id === "ads" && !canal ? "Ads (só ML)" : x.nome}<span class="pill">${num(x.pct, 2)}%</span></div>
-      <div class="dc-v" title="${x.id === "tarifa" && p.tarifa_pendente ? "inclui tarifa estimada da Shopee" : x.id === "ads" && canal === "Shopee" ? "não disponível para a Shopee" : ""}">${x.id === "ads" && canal === "Shopee" ? "—" : (x.id === "tarifa" && p.tarifa_pendente ? "≈ " : "") + reais(x.valor)}</div><div class="prog"><i style="width:${Math.min(100, x.pct * 2)}%"></i></div></div>`).join("")}</div>
+      <div class="dc-v" title="${x.id === "tarifa" && p.tarifa_pendente ? "inclui tarifa estimada (Shopee/TikTok)" : x.id === "ads" && semML ? `não disponível para ${canal === "TikTok" ? "o" : "a"} ${canal}` : ""}">${x.id === "ads" && semML ? "—" : (x.id === "tarifa" && p.tarifa_pendente ? "≈ " : "") + reais(x.valor)}</div><div class="prog"><i style="width:${Math.min(100, x.pct * 2)}%"></i></div></div>`).join("")}</div>
     <div class="baixo">
       <div class="tk"><div class="l"><span>TICKET MÉDIO</span>${pill(p.ticket_delta)}</div>
         <div class="v"><span>vendas<b>${brl(p.ticket)}</b></span><span style="text-align:right">margem<b>${brl(p.margem_por_venda)}</b></span></div></div>
@@ -356,8 +358,8 @@ function desenhar() {
     <div class="kpis">
       ${kpi("🛒", "Vendas", num(p.vendas), pill(p.vendas_delta), vs, "var(--txt)")}
       ${kpi("⛔", "Cancelados", num(p.cancelados), pill(p.cancelados_delta, true), vs, "#ef4458")}
-      ${kpi("🎯", canal ? "Taxa de conversão" : "Taxa de conversão (só ML)", canal === "Shopee" || p.conversao == null ? "—" : num(p.conversao, 1) + "%", canal === "Shopee" ? pill(null) : pill(p.conversao_delta),
-            canal === "Shopee" ? "não disponível para a Shopee" : p.visitas ? `${num(p.visitas)} visitas` : "sem visitas ainda", "var(--txt)")}
+      ${kpi("🎯", canal ? "Taxa de conversão" : "Taxa de conversão (só ML)", semML || p.conversao == null ? "—" : num(p.conversao, 1) + "%", semML ? pill(null) : pill(p.conversao_delta),
+            semML ? `não disponível para ${canal === "TikTok" ? "o" : "a"} ${canal}` : p.visitas ? `${num(p.visitas)} visitas` : "sem visitas ainda", "var(--txt)")}
       ${kpi("💲", "Receita", brl(p.receita), pill(p.receita_delta), vs, "#22c55e")}
     </div>
     <div class="tend"><div class="tend-t">TENDÊNCIA DE VENDAS <span id="mm"></span></div>${grafico(d.tendencia, pr.chave === "hoje")}</div>
