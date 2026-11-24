@@ -1,6 +1,6 @@
 // App "Vendidos" no celular. Cache so da casca (pagina, tema, icones); os dados vem sempre ao vivo do motor (outro dominio).
 // Mudou a pagina? Trocar o nome do CACHE para o celular pegar a versao nova.
-const CACHE = "vendidos-v2";
+const CACHE = "vendidos-v3";
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(["./", "manifest.webmanifest", "../tema.css", "../tema.js", "icone-192.png"])));
