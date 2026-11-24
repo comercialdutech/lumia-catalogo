@@ -263,9 +263,9 @@ function nomeBonito(s) {
   }).join(" ");
 }
 const curto = n => n.replace(/^Filamento\s+/i, "").replace(/\s*\d+(,\d+)?\s*kg\s*\([\d.]+mm\)\s*$/i, "").trim();
-function proxima(ms) {            // cron do servidor: :07 :22 :37 :52
+function proxima(ms) {            // cron do servidor: de 5 em 5 min (:02 :07 :12 ... :57)
   const d = new Date(ms);
-  for (const m of [7, 22, 37, 52, 67]) if (d.getMinutes() < m) { d.setMinutes(m, 0, 0); return d.getTime(); }
+  for (let m = 2; m <= 62; m += 5) if (d.getMinutes() < m) { d.setMinutes(m, 0, 0); return d.getTime(); }
 }
 // Sincronizar: o servidor manda o andamento (pedido, pct 0-100, etapa). Sem andamento deste pedido ainda = esperando o servidor
 // pegar (ele olha a cada minuto). Se a rodada automatica de 15 min atender antes, ela nao manda andamento: vale o "inicio".
