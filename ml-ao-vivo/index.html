@@ -130,9 +130,10 @@
  .tab td.pr{white-space:normal;min-width:220px}.tab td.pr span{display:block;color:var(--mut);font-size:11.5px}
  .tab tr.neg td{background:#fff4f5}.neg-v{color:var(--verm);font-weight:700}.sc{color:var(--mut)}
  @media (max-width:760px){.tot{grid-template-columns:repeat(2,1fr)}}
- @media (max-width:980px){.grid{grid-template-columns:1fr}}
+ @media (max-width:980px){.grid{grid-template-columns:minmax(0,1fr)}}   /* 1fr puro deixa o cartão mais largo que o celular */
  @media (max-width:560px){body{padding:12px 10px 50px}.ded,.kpis,.baixo{grid-template-columns:1fr}.valor-g{font-size:32px}
-   .donut{width:84px;height:84px}.card{padding:15px}.dir{margin-left:0}}
+   .donut{width:84px;height:84px}.card{padding:15px}.dir{margin-left:0}
+   .cab{flex-wrap:wrap}.cab .seg{margin-left:0;flex-basis:100%}}
 
  /* ---- tema escuro (escolha no hub, via tema.js) ---- */
  :root[data-theme=escuro]{color-scheme:dark;--bg:#111;--card:#1a1a1a;--borda:#2a2a2a;--txt:#eee;--mut:#9a9aa5;
