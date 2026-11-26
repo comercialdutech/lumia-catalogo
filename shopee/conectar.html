@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Conectar Shopee</title>
+<meta name="robots" content="noindex">
+<style>
+ :root{--bg:#f4f5f8;--card:#fff;--txt:#151821;--muted:#5b6170;--ok:#047857;--err:#b91c1c;--line:#e3e6ee}
+ @media (prefers-color-scheme:dark){:root{--bg:#0f1117;--card:#181b24;--txt:#eef0f5;--muted:#a3a9b8;--ok:#34d399;--err:#f87171;--line:#2a2f3c}}
+ body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;display:grid;place-items:center;min-height:100vh;padding:16px;box-sizing:border-box}
+ .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px;max-width:460px;width:100%}
+ h1{font-size:20px;margin:0 0 8px} p{margin:8px 0;color:var(--muted)} .ok{color:var(--ok)} .err{color:var(--err)} b{color:var(--txt)}
+</style></head><body>
+<div class="card"><h1 id="t">Conectando a loja Shopee…</h1><p id="m">Só um instante.</p></div>
+<script>
+// Volta da autorização da Shopee (app "Lumia Dutech"): entrega code + shop_id ao worker shopee, que grava o token.
+// O "estado" foi gerado pelo worker no /conectar e só vale uma vez, por 15 minutos.
+(async () => {
+  const q = new URLSearchParams(location.search), t = document.getElementById("t"), m = document.getElementById("m");
+  const estado = q.get("estado"), code = q.get("code"), shop = q.get("shop_id");
+  history.replaceState(null, "", location.pathname);   // tira o code da barra de endereço
+  if (!estado || !code || !shop) { t.textContent = "Link incompleto"; t.className = "err";
+    m.textContent = "A Shopee não devolveu a autorização. Gere um link novo e tente de novo."; return; }
+  try {
+    const r = await fetch("https://shopee.dutech.workers.dev/conectar/fim?" + new URLSearchParams({estado, code, shop_id: shop}));
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.erro || "erro");
+    t.textContent = "✅ Loja conectada"; t.className = "ok";
+    m.innerHTML = "";
+    m.append("Loja ", Object.assign(document.createElement("b"), {textContent: d.loja || ("shop_id " + d.shop_id)}),
+             " ligada como ", Object.assign(document.createElement("b"), {textContent: d.conta}),
+             ". Confira se é a loja certa e pode fechar esta página.");
+  } catch (e) { t.textContent = "Não conectou"; t.className = "err"; m.textContent = e.message; }
+})();
+</script>
+</body></html>
