@@ -33,7 +33,7 @@
 
 <a class="volta" href="../balcao/">‹ Balcão</a>
 <h1>Cadastrar cliente no Tiny</h1>
-<p class="sub">Conta Dutech · os dados vêm da ficha do contato no CRM e o código volta para lá</p>
+<p class="sub">Conta Dutech · os dados vêm da ficha do contato no CRM (e da conversa, no que faltar) e o código volta para lá</p>
 
 <div id="tela"></div>
 
@@ -103,7 +103,7 @@ async function buscar(){
   telaForm();
 }
 
-// de onde veio o dado: ficha do CRM ou do iPro (a conversa nao e mais lida, 27/11/2026)
+// de onde veio o dado: ficha do CRM, ficha do iPro ou o que o cliente escreveu na conversa
 const de = campo => {
   const f = (extra.fonte || {})[campo];
   return f ? ` <span class="ok">· ${esc(f)}</span>` : "";
@@ -112,12 +112,12 @@ const de = campo => {
 function telaForm(){
   tela.innerHTML = `<div class="cx">
     <b>${esc(contato.nome)}</b><div class="mini">${esc(contato.fone)}</div>
-    ${!extra.cpf && !extra.cep ? `<p class="falta">A ficha deste contato no CRM está sem CPF/CNPJ e CEP —
+    ${!extra.cpf && !extra.cep ? `<p class="falta">Não achei CPF/CNPJ nem CEP na ficha do CRM nem na conversa —
        digite aqui (ao cadastrar, a ficha do CRM é preenchida também).</p>` : ""}
     ${extra.codigoTiny ? `<p class="falta">Este contato já tem código ${esc(extra.codigoTiny)} no CRM —
        cadastrar de novo só completa o que faltar.</p>` : ""}
-    <label>Nome para a nota fiscal</label>
-    <input id="nome" value="${esc(contato.nome.replace(/\s*-\s*\d{3,6}\s*$/,""))}">
+    <label>Nome para a nota fiscal${de("nome")}</label>
+    <input id="nome" value="${esc(extra.nome || contato.nome.replace(/\s*-\s*\d{3,6}\s*$/,""))}">
     <label>CPF ou CNPJ${de("cpf")}</label>
     <input id="cpf" inputmode="numeric" value="${esc(extra.cpf)}">
     <div class="linha">
@@ -132,7 +132,7 @@ function telaForm(){
     <input id="bairro" value="${esc(extra.bairro)}">
     <div id="end" class="mini"></div>
     <label>Complemento (opcional)${de("complemento")}</label><input id="compl" value="${esc(extra.complemento)}">
-    <label>E-mail</label><input id="email" value="${esc(contato.email)}">
+    <label>E-mail${de("email")}</label><input id="email" value="${esc(extra.email || contato.email)}">
     <button onclick="gravar()">Cadastrar no Tiny</button>
     <button class="sec" onclick="telaBusca()">Cancelar</button></div>`;
   $("cep").addEventListener("blur", async () => {
